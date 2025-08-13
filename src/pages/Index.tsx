@@ -8,6 +8,7 @@ import { CrmDashboard } from "@/components/CrmDashboard";
 import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import { AIAgentTester } from "@/components/AIAgentTester";
 import { AIAgentDashboard } from "@/components/AIAgentDashboard";
+import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
 import { Terminal, Code, Database, Shield, Bot, Zap, Target, Brain } from "lucide-react";
@@ -212,7 +213,24 @@ const Index = () => {
         </div>
       </section>
 
-      {/* AI Agent Testing Suite */}
+      {/* Enhanced AI Agent Testing Suite */}
+      <section className="py-16 border-b border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Enhanced Agentic AI</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-4">Autonomous AI Agent Testing</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Test OpenAI-powered agents that can analyze AND take autonomous actions in your Salesforce.
+            </p>
+          </div>
+          <EnhancedAIAgentTester />
+        </div>
+      </section>
+
+      {/* Standard AI Agent Testing Suite */}
       <section className="py-16 border-b border-border/50">
         <div className="container mx-auto px-4">
           <AIAgentTester />

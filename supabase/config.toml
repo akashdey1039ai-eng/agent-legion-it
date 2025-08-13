@@ -48,3 +48,6 @@ verify_jwt = true
 
 [functions.ai-agent-executor]
 verify_jwt = true
+
+[functions.enhanced-ai-agent-executor]
+verify_jwt = true
