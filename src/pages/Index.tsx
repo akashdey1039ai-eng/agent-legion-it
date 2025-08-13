@@ -7,9 +7,9 @@ import { Terminal, Code, Database, Shield, Bot, Zap, Target, Brain } from "lucid
 const aiAgents = [
   {
     id: "crm-001",
-    name: "Salesforce Replacement Agent",
-    description: "Complete CRM solution replacing Salesforce with AI-powered lead management, opportunity tracking, customer insights, automated sales processes, and comprehensive case management system.",
-    capabilities: ["Lead Management", "Opportunity Tracking", "Customer Analytics", "Sales Automation", "Pipeline Forecasting", "Contact Management", "Case Management", "Support Ticketing", "SLA Monitoring", "Knowledge Base Integration", "Case Escalation", "Customer Communication Tracking"],
+    name: "CRM Intelligence Layer",
+    description: "Enterprise-ready AI layer that optimizes Salesforce operations, reduces license costs by 60-70%, and adds intelligent automation for lead scoring, case management, and process optimization.",
+    capabilities: ["License Optimization", "Intelligent Lead Scoring", "Automated Case Routing", "Process Intelligence", "Cost Reduction Analytics", "Salesforce Enhancement", "Workflow Automation", "Predictive Insights", "Integration Management"],
     status: "active" as const,
     specialization: "CRM Development Team",
     icon: "bot" as const,
