@@ -206,7 +206,7 @@ export function AIAgentTester() {
             ) : (
               <Brain className="h-6 w-6" />
             )}
-            <span>Test Lead Intelligence</span>
+            <span>Lead Intelligence</span>
           </Button>
 
           <Button
@@ -220,7 +220,7 @@ export function AIAgentTester() {
             ) : (
               <Target className="h-6 w-6" />
             )}
-            <span>Test Pipeline Analysis</span>
+            <span>Pipeline Analysis</span>
           </Button>
 
           <Button
