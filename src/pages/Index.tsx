@@ -6,58 +6,81 @@ import { Terminal, Code, Database, Shield, Bot, Zap, Target, Brain } from "lucid
 
 const aiAgents = [
   {
-    id: "neural-001",
-    name: "Neural Analyst",
-    description: "Advanced pattern recognition and data analysis specialist. Processes complex datasets to extract actionable insights and predict trends.",
-    capabilities: ["Pattern Recognition", "Predictive Analytics", "Data Mining", "Statistical Modeling"],
+    id: "crm-001",
+    name: "Salesforce Replacement Agent",
+    description: "Complete CRM solution replacing Salesforce with AI-powered lead management, opportunity tracking, customer insights, and automated sales processes.",
+    capabilities: ["Lead Management", "Opportunity Tracking", "Customer Analytics", "Sales Automation", "Pipeline Forecasting", "Contact Management"],
     status: "active" as const,
-    specialization: "Data Intelligence",
-    icon: "bot" as const
+    specialization: "CRM Development Team",
+    icon: "bot" as const,
+    team: "CRM Development",
+    priority: "critical" as const
   },
   {
-    id: "cyber-002", 
-    name: "Cyber Guardian",
-    description: "Elite cybersecurity agent designed to detect, prevent, and neutralize digital threats across all network infrastructures.",
-    capabilities: ["Threat Detection", "Vulnerability Scanning", "Incident Response", "Security Monitoring"],
+    id: "automation-002",
+    name: "Integration Master",
+    description: "Handles all automation and integrations across Boomi, AWS Glue, and UiPath platforms for seamless data flow and process automation.",
+    capabilities: ["Boomi Integration", "AWS Glue ETL", "UiPath RPA", "Data Pipeline Management", "Process Automation"],
+    status: "active" as const,
+    specialization: "Automation & Integrations Team",
+    icon: "zap" as const,
+    team: "Automation & Integrations",
+    priority: "high" as const
+  },
+  {
+    id: "sales-003",
+    name: "Sales Operations AI",
+    description: "Optimizes SDR and BDR operations with intelligent lead scoring, outreach automation, and performance analytics.",
+    capabilities: ["Lead Scoring", "Outreach Automation", "Performance Analytics", "Territory Management", "Sales Coaching"],
     status: "deployed" as const,
-    specialization: "Security Operations",
-    icon: "shield" as const
+    specialization: "Sales Operations Team",
+    icon: "target" as const,
+    team: "Sales Operations",
+    priority: "high" as const
   },
   {
-    id: "quantum-003",
-    name: "Quantum Optimizer",
-    description: "High-performance optimization agent that leverages quantum algorithms to solve complex computational problems.",
-    capabilities: ["Algorithm Optimization", "Resource Management", "Performance Tuning", "System Analysis"],
+    id: "infra-004",
+    name: "Infrastructure Guardian",
+    description: "Monitors and maintains IT infrastructure, provides automated support, and ensures system reliability and security.",
+    capabilities: ["System Monitoring", "Automated Support", "Security Management", "Performance Optimization", "Incident Response"],
     status: "active" as const,
-    specialization: "Performance Engineering",
-    icon: "zap" as const
+    specialization: "IT Infrastructure & Support Team",
+    icon: "shield" as const,
+    team: "IT Infrastructure & Support",
+    priority: "critical" as const
   },
   {
-    id: "tactical-004",
-    name: "Tactical Coordinator",
-    description: "Strategic planning and execution specialist that coordinates multi-agent operations and resource allocation.",
-    capabilities: ["Strategic Planning", "Resource Allocation", "Mission Coordination", "Risk Assessment"],
+    id: "workday-005",
+    name: "Workday Support Specialist",
+    description: "Manages Workday business applications with automated user support, system optimization, and HR process enhancement.",
+    capabilities: ["User Support Automation", "System Configuration", "HR Process Optimization", "Data Analytics", "Compliance Monitoring"],
+    status: "active" as const,
+    specialization: "Business Applications Team",
+    icon: "bot" as const,
+    team: "Business Applications",
+    priority: "medium" as const
+  },
+  {
+    id: "netsuite-006",
+    name: "NetSuite Finance AI",
+    description: "Handles NetSuite IT finance operations with automated reporting, financial data analysis, and system optimization.",
+    capabilities: ["Financial Reporting", "Data Analysis", "System Optimization", "Compliance Tracking", "Process Automation"],
+    status: "active" as const,
+    specialization: "IT Finance Team",
+    icon: "bot" as const,
+    team: "IT Finance",
+    priority: "high" as const
+  },
+  {
+    id: "product-007",
+    name: "Product Strategy AI",
+    description: "Supports product management with market analysis, feature prioritization, roadmap planning, and stakeholder communication.",
+    capabilities: ["Market Analysis", "Feature Prioritization", "Roadmap Planning", "Stakeholder Management", "Competitive Intelligence"],
     status: "standby" as const,
-    specialization: "Operations Management",
-    icon: "target" as const
-  },
-  {
-    id: "dev-005",
-    name: "Code Architect",
-    description: "Autonomous development agent capable of writing, testing, and optimizing code across multiple programming languages.",
-    capabilities: ["Code Generation", "Testing Automation", "Code Review", "Documentation"],
-    status: "active" as const,
-    specialization: "Software Development",
-    icon: "bot" as const
-  },
-  {
-    id: "intel-006",
-    name: "Intelligence Processor",
-    description: "Advanced NLP and machine learning agent specialized in processing and understanding unstructured data.",
-    capabilities: ["Natural Language Processing", "Sentiment Analysis", "Content Generation", "Language Translation"],
-    status: "active" as const,
-    specialization: "AI/ML Operations",
-    icon: "bot" as const
+    specialization: "Product Management Team",
+    icon: "target" as const,
+    team: "Product Management",
+    priority: "medium" as const
   }
 ];
 

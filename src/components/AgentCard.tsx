@@ -12,6 +12,8 @@ interface AgentCardProps {
     status: "active" | "standby" | "deployed";
     specialization: string;
     icon: "bot" | "zap" | "target" | "shield";
+    team: string;
+    priority: "critical" | "high" | "medium" | "low";
   };
 }
 
@@ -24,8 +26,15 @@ const iconMap = {
 
 const statusColors = {
   active: "bg-primary",
-  standby: "bg-accent",
+  standby: "bg-accent", 
   deployed: "bg-destructive",
+};
+
+const priorityColors = {
+  critical: "bg-destructive text-destructive-foreground",
+  high: "bg-orange-500 text-white",
+  medium: "bg-yellow-500 text-yellow-900",
+  low: "bg-muted text-muted-foreground"
 };
 
 export function AgentCard({ agent }: AgentCardProps) {
@@ -42,11 +51,16 @@ export function AgentCard({ agent }: AgentCardProps) {
             <div>
               <CardTitle className="text-lg">{agent.name}</CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
-                {agent.specialization}
+                {agent.team}
               </CardDescription>
             </div>
           </div>
-          <div className={`w-3 h-3 rounded-full ${statusColors[agent.status]} shadow-glow`} />
+          <div className="flex items-center gap-2">
+            <Badge className={`text-xs px-2 py-1 ${priorityColors[agent.priority]}`}>
+              {agent.priority.toUpperCase()}
+            </Badge>
+            <div className={`w-3 h-3 rounded-full ${statusColors[agent.status]} shadow-glow`} />
+          </div>
         </div>
       </CardHeader>
       
