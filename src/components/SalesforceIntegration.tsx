@@ -31,17 +31,20 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
 
     setIsConnecting(true);
     try {
-      // Build Salesforce OAuth URL
-      const salesforceAuthUrl = new URL('https://login.salesforce.com/services/oauth2/authorize');
-      salesforceAuthUrl.searchParams.set('response_type', 'code');
-      salesforceAuthUrl.searchParams.set('client_id', 'YOUR_CLIENT_ID'); // This would be fetched from backend
-      salesforceAuthUrl.searchParams.set('redirect_uri', `${window.location.origin}/salesforce-callback`);
-      salesforceAuthUrl.searchParams.set('scope', 'api refresh_token offline_access');
-      salesforceAuthUrl.searchParams.set('state', user.id);
+      // Get Salesforce OAuth URL from our backend
+      const { data, error } = await supabase.functions.invoke('salesforce-auth-url', {
+        body: { userId: user.id }
+      });
+
+      if (error) throw error;
+
+      if (!data?.authUrl) {
+        throw new Error('Failed to get Salesforce authorization URL');
+      }
 
       // Open Salesforce OAuth in new window
       const popup = window.open(
-        salesforceAuthUrl.toString(),
+        data.authUrl,
         'salesforce-auth',
         'width=600,height=700,scrollbars=yes,resizable=yes'
       );
@@ -60,7 +63,7 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
       console.error('Connection error:', error);
       toast({
         title: "Connection Failed",
-        description: "Failed to initiate Salesforce connection.",
+        description: error.message || "Failed to initiate Salesforce connection.",
         variant: "destructive",
       });
       setIsConnecting(false);
@@ -75,7 +78,7 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
         .from('salesforce_tokens')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (data && !error) {
         setIsConnected(true);

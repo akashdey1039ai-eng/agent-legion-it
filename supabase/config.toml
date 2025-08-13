@@ -40,5 +40,8 @@ enable_confirmations = true
 [functions.salesforce-auth]
 verify_jwt = false
 
+[functions.salesforce-auth-url]
+verify_jwt = true
+
 [functions.salesforce-sync]
 verify_jwt = true
