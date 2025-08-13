@@ -113,6 +113,7 @@ Deno.serve(async (req) => {
     let salesforceAPI: SalesforceAPI | null = null;
     
     if (enableActions) {
+      console.log(`🔍 Looking for Salesforce tokens for user: ${userId}`);
       const { data: tokens, error: tokensError } = await supabaseClient
         .from('salesforce_tokens')
         .select('*')
@@ -121,12 +122,21 @@ Deno.serve(async (req) => {
         .limit(1)
         .maybeSingle();
 
+      console.log(`🎯 Token query result:`, { tokens, tokensError });
+
       if (tokens && !tokensError) {
         // Check if token is still valid (not expired)
         const now = new Date();
         const expiresAt = new Date(tokens.expires_at);
         
+        console.log(`⏰ Token expiration check:`, { 
+          now: now.toISOString(), 
+          expiresAt: expiresAt.toISOString(),
+          isValid: expiresAt > now 
+        });
+        
         if (expiresAt > now) {
+          console.log(`✅ Valid Salesforce tokens found, initializing API`);
           salesforceAPI = new SalesforceAPI({
             access_token: tokens.access_token,
             instance_url: tokens.instance_url,
