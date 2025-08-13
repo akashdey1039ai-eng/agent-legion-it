@@ -87,6 +87,235 @@ export type Database = {
           },
         ]
       }
+      ai_agent_executions: {
+        Row: {
+          agent_id: string
+          approved_at: string | null
+          approved_by: string | null
+          completed_at: string | null
+          confidence_score: number | null
+          cost_usd: number | null
+          created_at: string
+          error_message: string | null
+          execution_time_ms: number | null
+          execution_type: string
+          human_approved: boolean | null
+          id: string
+          input_data: Json
+          output_data: Json | null
+          status: string
+          tokens_used: number | null
+        }
+        Insert: {
+          agent_id: string
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          confidence_score?: number | null
+          cost_usd?: number | null
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          execution_type: string
+          human_approved?: boolean | null
+          id?: string
+          input_data: Json
+          output_data?: Json | null
+          status?: string
+          tokens_used?: number | null
+        }
+        Update: {
+          agent_id?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          confidence_score?: number | null
+          cost_usd?: number | null
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          execution_type?: string
+          human_approved?: boolean | null
+          id?: string
+          input_data?: Json
+          output_data?: Json | null
+          status?: string
+          tokens_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_executions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agents: {
+        Row: {
+          config: Json
+          created_at: string
+          created_by: string
+          deployed_at: string | null
+          id: string
+          last_activity_at: string | null
+          max_confidence_threshold: number | null
+          min_confidence_threshold: number | null
+          name: string
+          requires_human_approval: boolean | null
+          security_level: string
+          status: string
+          type: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          created_by: string
+          deployed_at?: string | null
+          id?: string
+          last_activity_at?: string | null
+          max_confidence_threshold?: number | null
+          min_confidence_threshold?: number | null
+          name: string
+          requires_human_approval?: boolean | null
+          security_level?: string
+          status?: string
+          type: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          created_by?: string
+          deployed_at?: string | null
+          id?: string
+          last_activity_at?: string | null
+          max_confidence_threshold?: number | null
+          min_confidence_threshold?: number | null
+          name?: string
+          requires_human_approval?: boolean | null
+          security_level?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      ai_performance_metrics: {
+        Row: {
+          agent_id: string
+          avg_confidence_score: number | null
+          avg_execution_time_ms: number | null
+          created_at: string
+          failed_executions: number | null
+          human_override_rate: number | null
+          id: string
+          metric_date: string
+          successful_executions: number | null
+          total_cost_usd: number | null
+          total_executions: number | null
+          user_satisfaction_score: number | null
+        }
+        Insert: {
+          agent_id: string
+          avg_confidence_score?: number | null
+          avg_execution_time_ms?: number | null
+          created_at?: string
+          failed_executions?: number | null
+          human_override_rate?: number | null
+          id?: string
+          metric_date?: string
+          successful_executions?: number | null
+          total_cost_usd?: number | null
+          total_executions?: number | null
+          user_satisfaction_score?: number | null
+        }
+        Update: {
+          agent_id?: string
+          avg_confidence_score?: number | null
+          avg_execution_time_ms?: number | null
+          created_at?: string
+          failed_executions?: number | null
+          human_override_rate?: number | null
+          id?: string
+          metric_date?: string
+          successful_executions?: number | null
+          total_cost_usd?: number | null
+          total_executions?: number | null
+          user_satisfaction_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_performance_metrics_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_security_events: {
+        Row: {
+          agent_id: string | null
+          description: string
+          detected_at: string
+          event_type: string
+          execution_id: string | null
+          id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          severity: string
+          source_ip: unknown | null
+          user_agent: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          description: string
+          detected_at?: string
+          event_type: string
+          execution_id?: string | null
+          id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_ip?: unknown | null
+          user_agent?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          description?: string
+          detected_at?: string
+          event_type?: string
+          execution_id?: string | null
+          id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_ip?: unknown | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_security_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_security_events_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_members: {
         Row: {
           campaign_id: string | null
@@ -407,6 +636,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      data_classifications: {
+        Row: {
+          audit_required: boolean | null
+          classification: string
+          column_name: string
+          created_at: string
+          encryption_required: boolean | null
+          id: string
+          retention_days: number | null
+          table_name: string
+        }
+        Insert: {
+          audit_required?: boolean | null
+          classification: string
+          column_name: string
+          created_at?: string
+          encryption_required?: boolean | null
+          id?: string
+          retention_days?: number | null
+          table_name: string
+        }
+        Update: {
+          audit_required?: boolean | null
+          classification?: string
+          column_name?: string
+          created_at?: string
+          encryption_required?: boolean | null
+          id?: string
+          retention_days?: number | null
+          table_name?: string
+        }
+        Relationships: []
       }
       knowledge_articles: {
         Row: {
