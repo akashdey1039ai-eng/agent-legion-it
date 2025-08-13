@@ -6,6 +6,8 @@ import { AgentCard } from "@/components/AgentCard";
 import { CommandCenter } from "@/components/CommandCenter";
 import { CrmDashboard } from "@/components/CrmDashboard";
 import { SalesforceIntegration } from "@/components/SalesforceIntegration";
+import { AIAgentTester } from "@/components/AIAgentTester";
+import { AIAgentDashboard } from "@/components/AIAgentDashboard";
 import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
 import { Terminal, Code, Database, Shield, Bot, Zap, Target, Brain } from "lucide-react";
@@ -200,6 +202,20 @@ const Index = () => {
             </p>
           </div>
           <CrmDashboard />
+        </div>
+      </section>
+
+      {/* AI Agent Dashboard */}
+      <section className="py-16 border-b border-border/50">
+        <div className="container mx-auto px-4">
+          <AIAgentDashboard />
+        </div>
+      </section>
+
+      {/* AI Agent Testing Suite */}
+      <section className="py-16 border-b border-border/50">
+        <div className="container mx-auto px-4">
+          <AIAgentTester />
         </div>
       </section>
 
