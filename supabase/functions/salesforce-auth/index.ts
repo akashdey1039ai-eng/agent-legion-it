@@ -31,6 +31,16 @@ Deno.serve(async (req) => {
     const url = new URL(req.url)
     const code = url.searchParams.get('code')
     const state = url.searchParams.get('state')
+    const error = url.searchParams.get('error')
+
+    console.log('Received callback with URL:', req.url)
+    console.log('Code:', code)
+    console.log('State:', state)
+    console.log('Error:', error)
+
+    if (error) {
+      throw new Error(`Salesforce OAuth error: ${error}`)
+    }
 
     if (!code) {
       throw new Error('Authorization code is required')
