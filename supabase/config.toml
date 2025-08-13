@@ -45,3 +45,6 @@ verify_jwt = true
 
 [functions.salesforce-sync]
 verify_jwt = true
+
+[functions.ai-agent-executor]
+verify_jwt = true
