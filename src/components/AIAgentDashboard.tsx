@@ -147,10 +147,47 @@ export function AIAgentDashboard() {
     if (!user) return;
 
     try {
+      // Get real data based on agent type
+      const { data: agent } = await supabase
+        .from('ai_agents')
+        .select('type')
+        .eq('id', agentId)
+        .single();
+
+      let realInputData;
+      
+      if (agent?.type === 'lead_intelligence') {
+        // Get real contact IDs
+        const { data: contacts } = await supabase
+          .from('contacts')
+          .select('id')
+          .limit(3);
+        
+        if (!contacts || contacts.length === 0) {
+          throw new Error('No contacts found. Please sync some Salesforce data first.');
+        }
+        
+        realInputData = { contactIds: contacts.map(c => c.id) };
+      } else if (agent?.type === 'pipeline_analysis') {
+        // Get real opportunity IDs
+        const { data: opportunities } = await supabase
+          .from('opportunities')
+          .select('id')
+          .limit(3);
+        
+        if (!opportunities || opportunities.length === 0) {
+          throw new Error('No opportunities found. Please sync some Salesforce data first.');
+        }
+        
+        realInputData = { opportunityIds: opportunities.map(o => o.id) };
+      } else {
+        throw new Error('Unknown agent type');
+      }
+
       const { data, error } = await supabase.functions.invoke('ai-agent-executor', {
         body: {
           agentId,
-          inputData,
+          inputData: realInputData,
           userId: user.id,
           requestSource: 'dashboard'
         }
@@ -169,7 +206,7 @@ export function AIAgentDashboard() {
       console.error('Error executing agent:', error);
       toast({
         title: "Execution Failed",
-        description: "Failed to execute AI agent.",
+        description: error.message,
         variant: "destructive",
       });
     }
@@ -357,7 +394,7 @@ export function AIAgentDashboard() {
                     </Badge>
                     <Button
                       size="sm"
-                      onClick={() => executeAgent(agent.id, { contactIds: ['sample'] })}
+                      onClick={() => executeAgent(agent.id, {})}
                       disabled={agent.status !== 'active'}
                     >
                       Execute
