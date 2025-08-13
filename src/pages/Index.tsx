@@ -8,8 +8,8 @@ const aiAgents = [
   {
     id: "crm-001",
     name: "Salesforce Replacement Agent",
-    description: "Complete CRM solution replacing Salesforce with AI-powered lead management, opportunity tracking, customer insights, and automated sales processes.",
-    capabilities: ["Lead Management", "Opportunity Tracking", "Customer Analytics", "Sales Automation", "Pipeline Forecasting", "Contact Management"],
+    description: "Complete CRM solution replacing Salesforce with AI-powered lead management, opportunity tracking, customer insights, automated sales processes, and comprehensive case management system.",
+    capabilities: ["Lead Management", "Opportunity Tracking", "Customer Analytics", "Sales Automation", "Pipeline Forecasting", "Contact Management", "Case Management", "Support Ticketing", "SLA Monitoring", "Knowledge Base Integration", "Case Escalation", "Customer Communication Tracking"],
     status: "active" as const,
     specialization: "CRM Development Team",
     icon: "bot" as const,
