@@ -27,7 +27,10 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     )
 
-    const { code, state } = await req.json()
+    // Extract code and state from URL parameters
+    const url = new URL(req.url)
+    const code = url.searchParams.get('code')
+    const state = url.searchParams.get('state')
 
     if (!code) {
       throw new Error('Authorization code is required')
