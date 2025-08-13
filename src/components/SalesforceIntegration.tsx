@@ -87,8 +87,13 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
   };
 
   const checkConnection = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found, cannot check connection');
+      return;
+    }
 
+    console.log('Checking Salesforce connection for user:', user.id);
+    
     try {
       const { data, error } = await supabase
         .from('salesforce_tokens')
@@ -96,20 +101,30 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
         .eq('user_id', user.id)
         .maybeSingle();
 
+      console.log('Salesforce token query result:', { data, error });
+
       if (data && !error) {
         // Check if token is still valid (not expired)
         const now = new Date();
         const expiresAt = new Date(data.expires_at);
         
+        console.log('Token expiration check:', { 
+          now: now.toISOString(), 
+          expiresAt: expiresAt.toISOString(), 
+          isValid: expiresAt > now 
+        });
+        
         if (expiresAt > now) {
+          console.log('Setting connected to true');
           setIsConnected(true);
           setLastSyncTime(data.updated_at);
         } else {
           // Token is expired
-          setIsConnected(false);
           console.log('Salesforce token has expired');
+          setIsConnected(false);
         }
       } else {
+        console.log('No valid token found, setting connected to false');
         setIsConnected(false);
       }
     } catch (error) {
