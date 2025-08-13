@@ -19,7 +19,8 @@ interface TestResult {
 }
 
 export function EnhancedAIAgentTester() {
-  const [isRunning, setIsRunning] = useState(false);
+  const [isRunningLeadIntelligence, setIsRunningLeadIntelligence] = useState(false);
+  const [isRunningPipelineAnalysis, setIsRunningPipelineAnalysis] = useState(false);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [enableActions, setEnableActions] = useState(false);
   const { toast } = useToast();
@@ -28,7 +29,7 @@ export function EnhancedAIAgentTester() {
   const runEnhancedLeadIntelligenceTest = async () => {
     if (!user) return;
 
-    setIsRunning(true);
+    setIsRunningLeadIntelligence(true);
     
     try {
       // First, create a test agent
@@ -101,14 +102,14 @@ export function EnhancedAIAgentTester() {
         variant: "destructive",
       });
     } finally {
-      setIsRunning(false);
+      setIsRunningLeadIntelligence(false);
     }
   };
 
   const runEnhancedPipelineAnalysisTest = async () => {
     if (!user) return;
 
-    setIsRunning(true);
+    setIsRunningPipelineAnalysis(true);
     
     try {
       // Create a test pipeline analysis agent
@@ -181,7 +182,7 @@ export function EnhancedAIAgentTester() {
         variant: "destructive",
       });
     } finally {
-      setIsRunning(false);
+      setIsRunningPipelineAnalysis(false);
     }
   };
 
@@ -223,10 +224,10 @@ export function EnhancedAIAgentTester() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Button
             onClick={runEnhancedLeadIntelligenceTest}
-            disabled={isRunning}
+            disabled={isRunningLeadIntelligence || isRunningPipelineAnalysis}
             className="flex items-center gap-2 h-20 flex-col"
           >
-            {isRunning ? (
+            {isRunningLeadIntelligence ? (
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
               <Brain className="h-6 w-6" />
@@ -239,11 +240,11 @@ export function EnhancedAIAgentTester() {
 
           <Button
             onClick={runEnhancedPipelineAnalysisTest}
-            disabled={isRunning}
+            disabled={isRunningLeadIntelligence || isRunningPipelineAnalysis}
             variant="outline"
             className="flex items-center gap-2 h-20 flex-col"
           >
-            {isRunning ? (
+            {isRunningPipelineAnalysis ? (
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
               <Target className="h-6 w-6" />
