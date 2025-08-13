@@ -110,14 +110,17 @@ export function AIAgentDashboard() {
           confidence_score, 
           execution_time_ms, 
           completed_at,
-          ai_agents!inner(name, type)
+          status
         `)
         .eq('status', 'completed')
         .order('completed_at', { ascending: false })
         .limit(10);
 
       if (!execError && executions) {
+        console.log('Loaded executions:', executions.length);
         setExecutionResults(executions);
+      } else if (execError) {
+        console.error('Error loading executions:', execError);
       }
 
     } catch (error) {
@@ -485,10 +488,9 @@ export function AIAgentDashboard() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h4 className="font-semibold text-foreground">
-                        {execution.ai_agents.name}
+                        AI Agent Execution
                       </h4>
                       <p className="text-sm text-muted-foreground">
-                        {execution.ai_agents.type.replace('_', ' ')} • 
                         Confidence: {((execution.confidence_score || 0) * 100).toFixed(1)}% • 
                         {execution.execution_time_ms}ms
                       </p>
@@ -503,7 +505,11 @@ export function AIAgentDashboard() {
                       {execution.output_data.summary && (
                         <div>
                           <h5 className="font-medium text-foreground mb-2">Summary</h5>
-                          <p className="text-sm text-muted-foreground">{execution.output_data.summary}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {typeof execution.output_data.summary === 'string' 
+                              ? execution.output_data.summary 
+                              : JSON.stringify(execution.output_data.summary)}
+                          </p>
                         </div>
                       )}
 
@@ -515,14 +521,14 @@ export function AIAgentDashboard() {
                               <div key={index} className="bg-muted/50 rounded-lg p-3">
                                 <div className="flex items-center justify-between mb-2">
                                   <h6 className="font-medium text-sm">
-                                    {item.name || `Item ${index + 1}`}
+                                    {item.name || item.contactId || item.opportunityId || `Item ${index + 1}`}
                                   </h6>
                                   {item.newScore && (
                                     <Badge variant="outline">
                                       Score: {item.newScore}
                                     </Badge>
                                   )}
-                                  {item.riskScore && (
+                                  {item.riskScore !== undefined && (
                                     <Badge variant={item.riskLevel === 'High' ? 'destructive' : 
                                                  item.riskLevel === 'Medium' ? 'secondary' : 'default'}>
                                       {item.riskLevel} Risk
