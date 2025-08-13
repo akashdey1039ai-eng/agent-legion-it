@@ -42,6 +42,7 @@ export function AIAgentDashboard() {
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
+  const [executionResults, setExecutionResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const { toast } = useToast();
@@ -97,6 +98,26 @@ export function AIAgentDashboard() {
           avg_execution_time_ms: 0,
         });
         setMetrics(aggregated);
+      }
+
+      // Load recent execution results
+      const { data: executions, error: execError } = await supabase
+        .from('ai_agent_executions')
+        .select(`
+          id, 
+          agent_id, 
+          output_data, 
+          confidence_score, 
+          execution_time_ms, 
+          completed_at,
+          ai_agents!inner(name, type)
+        `)
+        .eq('status', 'completed')
+        .order('completed_at', { ascending: false })
+        .limit(10);
+
+      if (!execError && executions) {
+        setExecutionResults(executions);
       }
 
     } catch (error) {
@@ -200,7 +221,7 @@ export function AIAgentDashboard() {
         description: `Execution completed with ${(data.confidence * 100).toFixed(1)}% confidence.`,
       });
 
-      // Reload dashboard data
+      // Reload dashboard data to show new results
       loadDashboardData();
     } catch (error) {
       console.error('Error executing agent:', error);
@@ -438,6 +459,100 @@ export function AIAgentDashboard() {
                       {new Date(event.detected_at).toLocaleString()}
                     </p>
                   </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Execution Results */}
+      {executionResults.length > 0 && (
+        <Card className="bg-card/50 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-primary" />
+              Recent Execution Results
+            </CardTitle>
+            <CardDescription>
+              Latest AI agent analysis results and insights
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {executionResults.map((execution) => (
+                <div key={execution.id} className="border rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="font-semibold text-foreground">
+                        {execution.ai_agents.name}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {execution.ai_agents.type.replace('_', ' ')} • 
+                        Confidence: {((execution.confidence_score || 0) * 100).toFixed(1)}% • 
+                        {execution.execution_time_ms}ms
+                      </p>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {new Date(execution.completed_at).toLocaleString()}
+                    </div>
+                  </div>
+
+                  {execution.output_data && (
+                    <div className="space-y-4">
+                      {execution.output_data.summary && (
+                        <div>
+                          <h5 className="font-medium text-foreground mb-2">Summary</h5>
+                          <p className="text-sm text-muted-foreground">{execution.output_data.summary}</p>
+                        </div>
+                      )}
+
+                      {execution.output_data.analysis && Array.isArray(execution.output_data.analysis) && (
+                        <div>
+                          <h5 className="font-medium text-foreground mb-3">Analysis Results</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {execution.output_data.analysis.slice(0, 6).map((item: any, index: number) => (
+                              <div key={index} className="bg-muted/50 rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h6 className="font-medium text-sm">
+                                    {item.name || `Item ${index + 1}`}
+                                  </h6>
+                                  {item.newScore && (
+                                    <Badge variant="outline">
+                                      Score: {item.newScore}
+                                    </Badge>
+                                  )}
+                                  {item.riskScore && (
+                                    <Badge variant={item.riskLevel === 'High' ? 'destructive' : 
+                                                 item.riskLevel === 'Medium' ? 'secondary' : 'default'}>
+                                      {item.riskLevel} Risk
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  {item.recommendation}
+                                </p>
+                                {item.factors && item.factors.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {item.factors.map((factor: string, i: number) => (
+                                      <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                                        {factor}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          {execution.output_data.analysis.length > 6 && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              And {execution.output_data.analysis.length - 6} more results...
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
