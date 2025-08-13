@@ -345,7 +345,9 @@ Respond in JSON format:
         actionsExecuted++
 
         // Action 2: Real Salesforce Updates (if connected)
+        console.log(`🔍 Checking Salesforce connection: salesforceAPI=${!!salesforceAPI}, contact.salesforce_id=${contact.salesforce_id}`);
         if (salesforceAPI && contact.salesforce_id) {
+          console.log(`🚀 Proceeding with Salesforce updates for ${contact.first_name} ${contact.last_name}`);
           try {
             // Update Lead in Salesforce - try different field name variations
             const salesforceUpdateData: any = {
