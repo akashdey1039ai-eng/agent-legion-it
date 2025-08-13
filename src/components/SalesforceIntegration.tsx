@@ -97,11 +97,24 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
         .maybeSingle();
 
       if (data && !error) {
-        setIsConnected(true);
-        setLastSyncTime(data.updated_at);
+        // Check if token is still valid (not expired)
+        const now = new Date();
+        const expiresAt = new Date(data.expires_at);
+        
+        if (expiresAt > now) {
+          setIsConnected(true);
+          setLastSyncTime(data.updated_at);
+        } else {
+          // Token is expired
+          setIsConnected(false);
+          console.log('Salesforce token has expired');
+        }
+      } else {
+        setIsConnected(false);
       }
     } catch (error) {
       console.error('Error checking connection:', error);
+      setIsConnected(false);
     }
   };
 
