@@ -164,10 +164,10 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ExternalLink className="h-5 w-5" />
-            Salesforce Integration
+            Salesforce Developer Sandbox Integration
           </CardTitle>
           <CardDescription>
-            Connect and sync your Salesforce data with your CRM dashboard
+            Connect your <strong>Salesforce Developer Sandbox</strong> to enable fully autonomous AI agents that make real changes to your CRM data
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -194,20 +194,32 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
             </div>
             
             {!isConnected ? (
-              <Button 
-                onClick={handleConnect} 
-                disabled={isConnecting}
-                className="flex items-center gap-2"
-              >
-                {isConnecting ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Connecting...
-                  </>
-                ) : (
-                  'Connect to Salesforce'
-                )}
-              </Button>
+              <div className="space-y-4">
+                <Button 
+                  onClick={handleConnect} 
+                  disabled={isConnecting}
+                  className="flex items-center gap-2"
+                >
+                  {isConnecting ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Connecting to Salesforce...
+                    </>
+                  ) : (
+                    'Connect Developer Sandbox'
+                  )}
+                </Button>
+                
+                <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded border border-blue-200 dark:border-blue-800">
+                  <strong>📚 Setup Instructions:</strong>
+                  <ol className="mt-2 space-y-1 list-decimal list-inside">
+                    <li>Create a <strong>Developer Sandbox</strong> at <a href="https://developer.salesforce.com" className="text-blue-600 hover:underline" target="_blank">developer.salesforce.com</a></li>
+                    <li>Enable API access in your sandbox settings</li>
+                    <li>Click "Connect Developer Sandbox" above to authenticate</li>
+                    <li>Your AI agents will then make <strong>real autonomous changes</strong> to leads, opportunities, and tasks</li>
+                  </ol>
+                </div>
+              </div>
             ) : (
               <Button 
                 variant="outline" 
@@ -221,14 +233,33 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
       </Card>
 
       {isConnected && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <RefreshCw className="h-5 w-5" />
-              Data Synchronization
-            </CardTitle>
-            <CardDescription>
-              Sync specific data types from Salesforce to your local CRM
+        <>
+          <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                <CheckCircle className="h-5 w-5" />
+                🚀 Autonomous AI Agents Ready!
+              </CardTitle>
+              <CardDescription className="text-green-600 dark:text-green-400">
+                Your Salesforce Developer Sandbox is connected. AI agents can now make <strong>real autonomous changes</strong> to your CRM data including:
+                <ul className="mt-2 space-y-1 list-disc list-inside">
+                  <li><strong>Lead Scoring:</strong> Auto-update lead scores and statuses</li>
+                  <li><strong>Task Creation:</strong> Create follow-up tasks and meetings</li>
+                  <li><strong>Pipeline Management:</strong> Adjust opportunity probabilities and stages</li>
+                  <li><strong>AI Insights:</strong> Add AI analysis to record descriptions</li>
+                </ul>
+              </CardDescription>
+            </CardHeader>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5" />
+                Data Synchronization
+              </CardTitle>
+              <CardDescription>
+                Sync data from your Salesforce Developer Sandbox to enable AI analysis
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -260,8 +291,9 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
               ))}
             </div>
           </CardContent>
-        </Card>
-      )}
+            </Card>
+          </>
+        )}
     </div>
   );
 }

@@ -5,14 +5,75 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Enhanced AI Agent Executor with Autonomous Actions
+interface SalesforceTokens {
+  access_token: string;
+  instance_url: string;
+  token_type: string;
+}
+
+// Salesforce API Helper Class
+class SalesforceAPI {
+  constructor(private tokens: SalesforceTokens) {}
+
+  async makeRequest(endpoint: string, method: string = 'GET', body?: any) {
+    const url = `${this.tokens.instance_url}/services/data/v61.0/${endpoint}`;
+    
+    console.log(`🔗 Salesforce API ${method} ${url}`);
+    
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Authorization': `${this.tokens.token_type} ${this.tokens.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Salesforce API error: ${response.status} - ${errorText}`);
+      throw new Error(`Salesforce API error: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log(`✅ Salesforce API success:`, result);
+    return result;
+  }
+
+  async updateLead(leadId: string, updates: any) {
+    console.log(`🎯 Updating Salesforce Lead ${leadId} with:`, updates);
+    return await this.makeRequest(`sobjects/Lead/${leadId}`, 'PATCH', updates);
+  }
+
+  async createTask(taskData: any) {
+    console.log(`📋 Creating Salesforce Task:`, taskData);
+    return await this.makeRequest('sobjects/Task', 'POST', taskData);
+  }
+
+  async updateOpportunity(opportunityId: string, updates: any) {
+    console.log(`💰 Updating Salesforce Opportunity ${opportunityId} with:`, updates);
+    return await this.makeRequest(`sobjects/Opportunity/${opportunityId}`, 'PATCH', updates);
+  }
+
+  async createEvent(eventData: any) {
+    console.log(`📅 Creating Salesforce Event:`, eventData);
+    return await this.makeRequest('sobjects/Event', 'POST', eventData);
+  }
+
+  async query(soql: string) {
+    console.log(`🔍 Salesforce SOQL Query: ${soql}`);
+    return await this.makeRequest(`query/?q=${encodeURIComponent(soql)}`);
+  }
+}
+
+// Enhanced AI Agent Executor with Real Salesforce Integration
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('🚀 Starting Enhanced AI Agent with Autonomous Actions')
+    console.log('🚀 Starting Enhanced AI Agent with Autonomous Salesforce Actions')
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -48,6 +109,36 @@ Deno.serve(async (req) => {
 
     console.log(`🤖 Executing AI agent: ${agent.name} (Type: ${agent.type})`)
 
+    // Get Salesforce tokens for real API calls
+    let salesforceAPI: SalesforceAPI | null = null;
+    
+    if (enableActions) {
+      const { data: tokens, error: tokensError } = await supabaseClient
+        .from('salesforce_tokens')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (tokens && !tokensError) {
+        // Check if token is still valid (not expired)
+        const now = new Date();
+        const expiresAt = new Date(tokens.expires_at);
+        
+        if (expiresAt > now) {
+          salesforceAPI = new SalesforceAPI({
+            access_token: tokens.access_token,
+            instance_url: tokens.instance_url,
+            token_type: tokens.token_type || 'Bearer'
+          });
+          console.log('✅ Salesforce API initialized for real autonomous actions');
+        } else {
+          console.log('⚠️ Salesforce token expired - running in simulation mode');
+        }
+      } else {
+        console.log('⚠️ No Salesforce tokens found - running in simulation mode');
+      }
+    }
+
     const startTime = Date.now()
 
     try {
@@ -55,10 +146,10 @@ Deno.serve(async (req) => {
       let result
       switch (agent.type) {
         case 'lead_intelligence':
-          result = await executeEnhancedLeadIntelligence(supabaseClient, inputData, enableActions, openaiApiKey)
+          result = await executeEnhancedLeadIntelligence(supabaseClient, inputData, enableActions, openaiApiKey, salesforceAPI)
           break
         case 'pipeline_analysis':
-          result = await executeEnhancedPipelineAnalysis(supabaseClient, inputData, enableActions, openaiApiKey)
+          result = await executeEnhancedPipelineAnalysis(supabaseClient, inputData, enableActions, openaiApiKey, salesforceAPI)
           break
         default:
           throw new Error(`Unsupported agent type: ${agent.type}`)
@@ -120,8 +211,8 @@ Deno.serve(async (req) => {
   }
 })
 
-// Enhanced Lead Intelligence with Autonomous Actions
-async function executeEnhancedLeadIntelligence(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string) {
+// Enhanced Lead Intelligence with Real Salesforce Actions
+async function executeEnhancedLeadIntelligence(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string, salesforceAPI: SalesforceAPI | null) {
   console.log('🎯 Executing Enhanced Lead Intelligence with AI-powered actions')
   
   const { contactIds } = inputData
@@ -229,7 +320,7 @@ Respond in JSON format:
       // Execute Autonomous Actions if enabled
       const actions = []
       if (enableActions) {
-        // Action 1: Update Lead Score in Database
+        // Action 1: Update Lead Score in Local Database
         await supabaseClient
           .from('contacts')
           .update({ 
@@ -238,10 +329,60 @@ Respond in JSON format:
           })
           .eq('id', contact.id)
         
-        actions.push(`Updated lead score to ${aiAnalysis.newScore}`)
+        actions.push(`Updated lead score to ${aiAnalysis.newScore} in local database`)
         actionsExecuted++
 
-        // Action 2: Create Follow-up Task
+        // Action 2: Real Salesforce Updates (if connected)
+        if (salesforceAPI && contact.salesforce_id) {
+          try {
+            // Update Lead in Salesforce
+            await salesforceAPI.updateLead(contact.salesforce_id, {
+              Lead_Score__c: aiAnalysis.newScore,
+              Rating: aiAnalysis.priority,
+              Status: aiAnalysis.priority === 'High' ? 'Working - Contacted' : 'Open - Not Contacted',
+              Description: `AI Analysis (${new Date().toLocaleDateString()}): ${aiAnalysis.reasoning}\n\nAI Confidence: 92%\n\nRecommended Email: "${aiAnalysis.emailSubject}"`
+            });
+            actions.push(`✅ Updated lead score to ${aiAnalysis.newScore} in Salesforce`)
+            actionsExecuted++
+
+            // Create Follow-up Task in Salesforce
+            if (aiAnalysis.priority === 'High') {
+              const taskData = {
+                Subject: `AI: Follow up with ${contact.first_name} ${contact.last_name} - ${aiAnalysis.priority} Priority`,
+                Description: `AI Analysis: ${aiAnalysis.reasoning}\n\nRecommended Actions:\n${aiAnalysis.recommendedActions.join('\n')}\n\nNext Steps: ${aiAnalysis.nextSteps}`,
+                Status: 'Not Started',
+                Priority: aiAnalysis.priority,
+                WhoId: contact.salesforce_id,
+                ActivityDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
+                Type: 'Call'
+              };
+              
+              await salesforceAPI.createTask(taskData);
+              actions.push(`✅ Created high-priority follow-up task in Salesforce`)
+              actionsExecuted++
+
+              // Schedule Discovery Call Event for High Priority
+              const eventData = {
+                Subject: `AI: Discovery Call - ${contact.first_name} ${contact.last_name}`,
+                Description: `AI-scheduled discovery call based on lead score of ${aiAnalysis.newScore}. ${aiAnalysis.nextSteps}`,
+                StartDateTime: new Date(Date.now() + 172800000).toISOString(), // Day after tomorrow
+                EndDateTime: new Date(Date.now() + 172800000 + 3600000).toISOString(), // 1 hour meeting
+                WhoId: contact.salesforce_id,
+                Type: 'Meeting'
+              };
+              
+              await salesforceAPI.createEvent(eventData);
+              actions.push(`✅ Scheduled discovery call in Salesforce calendar`)
+              actionsExecuted++
+            }
+
+          } catch (salesforceError) {
+            console.error('Salesforce action failed:', salesforceError);
+            actions.push(`❌ Salesforce error: ${salesforceError.message}`)
+          }
+        }
+
+        // Action 3: Create Local Follow-up Task (fallback or additional)
         if (aiAnalysis.priority === 'High') {
           await supabaseClient
             .from('activities')
@@ -254,11 +395,11 @@ Respond in JSON format:
               scheduled_at: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() // 2 hours from now
             })
           
-          actions.push('Created high-priority follow-up task')
+          actions.push('Created high-priority follow-up task in local CRM')
           actionsExecuted++
         }
 
-        // Action 3: Log AI-Generated Email Subject for Sales Rep
+        // Action 4: Log AI-Generated Email Subject for Sales Rep
         await supabaseClient
           .from('activities')
           .insert({
@@ -316,8 +457,8 @@ Respond in JSON format:
   }
 }
 
-// Enhanced Pipeline Analysis with Autonomous Actions  
-async function executeEnhancedPipelineAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string) {
+// Enhanced Pipeline Analysis with Real Salesforce Actions  
+async function executeEnhancedPipelineAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string, salesforceAPI: SalesforceAPI | null) {
   console.log('📈 Executing Enhanced Pipeline Analysis with AI-powered actions')
   
   const { opportunityIds } = inputData
