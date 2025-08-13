@@ -14,6 +14,257 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          opportunity_id: string | null
+          owner_id: string | null
+          scheduled_at: string | null
+          status: string | null
+          subject: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          opportunity_id?: string | null
+          owner_id?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          subject: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          opportunity_id?: string | null
+          owner_id?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          subject?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          description: string | null
+          id: string
+          industry: string | null
+          name: string
+          phone: string | null
+          revenue: number | null
+          size: string | null
+          state: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          name: string
+          phone?: string | null
+          revenue?: number | null
+          size?: string | null
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          industry?: string | null
+          name?: string
+          phone?: string | null
+          revenue?: number | null
+          size?: string | null
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          department: string | null
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          lead_score: number | null
+          lead_source: string | null
+          owner_id: string | null
+          phone: string | null
+          status: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          department?: string | null
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          lead_score?: number | null
+          lead_source?: string | null
+          owner_id?: string | null
+          phone?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          lead_score?: number | null
+          lead_source?: string | null
+          owner_id?: string | null
+          phone?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunities: {
+        Row: {
+          amount: number | null
+          company_id: string | null
+          contact_id: string | null
+          created_at: string
+          description: string | null
+          expected_close_date: string | null
+          id: string
+          name: string
+          owner_id: string | null
+          probability: number | null
+          stage: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          name: string
+          owner_id?: string | null
+          probability?: number | null
+          stage?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          name?: string
+          owner_id?: string | null
+          probability?: number | null
+          stage?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
