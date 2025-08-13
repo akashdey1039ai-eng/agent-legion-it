@@ -35,6 +35,8 @@ Deno.serve(async (req) => {
       .from('salesforce_tokens')
       .select('*')
       .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .single()
 
     if (tokenError || !tokenData) {
