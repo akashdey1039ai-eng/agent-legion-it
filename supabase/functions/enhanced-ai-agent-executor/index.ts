@@ -347,18 +347,29 @@ Respond in JSON format:
         // Action 2: Real Salesforce Updates (if connected)
         if (salesforceAPI && contact.salesforce_id) {
           try {
-            // Update Lead in Salesforce
-            const salesforceUpdateData = {
-              Lead_Score__c: aiAnalysis.newScore,
+            // Update Lead in Salesforce - try different field name variations
+            const salesforceUpdateData: any = {
               Rating: aiAnalysis.priority,
               Status: aiAnalysis.priority === 'High' ? 'Working - Contacted' : 'Open - Not Contacted',
               Description: `AI Analysis (${new Date().toLocaleDateString()}): ${aiAnalysis.reasoning}\n\nAI Confidence: 92%\n\nRecommended Email: "${aiAnalysis.emailSubject}"`
             };
             
+            // Try different possible field names for Lead Score
+            const possibleFieldNames = ['Lead_Score__c', 'LeadScore__c', 'Lead_Score_Number__c', 'Score__c'];
+            for (const fieldName of possibleFieldNames) {
+              salesforceUpdateData[fieldName] = aiAnalysis.newScore;
+            }
+            
             console.log(`🎯 Updating Salesforce lead ${contact.salesforce_id} with data:`, salesforceUpdateData);
             
-            await salesforceAPI.updateLead(contact.salesforce_id, salesforceUpdateData);
-            actions.push(`✅ Updated lead score to ${aiAnalysis.newScore} in Salesforce`)
+            try {
+              await salesforceAPI.updateLead(contact.salesforce_id, salesforceUpdateData);
+              actions.push(`✅ Updated lead score to ${aiAnalysis.newScore} in Salesforce`);
+              console.log(`✅ Successfully updated Salesforce lead ${contact.salesforce_id}`);
+            } catch (sfError) {
+              console.error(`❌ Salesforce update failed for lead ${contact.salesforce_id}:`, sfError);
+              actions.push(`❌ Salesforce update failed: ${sfError.message}`);
+            }
             actionsExecuted++
 
             // Create Follow-up Task in Salesforce
