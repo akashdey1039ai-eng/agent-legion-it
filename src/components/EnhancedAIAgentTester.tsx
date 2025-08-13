@@ -315,13 +315,64 @@ export function EnhancedAIAgentTester() {
                     </div>
                     
                     {result.results && (
-                      <div>
-                        <strong>AI Analysis Results:</strong>
-                        <div className="mt-2 p-3 bg-muted rounded text-xs">
-                          <pre className="overflow-auto max-h-40 text-xs">
-                            {JSON.stringify(result.results, null, 2)}
-                          </pre>
-                        </div>
+                      <div className="space-y-4">
+                        {/* Actions Executed Details */}
+                        {result.results.analysis && result.actionsExecuted > 0 && (
+                          <div>
+                            <strong>✅ Actions Executed:</strong>
+                            <div className="mt-2 space-y-3">
+                              {result.results.analysis.map((contact: any, idx: number) => (
+                                <div key={idx} className="p-3 bg-muted/50 rounded border border-primary/10">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <h6 className="font-medium text-foreground">{contact.name}</h6>
+                                    <Badge variant="outline" className="text-xs">
+                                      Score: {contact.oldScore} → {contact.newScore}
+                                    </Badge>
+                                  </div>
+                                  {contact.actionsExecuted && contact.actionsExecuted.length > 0 && (
+                                    <div className="space-y-1">
+                                      <div className="text-xs font-medium text-foreground">Actions Taken:</div>
+                                      {contact.actionsExecuted.map((action: string, actionIdx: number) => (
+                                        <div key={actionIdx} className="text-xs text-muted-foreground flex items-center gap-1">
+                                          <CheckCircle className="h-3 w-3 text-green-500" />
+                                          {action}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {contact.emailSubject && (
+                                    <div className="mt-2 text-xs">
+                                      <span className="font-medium text-foreground">Email Subject: </span>
+                                      <span className="text-muted-foreground italic">"{contact.emailSubject}"</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Summary */}
+                        {result.results.summary && (
+                          <div>
+                            <strong>📊 Summary:</strong>
+                            <div className="mt-1 p-3 bg-primary/5 border border-primary/20 rounded text-sm text-foreground">
+                              {result.results.summary}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Raw JSON (Collapsed) */}
+                        <details className="cursor-pointer">
+                          <summary className="font-medium text-foreground hover:text-primary transition-colors">
+                            🔍 View Raw Results (JSON)
+                          </summary>
+                          <div className="mt-2 p-3 bg-muted rounded text-xs">
+                            <pre className="overflow-auto max-h-40 text-xs">
+                              {JSON.stringify(result.results, null, 2)}
+                            </pre>
+                          </div>
+                        </details>
                       </div>
                     )}
                   </div>
