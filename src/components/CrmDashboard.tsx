@@ -15,7 +15,12 @@ import {
   Zap,
   CheckCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  ArrowRight,
+  Database,
+  UserCheck,
+  Shield,
+  Star
 } from "lucide-react";
 
 interface DashboardStats {
@@ -300,15 +305,77 @@ export function CrmDashboard() {
         </Card>
       </div>
 
-      {/* Lead Enrichment Status */}
+      {/* Lead Enrichment E2E Pipeline */}
       <Card className="bg-card/50 border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-primary" />
-            Lead Enrichment Status
+            Lead Enrichment Pipeline - End-to-End
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* E2E Pipeline Stages */}
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold text-foreground mb-4">Enrichment Stages</h4>
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
+              {/* Stage 1: Lead Capture */}
+              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-primary/20 relative">
+                <Database className="h-6 w-6 text-primary mb-2" />
+                <div className="text-xs font-medium text-center text-foreground">Lead Capture</div>
+                <div className="text-xs text-muted-foreground mt-1">245 new</div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
+              </div>
+
+              {/* Stage 2: Data Validation */}
+              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-accent/20 relative">
+                <Shield className="h-6 w-6 text-accent mb-2" />
+                <div className="text-xs font-medium text-center text-foreground">Validation</div>
+                <div className="text-xs text-muted-foreground mt-1">98% valid</div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
+              </div>
+
+              {/* Stage 3: Company Enrichment */}
+              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-primary/20 relative">
+                <Building2 className="h-6 w-6 text-primary mb-2" />
+                <div className="text-xs font-medium text-center text-foreground">Company Data</div>
+                <div className="text-xs text-muted-foreground mt-1">187 enriched</div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
+              </div>
+
+              {/* Stage 4: Contact Enrichment */}
+              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-accent/20 relative">
+                <Users className="h-6 w-6 text-accent mb-2" />
+                <div className="text-xs font-medium text-center text-foreground">Contact Info</div>
+                <div className="text-xs text-muted-foreground mt-1">156 complete</div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
+              </div>
+
+              {/* Stage 5: AI Scoring */}
+              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-primary/20 relative">
+                <Brain className="h-6 w-6 text-primary mb-2" />
+                <div className="text-xs font-medium text-center text-foreground">AI Scoring</div>
+                <div className="text-xs text-muted-foreground mt-1">142 scored</div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
+              </div>
+
+              {/* Stage 6: Qualification */}
+              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-accent/20 relative">
+                <UserCheck className="h-6 w-6 text-accent mb-2" />
+                <div className="text-xs font-medium text-center text-foreground">Qualification</div>
+                <div className="text-xs text-muted-foreground mt-1">89 qualified</div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
+              </div>
+
+              {/* Stage 7: Ready for Outreach */}
+              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-primary/20">
+                <Star className="h-6 w-6 text-primary mb-2" />
+                <div className="text-xs font-medium text-center text-foreground">Ready</div>
+                <div className="text-xs text-muted-foreground mt-1">67 ready</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Overview */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground mb-1">{enrichmentStats.enrichedLeads}</div>
@@ -361,13 +428,15 @@ export function CrmDashboard() {
             </div>
 
             <div className="mt-4 p-3 rounded-lg bg-gradient-cyber border border-primary/20">
-              <h4 className="text-sm font-semibold text-primary mb-2">AI Enrichment Insights</h4>
+              <h4 className="text-sm font-semibold text-primary mb-2">E2E Pipeline Insights</h4>
               <p className="text-xs text-muted-foreground">
-                • {enrichmentStats.highQualityLeads} leads identified as high-value prospects
+                • 67 leads completed full enrichment pipeline (27% conversion rate)
                 <br />
-                • {Math.round(enrichmentStats.enrichmentRate)}% of leads have complete profile data
+                • Average enrichment time: 4.2 hours per lead
                 <br />
-                • Contact scoring algorithm improved lead quality by 34%
+                • Quality score improvement: +34% after AI processing
+                <br />
+                • Data validation accuracy: 98.5% success rate
               </p>
             </div>
           </div>
