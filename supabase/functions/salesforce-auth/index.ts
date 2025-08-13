@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
         body: new URLSearchParams({
           grant_type: 'authorization_code',
           client_id: Deno.env.get('SALESFORCE_CLIENT_ID') ?? '',
+          client_secret: Deno.env.get('SALESFORCE_CLIENT_SECRET') ?? '',
           redirect_uri: `${Deno.env.get('SUPABASE_URL')}/functions/v1/salesforce-auth`,
           code: code,
           code_verifier: oauthState.code_verifier,
