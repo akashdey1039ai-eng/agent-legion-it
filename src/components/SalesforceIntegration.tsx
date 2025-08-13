@@ -99,7 +99,9 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
         .from('salesforce_tokens')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
 
       console.log('Salesforce token query result:', { data, error });
 
