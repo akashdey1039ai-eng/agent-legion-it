@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -11,7 +12,8 @@ import {
   TrendingUp, 
   DollarSign,
   Calendar,
-  Brain
+  Brain,
+  Database
 } from "lucide-react";
 
 interface DashboardStats {
@@ -145,7 +147,7 @@ export function CrmDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Key Metrics */}
+      {/* Essential Metrics Only */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-card/50 border-primary/20 hover:shadow-command transition-cyber">
           <CardContent className="p-6">
@@ -193,24 +195,7 @@ export function CrmDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-accent/10">
-                <Activity className="h-5 w-5 text-accent" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{stats.totalActivities}</p>
-                <p className="text-sm text-muted-foreground">Activities</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Revenue Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-card/50 border-primary/20 hover:shadow-command transition-cyber">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <DollarSign className="h-5 w-5 text-primary" />
+                <DollarSign className="h-5 w-5 text-accent" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.pipelineValue)}</p>
@@ -219,138 +204,26 @@ export function CrmDashboard() {
             </div>
           </CardContent>
         </Card>
-
-        <Card className="bg-card/50 border-primary/20 hover:shadow-command transition-cyber">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent/10">
-                <TrendingUp className="h-5 w-5 text-accent" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{stats.wonDeals}</p>
-                <p className="text-sm text-muted-foreground">Won Deals</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card/50 border-primary/20 hover:shadow-command transition-cyber">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Target className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{stats.conversionRate.toFixed(1)}%</p>
-                <p className="text-sm text-muted-foreground">Conversion Rate</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card/50 border-primary/20 hover:shadow-command transition-cyber">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent/10">
-                <DollarSign className="h-5 w-5 text-accent" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.avgDealSize)}</p>
-                <p className="text-sm text-muted-foreground">Avg Deal Size</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-
-      {/* AI Insights & Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* AI Insights */}
-        <Card className="bg-card/50 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
-              AI Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 rounded-lg bg-gradient-cyber border border-primary/20">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-primary">Pipeline Health</h4>
-                <Badge variant="secondary">Excellent</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Your conversion rate of {stats.conversionRate.toFixed(1)}% is above industry average.
-              </p>
-              <Progress value={Math.min(stats.conversionRate * 2, 100)} className="h-2" />
-            </div>
-
-            <div className="p-4 rounded-lg bg-gradient-cyber border border-accent/20">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-accent">Revenue Forecast</h4>
-                <Badge variant="outline">Trending Up</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Based on current pipeline, projected monthly revenue: {formatCurrency(stats.pipelineValue * 0.3)}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-lg bg-gradient-cyber border border-primary/20">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-primary">Activity Insights</h4>
-                <Badge variant="secondary">Active</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {stats.totalActivities} total activities. High engagement detected across pipeline.
-              </p>
-            </div>
+      {/* Sync Status & Quick Actions */}
+      {stats.totalContacts === 0 && stats.totalOpportunities === 0 && (
+        <Card className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
+          <CardContent className="p-6 text-center">
+            <Database className="h-12 w-12 text-amber-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-2">
+              No Salesforce Data Found
+            </h3>
+            <p className="text-amber-700 dark:text-amber-300 mb-4">
+              Connect your Salesforce Developer Sandbox and sync data to see insights and enable AI agents.
+            </p>
+            <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
+              <Database className="h-4 w-4 mr-2" />
+              Go to Salesforce Integration
+            </Button>
           </CardContent>
         </Card>
-
-        {/* Recent Activities */}
-        <Card className="bg-card/50 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-accent" />
-              Recent Activities
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentActivities.length > 0 ? (
-                recentActivities.slice(0, 6).map((activity) => (
-                  <div key={activity.id} className="flex items-center gap-3 p-3 rounded-lg bg-gradient-cyber border border-border/50">
-                    <Badge className={getActivityTypeColor(activity.type)}>
-                      {activity.type}
-                    </Badge>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {activity.subject}
-                      </p>
-                      {(activity.contact_name || activity.company_name) && (
-                        <p className="text-xs text-muted-foreground">
-                          {activity.contact_name}
-                          {activity.contact_name && activity.company_name && ' • '}
-                          {activity.company_name}
-                        </p>
-                      )}
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {activity.status}
-                    </Badge>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-6 text-muted-foreground">
-                  <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No recent activities</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      )}
     </div>
   );
 }
