@@ -348,12 +348,16 @@ Respond in JSON format:
         if (salesforceAPI && contact.salesforce_id) {
           try {
             // Update Lead in Salesforce
-            await salesforceAPI.updateLead(contact.salesforce_id, {
+            const salesforceUpdateData = {
               Lead_Score__c: aiAnalysis.newScore,
               Rating: aiAnalysis.priority,
               Status: aiAnalysis.priority === 'High' ? 'Working - Contacted' : 'Open - Not Contacted',
               Description: `AI Analysis (${new Date().toLocaleDateString()}): ${aiAnalysis.reasoning}\n\nAI Confidence: 92%\n\nRecommended Email: "${aiAnalysis.emailSubject}"`
-            });
+            };
+            
+            console.log(`🎯 Updating Salesforce lead ${contact.salesforce_id} with data:`, salesforceUpdateData);
+            
+            await salesforceAPI.updateLead(contact.salesforce_id, salesforceUpdateData);
             actions.push(`✅ Updated lead score to ${aiAnalysis.newScore} in Salesforce`)
             actionsExecuted++
 
