@@ -105,8 +105,8 @@ Deno.serve(async (req) => {
         })
         .eq('id', executionId)
 
-      // Background task: update performance metrics
-      EdgeRuntime.waitUntil(updatePerformanceMetrics(supabaseClient, agentId, executionTime, confidenceScore, true))
+      // Update performance metrics (don't await to avoid blocking)
+      updatePerformanceMetrics(supabaseClient, agentId, executionTime, confidenceScore, true)
 
       console.log(`AI agent execution completed: ${executionId} in ${executionTime}ms`)
 
@@ -139,8 +139,8 @@ Deno.serve(async (req) => {
         })
         .eq('id', executionId)
 
-      // Background task: update performance metrics
-      EdgeRuntime.waitUntil(updatePerformanceMetrics(supabaseClient, agentId, executionTime, 0, false))
+      // Update performance metrics (don't await to avoid blocking)
+      updatePerformanceMetrics(supabaseClient, agentId, executionTime, 0, false)
 
       throw executionError
     }
