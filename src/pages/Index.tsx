@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AgentCard } from "@/components/AgentCard";
 import { CommandCenter } from "@/components/CommandCenter";
 import { CrmDashboard } from "@/components/CrmDashboard";
+import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
 import { Terminal, Code, Database, Shield, Bot, Zap, Target, Brain } from "lucide-react";
@@ -168,8 +169,25 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CRM Intelligence Dashboard - Hidden */}
-      {/* <section className="py-16 border-b border-border/50">
+      {/* Salesforce Integration Section */}
+      <section className="py-16 border-b border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6">
+              <Database className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Salesforce Integration</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-4">Connect Your Salesforce</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Sync and manage your Salesforce data directly from your AI command center.
+            </p>
+          </div>
+          <SalesforceIntegration />
+        </div>
+      </section>
+
+      {/* CRM Intelligence Dashboard */}
+      <section className="py-16 border-b border-border/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6">
@@ -183,7 +201,7 @@ const Index = () => {
           </div>
           <CrmDashboard />
         </div>
-      </section> */}
+      </section>
 
       {/* AI Agents Grid */}
       <section className="py-16">
