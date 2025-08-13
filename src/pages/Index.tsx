@@ -1,6 +1,10 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { AgentCard } from "@/components/AgentCard";
 import { CommandCenter } from "@/components/CommandCenter";
+import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
 import { Terminal, Code, Database, Shield, Bot, Zap, Target, Brain } from "lucide-react";
 
@@ -85,8 +89,33 @@ const aiAgents = [
 ];
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+          <p className="text-muted-foreground">Authenticating...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      <Header />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div 
