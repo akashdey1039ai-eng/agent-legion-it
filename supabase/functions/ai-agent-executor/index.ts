@@ -12,15 +12,23 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('Starting AI agent execution request')
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    const { agentId, inputData, userId, requestSource } = await req.json()
+    console.log('Supabase client created')
+
+    const body = await req.json()
+    console.log('Request body received:', body)
+    
+    const { agentId, inputData, userId, requestSource } = body
 
     // Security validation
     if (!agentId || !inputData || !userId) {
+      console.error('Invalid request parameters:', { agentId, inputData, userId })
       await logSecurityEvent(supabaseClient, null, null, 'unauthorized_access', 'high', 
         'Missing required parameters for agent execution', req)
       throw new Error('Invalid request parameters')
@@ -147,14 +155,17 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('AI Agent execution error:', error)
+    console.error('Error stack:', error.stack)
+    
     return new Response(
       JSON.stringify({
         error: error.message,
         success: false,
+        details: error.stack
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500,
       }
     )
   }
