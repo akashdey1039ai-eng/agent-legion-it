@@ -40,6 +40,8 @@ export default function SalesforceCallback() {
           
           // Close the popup window if we're in one
           if (window.opener) {
+            // Send success message to parent window
+            window.opener.postMessage({ type: 'SALESFORCE_AUTH_SUCCESS' }, '*');
             window.close();
           } else {
             navigate('/');

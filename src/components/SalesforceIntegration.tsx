@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,10 +49,26 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
         'width=600,height=700,scrollbars=yes,resizable=yes'
       );
 
-      // Listen for the callback
+      // Listen for messages from the popup
+      const handleMessage = (event: MessageEvent) => {
+        if (event.data.type === 'SALESFORCE_AUTH_SUCCESS') {
+          setIsConnecting(false);
+          checkConnection(); // Refresh connection status
+          toast({
+            title: "Connected Successfully",
+            description: "Your Salesforce account has been connected.",
+          });
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Listen for the callback (fallback)
       const checkClosed = setInterval(() => {
         if (popup?.closed) {
           clearInterval(checkClosed);
+          window.removeEventListener('message', handleMessage);
           setIsConnecting(false);
           // Check if connection was successful
           checkConnection();
@@ -138,9 +154,9 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
   ];
 
   // Check connection status on component mount
-  useState(() => {
+  useEffect(() => {
     checkConnection();
-  });
+  }, [user]);
 
   return (
     <div className="space-y-6">
