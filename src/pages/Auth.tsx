@@ -35,7 +35,7 @@ export default function Auth() {
       } else {
         toast({
           title: 'Welcome back!',
-          description: 'Successfully signed in to AI Command Center.',
+          description: "Successfully signed in to IT AI Command Center.",
         });
         navigate('/');
       }
@@ -104,7 +104,7 @@ export default function Auth() {
               <Shield className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">AI Command Center</CardTitle>
+          <CardTitle className="text-2xl font-bold">IT AI Command Center</CardTitle>
           <CardDescription>
             Secure access to AI Army Intelligence Operations
           </CardDescription>

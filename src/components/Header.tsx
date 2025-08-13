@@ -22,7 +22,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center space-x-2">
           <Shield className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold">AI Command Center</h1>
+          <h1 className="text-xl font-bold">IT AI Command Center</h1>
         </div>
         
         {user && (
