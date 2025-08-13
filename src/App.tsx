@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
+// QueryClient for React Query state management
 const queryClient = new QueryClient();
 
 const App = () => (
