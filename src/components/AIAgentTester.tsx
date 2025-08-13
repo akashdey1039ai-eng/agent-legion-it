@@ -32,7 +32,7 @@ export function AIAgentTester() {
       const { data: agent, error: agentError } = await supabase
         .from('ai_agents')
         .insert({
-          name: 'Test Lead Intelligence Agent',
+          name: 'Lead Intelligence Agent',
           type: 'lead_intelligence',
           status: 'active',
           created_by: user.id,
@@ -110,7 +110,7 @@ export function AIAgentTester() {
       const { data: agent, error: agentError } = await supabase
         .from('ai_agents')
         .insert({
-          name: 'Test Pipeline Analysis Agent',
+          name: 'Pipeline Analysis Agent',
           type: 'pipeline_analysis',
           status: 'active',
           created_by: user.id,
