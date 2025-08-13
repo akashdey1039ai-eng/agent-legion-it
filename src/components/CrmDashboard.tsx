@@ -11,16 +11,7 @@ import {
   TrendingUp, 
   DollarSign,
   Calendar,
-  Brain,
-  Zap,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  ArrowRight,
-  Database,
-  UserCheck,
-  Shield,
-  Star
+  Brain
 } from "lucide-react";
 
 interface DashboardStats {
@@ -34,14 +25,6 @@ interface DashboardStats {
   avgDealSize: number;
 }
 
-interface LeadEnrichmentStats {
-  totalLeads: number;
-  enrichedLeads: number;
-  enrichmentRate: number;
-  highQualityLeads: number;
-  enrichmentInProgress: number;
-  enrichmentErrors: number;
-}
 
 interface RecentActivity {
   id: string;
@@ -63,14 +46,6 @@ export function CrmDashboard() {
     wonDeals: 0,
     conversionRate: 0,
     avgDealSize: 0
-  });
-  const [enrichmentStats, setEnrichmentStats] = useState<LeadEnrichmentStats>({
-    totalLeads: 0,
-    enrichedLeads: 0,
-    enrichmentRate: 0,
-    highQualityLeads: 0,
-    enrichmentInProgress: 0,
-    enrichmentErrors: 0
   });
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,23 +98,6 @@ export function CrmDashboard() {
 
       setRecentActivities(formattedActivities);
 
-      // Calculate lead enrichment stats based on contacts data
-      const contacts = contactsResult.data || [];
-      const totalLeads = contacts.length;
-      const enrichedLeads = contacts.filter(contact => contact.lead_score && contact.lead_score > 0).length;
-      const highQualityLeads = contacts.filter(contact => contact.lead_score && contact.lead_score >= 80).length;
-      const enrichmentInProgress = Math.floor(totalLeads * 0.15); // Mock 15% in progress
-      const enrichmentErrors = Math.floor(totalLeads * 0.05); // Mock 5% errors
-      const enrichmentRate = totalLeads > 0 ? (enrichedLeads / totalLeads) * 100 : 0;
-
-      setEnrichmentStats({
-        totalLeads,
-        enrichedLeads,
-        enrichmentRate,
-        highQualityLeads,
-        enrichmentInProgress,
-        enrichmentErrors
-      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -305,143 +263,6 @@ export function CrmDashboard() {
         </Card>
       </div>
 
-      {/* Lead Enrichment E2E Pipeline */}
-      <Card className="bg-card/50 border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-primary" />
-            Lead Enrichment Pipeline - End-to-End
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* E2E Pipeline Stages */}
-          <div className="mb-6">
-            <h4 className="text-sm font-semibold text-foreground mb-4">Enrichment Stages</h4>
-            <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
-              {/* Stage 1: Lead Capture */}
-              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-primary/20 relative">
-                <Database className="h-6 w-6 text-primary mb-2" />
-                <div className="text-xs font-medium text-center text-foreground">Lead Capture</div>
-                <div className="text-xs text-muted-foreground mt-1">245 new</div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
-              </div>
-
-              {/* Stage 2: Data Validation */}
-              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-accent/20 relative">
-                <Shield className="h-6 w-6 text-accent mb-2" />
-                <div className="text-xs font-medium text-center text-foreground">Validation</div>
-                <div className="text-xs text-muted-foreground mt-1">98% valid</div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
-              </div>
-
-              {/* Stage 3: Company Enrichment */}
-              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-primary/20 relative">
-                <Building2 className="h-6 w-6 text-primary mb-2" />
-                <div className="text-xs font-medium text-center text-foreground">Company Data</div>
-                <div className="text-xs text-muted-foreground mt-1">187 enriched</div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
-              </div>
-
-              {/* Stage 4: Contact Enrichment */}
-              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-accent/20 relative">
-                <Users className="h-6 w-6 text-accent mb-2" />
-                <div className="text-xs font-medium text-center text-foreground">Contact Info</div>
-                <div className="text-xs text-muted-foreground mt-1">156 complete</div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
-              </div>
-
-              {/* Stage 5: AI Scoring */}
-              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-primary/20 relative">
-                <Brain className="h-6 w-6 text-primary mb-2" />
-                <div className="text-xs font-medium text-center text-foreground">AI Scoring</div>
-                <div className="text-xs text-muted-foreground mt-1">142 scored</div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
-              </div>
-
-              {/* Stage 6: Qualification */}
-              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-accent/20 relative">
-                <UserCheck className="h-6 w-6 text-accent mb-2" />
-                <div className="text-xs font-medium text-center text-foreground">Qualification</div>
-                <div className="text-xs text-muted-foreground mt-1">89 qualified</div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground absolute -right-2 top-1/2 transform -translate-y-1/2 hidden md:block" />
-              </div>
-
-              {/* Stage 7: Ready for Outreach */}
-              <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-cyber border border-primary/20">
-                <Star className="h-6 w-6 text-primary mb-2" />
-                <div className="text-xs font-medium text-center text-foreground">Ready</div>
-                <div className="text-xs text-muted-foreground mt-1">67 ready</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Status Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-foreground mb-1">{enrichmentStats.enrichedLeads}</div>
-              <div className="text-sm text-muted-foreground">Enriched Leads</div>
-              <div className="text-xs text-primary mt-1">{enrichmentStats.enrichmentRate.toFixed(1)}% complete</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-accent mb-1">{enrichmentStats.highQualityLeads}</div>
-              <div className="text-sm text-muted-foreground">High Quality</div>
-              <div className="text-xs text-accent mt-1">Score ≥ 80</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-foreground mb-1">{enrichmentStats.enrichmentInProgress}</div>
-              <div className="text-sm text-muted-foreground">In Progress</div>
-              <div className="text-xs text-muted-foreground mt-1">Processing...</div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">Enrichment Progress</span>
-              <span className="text-sm text-muted-foreground">{enrichmentStats.enrichmentRate.toFixed(1)}%</span>
-            </div>
-            <Progress value={enrichmentStats.enrichmentRate} className="h-2" />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-cyber border border-border/50">
-                <CheckCircle className="h-4 w-4 text-primary" />
-                <div>
-                  <div className="text-sm font-medium text-foreground">{enrichmentStats.enrichedLeads}</div>
-                  <div className="text-xs text-muted-foreground">Completed</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-cyber border border-border/50">
-                <Clock className="h-4 w-4 text-accent" />
-                <div>
-                  <div className="text-sm font-medium text-foreground">{enrichmentStats.enrichmentInProgress}</div>
-                  <div className="text-xs text-muted-foreground">Processing</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-cyber border border-border/50">
-                <AlertCircle className="h-4 w-4 text-destructive" />
-                <div>
-                  <div className="text-sm font-medium text-foreground">{enrichmentStats.enrichmentErrors}</div>
-                  <div className="text-xs text-muted-foreground">Errors</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 p-3 rounded-lg bg-gradient-cyber border border-primary/20">
-              <h4 className="text-sm font-semibold text-primary mb-2">E2E Pipeline Insights</h4>
-              <p className="text-xs text-muted-foreground">
-                • 67 leads completed full enrichment pipeline (27% conversion rate)
-                <br />
-                • Average enrichment time: 4.2 hours per lead
-                <br />
-                • Quality score improvement: +34% after AI processing
-                <br />
-                • Data validation accuracy: 98.5% success rate
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* AI Insights & Recent Activities */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
