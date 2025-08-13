@@ -21,8 +21,10 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          last_sync_at: string | null
           opportunity_id: string | null
           owner_id: string | null
+          salesforce_id: string | null
           scheduled_at: string | null
           status: string | null
           subject: string
@@ -35,8 +37,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          last_sync_at?: string | null
           opportunity_id?: string | null
           owner_id?: string | null
+          salesforce_id?: string | null
           scheduled_at?: string | null
           status?: string | null
           subject: string
@@ -49,8 +53,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          last_sync_at?: string | null
           opportunity_id?: string | null
           owner_id?: string | null
+          salesforce_id?: string | null
           scheduled_at?: string | null
           status?: string | null
           subject?: string
@@ -81,6 +87,195 @@ export type Database = {
           },
         ]
       }
+      campaign_members: {
+        Row: {
+          campaign_id: string | null
+          contact_id: string | null
+          created_at: string
+          first_responded_date: string | null
+          has_responded: boolean | null
+          id: string
+          last_sync_at: string | null
+          salesforce_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          first_responded_date?: string | null
+          has_responded?: boolean | null
+          id?: string
+          last_sync_at?: string | null
+          salesforce_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          first_responded_date?: string | null
+          has_responded?: boolean | null
+          id?: string
+          last_sync_at?: string | null
+          salesforce_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_members_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_members_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          actual_cost: number | null
+          budgeted_cost: number | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          expected_response: number | null
+          expected_revenue: number | null
+          id: string
+          last_sync_at: string | null
+          name: string
+          number_sent: number | null
+          owner_id: string | null
+          salesforce_id: string | null
+          start_date: string | null
+          status: string | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          budgeted_cost?: number | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          expected_response?: number | null
+          expected_revenue?: number | null
+          id?: string
+          last_sync_at?: string | null
+          name: string
+          number_sent?: number | null
+          owner_id?: string | null
+          salesforce_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          budgeted_cost?: number | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          expected_response?: number | null
+          expected_revenue?: number | null
+          id?: string
+          last_sync_at?: string | null
+          name?: string
+          number_sent?: number | null
+          owner_id?: string | null
+          salesforce_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cases: {
+        Row: {
+          case_number: string | null
+          closed_at: string | null
+          company_id: string | null
+          contact_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          last_sync_at: string | null
+          origin: string | null
+          owner_id: string | null
+          priority: string
+          reason: string | null
+          salesforce_id: string | null
+          status: string
+          subject: string
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          case_number?: string | null
+          closed_at?: string | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_sync_at?: string | null
+          origin?: string | null
+          owner_id?: string | null
+          priority?: string
+          reason?: string | null
+          salesforce_id?: string | null
+          status?: string
+          subject: string
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          case_number?: string | null
+          closed_at?: string | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_sync_at?: string | null
+          origin?: string | null
+          owner_id?: string | null
+          priority?: string
+          reason?: string | null
+          salesforce_id?: string | null
+          status?: string
+          subject?: string
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
@@ -90,9 +285,11 @@ export type Database = {
           description: string | null
           id: string
           industry: string | null
+          last_sync_at: string | null
           name: string
           phone: string | null
           revenue: number | null
+          salesforce_id: string | null
           size: string | null
           state: string | null
           updated_at: string
@@ -106,9 +303,11 @@ export type Database = {
           description?: string | null
           id?: string
           industry?: string | null
+          last_sync_at?: string | null
           name: string
           phone?: string | null
           revenue?: number | null
+          salesforce_id?: string | null
           size?: string | null
           state?: string | null
           updated_at?: string
@@ -122,9 +321,11 @@ export type Database = {
           description?: string | null
           id?: string
           industry?: string | null
+          last_sync_at?: string | null
           name?: string
           phone?: string | null
           revenue?: number | null
+          salesforce_id?: string | null
           size?: string | null
           state?: string | null
           updated_at?: string
@@ -141,10 +342,13 @@ export type Database = {
           first_name: string
           id: string
           last_name: string
+          last_sync_at: string | null
           lead_score: number | null
           lead_source: string | null
           owner_id: string | null
           phone: string | null
+          salesforce_id: string | null
+          salesforce_type: string | null
           status: string | null
           title: string | null
           updated_at: string
@@ -157,10 +361,13 @@ export type Database = {
           first_name: string
           id?: string
           last_name: string
+          last_sync_at?: string | null
           lead_score?: number | null
           lead_source?: string | null
           owner_id?: string | null
           phone?: string | null
+          salesforce_id?: string | null
+          salesforce_type?: string | null
           status?: string | null
           title?: string | null
           updated_at?: string
@@ -173,10 +380,13 @@ export type Database = {
           first_name?: string
           id?: string
           last_name?: string
+          last_sync_at?: string | null
           lead_score?: number | null
           lead_source?: string | null
           owner_id?: string | null
           phone?: string | null
+          salesforce_id?: string | null
+          salesforce_type?: string | null
           status?: string | null
           title?: string | null
           updated_at?: string
@@ -198,6 +408,81 @@ export type Database = {
           },
         ]
       }
+      knowledge_articles: {
+        Row: {
+          article_number: string | null
+          article_type: string | null
+          content: string | null
+          created_at: string
+          created_by_id: string | null
+          data_category: string | null
+          data_category_group: string | null
+          id: string
+          is_visible_in_app: boolean | null
+          is_visible_in_csp: boolean | null
+          is_visible_in_pkb: boolean | null
+          language: string | null
+          last_modified_by_id: string | null
+          last_sync_at: string | null
+          publish_status: string | null
+          published_at: string | null
+          salesforce_id: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+          url_name: string | null
+          validation_status: string | null
+        }
+        Insert: {
+          article_number?: string | null
+          article_type?: string | null
+          content?: string | null
+          created_at?: string
+          created_by_id?: string | null
+          data_category?: string | null
+          data_category_group?: string | null
+          id?: string
+          is_visible_in_app?: boolean | null
+          is_visible_in_csp?: boolean | null
+          is_visible_in_pkb?: boolean | null
+          language?: string | null
+          last_modified_by_id?: string | null
+          last_sync_at?: string | null
+          publish_status?: string | null
+          published_at?: string | null
+          salesforce_id?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          url_name?: string | null
+          validation_status?: string | null
+        }
+        Update: {
+          article_number?: string | null
+          article_type?: string | null
+          content?: string | null
+          created_at?: string
+          created_by_id?: string | null
+          data_category?: string | null
+          data_category_group?: string | null
+          id?: string
+          is_visible_in_app?: boolean | null
+          is_visible_in_csp?: boolean | null
+          is_visible_in_pkb?: boolean | null
+          language?: string | null
+          last_modified_by_id?: string | null
+          last_sync_at?: string | null
+          publish_status?: string | null
+          published_at?: string | null
+          salesforce_id?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          url_name?: string | null
+          validation_status?: string | null
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           amount: number | null
@@ -207,9 +492,11 @@ export type Database = {
           description: string | null
           expected_close_date: string | null
           id: string
+          last_sync_at: string | null
           name: string
           owner_id: string | null
           probability: number | null
+          salesforce_id: string | null
           stage: string | null
           updated_at: string
         }
@@ -221,9 +508,11 @@ export type Database = {
           description?: string | null
           expected_close_date?: string | null
           id?: string
+          last_sync_at?: string | null
           name: string
           owner_id?: string | null
           probability?: number | null
+          salesforce_id?: string | null
           stage?: string | null
           updated_at?: string
         }
@@ -235,9 +524,11 @@ export type Database = {
           description?: string | null
           expected_close_date?: string | null
           id?: string
+          last_sync_at?: string | null
           name?: string
           owner_id?: string | null
           probability?: number | null
+          salesforce_id?: string | null
           stage?: string | null
           updated_at?: string
         }
@@ -301,6 +592,48 @@ export type Database = {
           role?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      salesforce_sync_log: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          data_payload: Json | null
+          error_message: string | null
+          id: string
+          local_id: string | null
+          object_type: string
+          operation: string
+          salesforce_id: string | null
+          status: string
+          sync_direction: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          data_payload?: Json | null
+          error_message?: string | null
+          id?: string
+          local_id?: string | null
+          object_type: string
+          operation: string
+          salesforce_id?: string | null
+          status?: string
+          sync_direction: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          data_payload?: Json | null
+          error_message?: string | null
+          id?: string
+          local_id?: string | null
+          object_type?: string
+          operation?: string
+          salesforce_id?: string | null
+          status?: string
+          sync_direction?: string
         }
         Relationships: []
       }
