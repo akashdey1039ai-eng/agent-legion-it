@@ -2,63 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AI Army Portfolio Design System - Futuristic Tech Aesthetic */
+/* Professional Enterprise Design System */
 
 @layer base {
   :root {
-    /* Core Dark Theme */
-    --background: 220 27% 8%;
-    --foreground: 210 40% 95%;
+    /* Professional Color Palette */
+    --background: 222 25% 4%;
+    --foreground: 210 40% 98%;
 
-    /* Command Center Cards */
-    --card: 220 27% 12%;
-    --card-foreground: 210 40% 95%;
+    /* Enterprise Cards */
+    --card: 222 25% 8%;
+    --card-foreground: 210 40% 98%;
 
-    /* Elevated Surfaces */
-    --popover: 220 27% 15%;
-    --popover-foreground: 210 40% 95%;
+    /* Surface Layers */
+    --popover: 222 25% 10%;
+    --popover-foreground: 210 40% 98%;
 
-    /* Electric Primary - Cyber Blue */
-    --primary: 200 100% 60%;
-    --primary-foreground: 220 27% 8%;
+    /* Professional Primary - Deep Blue */
+    --primary: 210 85% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Agent Status - Muted Tech */
-    --secondary: 220 27% 18%;
-    --secondary-foreground: 210 40% 85%;
+    /* Secondary Surfaces */
+    --secondary: 222 25% 12%;
+    --secondary-foreground: 210 25% 88%;
 
-    /* Inactive Elements */
-    --muted: 220 27% 15%;
-    --muted-foreground: 210 15% 65%;
+    /* Subtle Elements */
+    --muted: 222 25% 10%;
+    --muted-foreground: 210 15% 70%;
 
-    /* Highlight Accent - Electric Cyan */
-    --accent: 180 100% 65%;
-    --accent-foreground: 220 27% 8%;
+    /* Accent Highlights */
+    --accent: 200 80% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    /* Alert Systems */
-    --destructive: 0 80% 60%;
-    --destructive-foreground: 210 40% 95%;
+    /* Alert States */
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Interface Elements */
-    --border: 220 27% 18%;
-    --input: 220 27% 15%;
-    --ring: 200 100% 60%;
+    /* Interface Borders */
+    --border: 222 25% 15%;
+    --input: 222 25% 10%;
+    --ring: 210 85% 55%;
+
+    /* Success States */
+    --success: 142 76% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning States */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
     /* Design Tokens */
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Command Gradients */
-    --gradient-command: linear-gradient(135deg, hsl(200 100% 60%), hsl(180 100% 65%));
-    --gradient-neural: linear-gradient(180deg, hsl(220 27% 12%), hsl(220 27% 8%));
-    --gradient-cyber: linear-gradient(45deg, hsl(200 100% 60% / 0.1), hsl(180 100% 65% / 0.1));
+    /* Professional Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(210 85% 55%), hsl(200 80% 60%));
+    --gradient-surface: linear-gradient(180deg, hsl(222 25% 8%), hsl(222 25% 4%));
+    --gradient-subtle: linear-gradient(45deg, hsl(222 25% 8% / 0.5), hsl(210 85% 55% / 0.1));
 
-    /* Advanced Shadows */
-    --shadow-command: 0 10px 30px -10px hsl(200 100% 60% / 0.3);
-    --shadow-neural: 0 20px 40px -15px hsl(220 27% 8% / 0.8);
-    --shadow-glow: 0 0 20px hsl(200 100% 60% / 0.4);
+    /* Enterprise Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(222 25% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(222 25% 0% / 0.1), 0 2px 4px -2px hsl(222 25% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(222 25% 0% / 0.1), 0 4px 6px -4px hsl(222 25% 0% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(222 25% 0% / 0.1), 0 8px 10px -6px hsl(222 25% 0% / 0.1);
+    --shadow-glow: 0 0 20px hsl(210 85% 55% / 0.3);
 
-    /* Animations */
-    --transition-cyber: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-neural: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Smooth Transitions */
+    --transition-default: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 

@@ -18,11 +18,16 @@ export function Header() {
   };
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Shield className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold">IT AI Command Center</h1>
+    <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <div className="container flex h-16 items-center justify-between px-6">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-gradient-primary rounded-lg shadow-glow">
+            <Shield className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">IT AI Command Center</h1>
+            <p className="text-xs text-muted-foreground">Enterprise Intelligence Platform</p>
+          </div>
         </div>
         
         {user && (
