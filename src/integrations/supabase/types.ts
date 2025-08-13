@@ -483,6 +483,27 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_states: {
+        Row: {
+          code_verifier: string
+          created_at: string
+          expires_at: string
+          state: string
+        }
+        Insert: {
+          code_verifier: string
+          created_at?: string
+          expires_at: string
+          state: string
+        }
+        Update: {
+          code_verifier?: string
+          created_at?: string
+          expires_at?: string
+          state?: string
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           amount: number | null

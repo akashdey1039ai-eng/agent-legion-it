@@ -46,9 +46,24 @@ Deno.serve(async (req) => {
       throw new Error('Authorization code is required')
     }
 
+    if (!state) {
+      throw new Error('State parameter is required')
+    }
+
+    // Retrieve the code verifier for PKCE
+    const { data: oauthState, error: stateError } = await supabaseClient
+      .from('oauth_states')
+      .select('code_verifier')
+      .eq('state', state)
+      .maybeSingle()
+
+    if (stateError || !oauthState) {
+      throw new Error('Invalid or expired OAuth state')
+    }
+
     console.log('Exchanging authorization code for access token')
 
-    // Exchange authorization code for access token
+    // Exchange authorization code for access token with PKCE
     const tokenResponse = await fetch('https://login.salesforce.com/services/oauth2/token', {
       method: 'POST',
       headers: {
@@ -57,9 +72,9 @@ Deno.serve(async (req) => {
         body: new URLSearchParams({
           grant_type: 'authorization_code',
           client_id: Deno.env.get('SALESFORCE_CLIENT_ID') ?? '',
-          client_secret: Deno.env.get('SALESFORCE_CLIENT_SECRET') ?? '',
           redirect_uri: `${Deno.env.get('SUPABASE_URL')}/functions/v1/salesforce-auth`,
           code: code,
+          code_verifier: oauthState.code_verifier,
         }),
     })
 
