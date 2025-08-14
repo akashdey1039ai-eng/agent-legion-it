@@ -6,7 +6,7 @@ import { CrmDashboard } from "@/components/CrmDashboard";
 import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import HubSpotIntegration from "@/components/HubSpotIntegration";
 import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
-import SalesforceDataExtractor from "@/components/SalesforceDataExtractor";
+
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
@@ -89,7 +89,7 @@ const Index = () => {
       <section className="py-12">
         <div className="container mx-auto px-6">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Overview
@@ -101,10 +101,6 @@ const Index = () => {
               <TabsTrigger value="agents" className="flex items-center gap-2">
                 <Bot className="h-4 w-4" />
                 AI Agents
-              </TabsTrigger>
-              <TabsTrigger value="data-extractor" className="flex items-center gap-2">
-                <Database className="h-4 w-4" />
-                SF Data
               </TabsTrigger>
               <TabsTrigger value="dashboard" className="flex items-center gap-2">
                 <PieChart className="h-4 w-4" />
@@ -589,10 +585,6 @@ const Index = () => {
             )}
             </TabsContent>
 
-            {/* Salesforce Data Extractor Tab */}
-            <TabsContent value="data-extractor" className="mt-8">
-              <SalesforceDataExtractor />
-            </TabsContent>
 
             {/* Intelligence Dashboard Tab */}
             <TabsContent value="dashboard" className="mt-8">
