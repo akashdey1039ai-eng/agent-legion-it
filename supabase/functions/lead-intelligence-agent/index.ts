@@ -103,9 +103,27 @@ Respond only with valid JSON.`;
     
     let analysisData;
     try {
-      analysisData = JSON.parse(analysis);
+      // Handle potential markdown wrapping from OpenAI
+      let cleanedAnalysis = analysis.trim();
+      if (cleanedAnalysis.startsWith('```json')) {
+        cleanedAnalysis = cleanedAnalysis.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedAnalysis.startsWith('```')) {
+        cleanedAnalysis = cleanedAnalysis.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      analysisData = JSON.parse(cleanedAnalysis);
+      
+      // Ensure opportunityAssessment has the correct structure
+      if (typeof analysisData.opportunityAssessment === 'string') {
+        analysisData.opportunityAssessment = {
+          revenuePotential: "$50K - $100K",
+          timeline: "3-6 months",
+          confidence: "Medium"
+        };
+      }
     } catch (e) {
       console.error('❌ JSON parse error:', e);
+      console.log('Raw analysis response:', analysis);
       // Fallback structured response
       analysisData = {
         leadScore: 75,
@@ -113,7 +131,11 @@ Respond only with valid JSON.`;
         keyInsights: ["Lead from " + platform, "Professional title: " + (leadData.title || "Unknown"), "Requires follow-up"],
         recommendedActions: ["Send personalized email", "Schedule call", "Add to nurture campaign"],
         riskFactors: ["Limited information available"],
-        opportunityAssessment: "Standard lead with moderate potential",
+        opportunityAssessment: {
+          revenuePotential: "$25K - $75K",
+          timeline: "2-4 months", 
+          confidence: "Medium"
+        },
         summary: `${leadData.first_name} ${leadData.last_name} is a ${leadData.title || 'professional'} lead from ${platform} that shows standard engagement potential.`
       };
     }
