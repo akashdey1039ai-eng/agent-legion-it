@@ -18,19 +18,22 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'); 
     
-    // Get OpenAI API key using environment object (more reliable in Supabase)
+    // Get OpenAI API key with detailed debugging
     const envVars = Deno.env.toObject();
     const openAIApiKey = envVars.OPENAI_API_KEY;
     
-    console.log('Environment check:', {
+    console.log('🔧 Detailed environment check:', {
       supabaseUrl: !!supabaseUrl,
       supabaseServiceKey: !!supabaseServiceKey,
-      openAIApiKey: !!openAIApiKey,
+      keyExists: 'OPENAI_API_KEY' in envVars,
+      keyValue: openAIApiKey,
+      keyType: typeof openAIApiKey,
       keyLength: openAIApiKey ? openAIApiKey.length : 0,
-      keyExists: 'OPENAI_API_KEY' in envVars
+      keyTrimmed: openAIApiKey ? openAIApiKey.trim() : null,
+      keyValid: !!(openAIApiKey && openAIApiKey.trim().length > 0)
     });
 
-    if (!openAIApiKey) {
+    if (!openAIApiKey || !openAIApiKey.trim()) {
       const errorMsg = 'OpenAI API key not accessible';
       const envKeys = Object.keys(Deno.env.toObject());
       console.error(errorMsg, { envKeys });
