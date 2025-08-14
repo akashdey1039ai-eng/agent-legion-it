@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ const clearTestResults = () => {
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
 
   useEffect(() => {
     // Clear previous test results on page load
@@ -166,35 +167,102 @@ const Index = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                   {/* Platform Cards */}
-                  <div className="bg-card border border-border/50 rounded-lg p-4 text-center">
+                  <button
+                    onClick={() => setSelectedPlatform('salesforce')}
+                    className={`bg-card border rounded-lg p-4 text-center transition-all hover:shadow-lg hover:scale-105 ${
+                      selectedPlatform === 'salesforce' 
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                        : 'border-border/50 hover:border-border'
+                    }`}
+                  >
                     <div className="w-12 h-12 bg-blue-600 rounded-lg mx-auto mb-3 flex items-center justify-center text-white font-bold">SF</div>
                     <h3 className="font-medium mb-1">Salesforce</h3>
                     <p className="text-xs text-muted-foreground">Enterprise CRM</p>
-                  </div>
+                  </button>
                   
-                  <div className="bg-card border border-border/50 rounded-lg p-4 text-center">
+                  <button
+                    onClick={() => setSelectedPlatform('hubspot')}
+                    className={`bg-card border rounded-lg p-4 text-center transition-all hover:shadow-lg hover:scale-105 ${
+                      selectedPlatform === 'hubspot' 
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-950' 
+                        : 'border-border/50 hover:border-border'
+                    }`}
+                  >
                     <div className="w-12 h-12 bg-orange-500 rounded-lg mx-auto mb-3 flex items-center justify-center text-white font-bold">HS</div>
                     <h3 className="font-medium mb-1">HubSpot</h3>
                     <p className="text-xs text-muted-foreground">Inbound Marketing</p>
-                  </div>
+                  </button>
                   
-                  <div className="bg-card border border-border/50 rounded-lg p-4 text-center opacity-50">
+                  <button
+                    onClick={() => setSelectedPlatform('pipedrive')}
+                    className={`bg-card border rounded-lg p-4 text-center transition-all hover:shadow-lg hover:scale-105 opacity-50 cursor-not-allowed ${
+                      selectedPlatform === 'pipedrive' 
+                        ? 'border-green-500 bg-green-50 dark:bg-green-950' 
+                        : 'border-border/50'
+                    }`}
+                    disabled
+                  >
                     <div className="w-12 h-12 bg-green-600 rounded-lg mx-auto mb-3 flex items-center justify-center text-white font-bold">PD</div>
                     <h3 className="font-medium mb-1">Pipedrive</h3>
                     <p className="text-xs text-muted-foreground">Coming Soon</p>
-                  </div>
+                  </button>
                   
-                  <div className="bg-card border border-primary/50 rounded-lg p-4 text-center bg-primary/5">
+                  <button
+                    onClick={() => setSelectedPlatform('native')}
+                    className={`bg-card border rounded-lg p-4 text-center transition-all hover:shadow-lg hover:scale-105 ${
+                      selectedPlatform === 'native' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-primary/50 bg-primary/5 hover:border-primary'
+                    }`}
+                  >
                     <div className="w-12 h-12 bg-gradient-primary rounded-lg mx-auto mb-3 flex items-center justify-center">
                       <Brain className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="font-medium mb-1">Native CRM</h3>
                     <p className="text-xs text-muted-foreground">AI-First Platform</p>
-                  </div>
+                  </button>
                 </div>
                 
-                <SalesforceIntegration />
-                <HubSpotIntegration />
+                {/* Show integration details based on selected platform */}
+                {selectedPlatform === 'salesforce' && <SalesforceIntegration />}
+                {selectedPlatform === 'hubspot' && <HubSpotIntegration />}
+                {selectedPlatform === 'pipedrive' && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Target className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Pipedrive Integration</h3>
+                    <p className="text-muted-foreground mb-4">Coming soon! Pipedrive integration is currently in development.</p>
+                    <Button disabled className="opacity-50">
+                      Connect Pipedrive (Coming Soon)
+                    </Button>
+                  </div>
+                )}
+                {selectedPlatform === 'native' && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Brain className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Native AI-First CRM</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Our built-in CRM system designed specifically for AI automation and intelligence.
+                    </p>
+                    <Button className="bg-gradient-primary hover:opacity-90">
+                      Explore Native CRM
+                    </Button>
+                  </div>
+                )}
+                {!selectedPlatform && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Database className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Select a CRM Platform</h3>
+                    <p className="text-muted-foreground">
+                      Choose a CRM platform above to view integration details and setup instructions.
+                    </p>
+                  </div>
+                )}
               </div>
             </TabsContent>
 
