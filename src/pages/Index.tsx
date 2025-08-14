@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CrmDashboard } from "@/components/CrmDashboard";
 import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import HubSpotIntegration from "@/components/HubSpotIntegration";
+import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
@@ -86,7 +87,7 @@ const Index = () => {
       <section className="py-12">
         <div className="container mx-auto px-6">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Overview
@@ -98,6 +99,10 @@ const Index = () => {
               <TabsTrigger value="agents" className="flex items-center gap-2">
                 <Bot className="h-4 w-4" />
                 AI Agents
+              </TabsTrigger>
+              <TabsTrigger value="lead-intelligence" className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                Lead Intelligence
               </TabsTrigger>
               <TabsTrigger value="dashboard" className="flex items-center gap-2">
                 <PieChart className="h-4 w-4" />
@@ -553,6 +558,11 @@ const Index = () => {
                   </div>
                 </div>
               </div>
+            </TabsContent>
+
+            {/* Lead Intelligence Agent Tab */}
+            <TabsContent value="lead-intelligence" className="mt-8">
+              <LeadIntelligenceAgent />
             </TabsContent>
 
             {/* Intelligence Dashboard Tab */}
