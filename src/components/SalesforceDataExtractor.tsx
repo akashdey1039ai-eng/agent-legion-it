@@ -33,10 +33,7 @@ export default function SalesforceDataExtractor() {
           userId: user.id,
           direction: 'from_salesforce',
           limit: 5 // Get only 5 records for testing
-        },
-        headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
+        }
       });
 
       if (error) {
