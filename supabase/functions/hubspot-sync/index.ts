@@ -70,6 +70,8 @@ Deno.serve(async (req) => {
       })
     }
 
+    console.log(`Starting HubSpot ${objectType} sync for user: ${userId}`)
+
     // Create sync log entry
     const { data: logEntry, error: logError } = await supabase
       .from('hubspot_sync_log')
@@ -160,7 +162,6 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
         email: 'email',
         phone: 'phone',
         jobtitle: 'title',
-        company: 'company_name',
         lifecyclestage: 'status'
       }
     },
@@ -209,6 +210,8 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
   // Fetch data from HubSpot
   const url = `https://api.hubapi.com/crm/v3/objects/${mapping.hubspotEndpoint}?properties=${mapping.properties.join(',')}&limit=100`
   
+  console.log(`Fetching from HubSpot URL: ${url}`)
+  
   const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -216,8 +219,11 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
     },
   })
 
+  console.log(`HubSpot API response status: ${response.status}`)
+
   if (!response.ok) {
     const errorText = await response.text()
+    console.error(`HubSpot API error details: ${errorText}`)
     throw new Error(`HubSpot API error: ${response.status} ${errorText}`)
   }
 
@@ -245,6 +251,9 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
   })
 
   if (transformedRecords.length > 0) {
+    console.log(`Upserting ${transformedRecords.length} records to ${mapping.table}`)
+    console.log('Sample record:', JSON.stringify(transformedRecords[0], null, 2))
+    
     const { error } = await supabase
       .from(mapping.table)
       .upsert(transformedRecords, { 
@@ -253,10 +262,13 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
       })
 
     if (error) {
+      console.error('Database upsert error details:', error)
       throw new Error(`Database upsert failed: ${error.message}`)
     }
 
     console.log(`Successfully synced ${transformedRecords.length} ${objectType} records`)
+  } else {
+    console.log(`No ${objectType} records to sync`)
   }
 }
 
