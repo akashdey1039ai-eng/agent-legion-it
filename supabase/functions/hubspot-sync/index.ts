@@ -19,9 +19,12 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('HubSpot sync function started')
     const { objectType, direction = 'from' } = await req.json()
+    console.log(`Sync request for objectType: ${objectType}, direction: ${direction}`)
     
     if (!objectType) {
+      console.error('Missing objectType parameter')
       return new Response(JSON.stringify({ error: 'Missing objectType parameter' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -139,8 +142,14 @@ Deno.serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Error in HubSpot sync:', error)
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error('Error in HubSpot sync - detailed:', error)
+    console.error('Error stack:', error.stack)
+    console.error('Error message:', error.message)
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error', 
+      details: error.message,
+      type: error.constructor.name 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
