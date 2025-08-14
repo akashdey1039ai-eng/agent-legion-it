@@ -272,14 +272,16 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
               </CardTitle>
               <CardDescription className="text-green-600 dark:text-green-400">
                 Your Salesforce Developer Sandbox is connected. AI agents can now make <strong>real autonomous changes</strong> to your CRM data including:
-                <ul className="mt-2 space-y-1 list-disc list-inside">
-                  <li><strong>Lead Scoring:</strong> Auto-update lead scores and statuses</li>
-                  <li><strong>Task Creation:</strong> Create follow-up tasks and meetings</li>
-                  <li><strong>Pipeline Management:</strong> Adjust opportunity probabilities and stages</li>
-                  <li><strong>AI Insights:</strong> Add AI analysis to record descriptions</li>
-                </ul>
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <div className="mt-2 space-y-1 text-sm text-green-600 dark:text-green-400">
+                <div><strong>Lead Scoring:</strong> Auto-update lead scores and statuses</div>
+                <div><strong>Task Creation:</strong> Create follow-up tasks and meetings</div>
+                <div><strong>Pipeline Management:</strong> Adjust opportunity probabilities and stages</div>
+                <div><strong>AI Insights:</strong> Add AI analysis to record descriptions</div>
+              </div>
+            </CardContent>
           </Card>
           
           <Card>

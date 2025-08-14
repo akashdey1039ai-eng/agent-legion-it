@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { CrmDashboard } from "@/components/CrmDashboard";
 import { SalesforceIntegration } from "@/components/SalesforceIntegration";
+import HubSpotIntegration from "@/components/HubSpotIntegration";
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
@@ -171,10 +172,10 @@ const Index = () => {
                     <p className="text-xs text-muted-foreground">Enterprise CRM</p>
                   </div>
                   
-                  <div className="bg-card border border-border/50 rounded-lg p-4 text-center opacity-50">
+                  <div className="bg-card border border-border/50 rounded-lg p-4 text-center">
                     <div className="w-12 h-12 bg-orange-500 rounded-lg mx-auto mb-3 flex items-center justify-center text-white font-bold">HS</div>
                     <h3 className="font-medium mb-1">HubSpot</h3>
-                    <p className="text-xs text-muted-foreground">Coming Soon</p>
+                    <p className="text-xs text-muted-foreground">Inbound Marketing</p>
                   </div>
                   
                   <div className="bg-card border border-border/50 rounded-lg p-4 text-center opacity-50">
@@ -193,6 +194,7 @@ const Index = () => {
                 </div>
                 
                 <SalesforceIntegration />
+                <HubSpotIntegration />
               </div>
             </TabsContent>
 
