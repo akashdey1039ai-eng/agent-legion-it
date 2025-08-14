@@ -89,12 +89,27 @@ Format your response as JSON with the following structure:
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+      const errorData = await response.text();
+      console.error('OpenAI API error status:', response.status);
+      console.error('OpenAI API error response:', errorData);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
     }
 
-    const aiResponse = await response.json();
+    const responseText = await response.text();
+    console.log('OpenAI raw response:', responseText);
+
+    if (!responseText.trim()) {
+      throw new Error('Empty response from OpenAI API');
+    }
+
+    const aiResponse = JSON.parse(responseText);
+    console.log('OpenAI parsed response:', JSON.stringify(aiResponse, null, 2));
+    
+    if (!aiResponse.choices || !aiResponse.choices[0] || !aiResponse.choices[0].message || !aiResponse.choices[0].message.content) {
+      console.error('Invalid OpenAI response structure:', aiResponse);
+      throw new Error('Invalid response structure from OpenAI');
+    }
+
     const analysisResult = JSON.parse(aiResponse.choices[0].message.content);
 
     // Store the analysis result
