@@ -59,8 +59,8 @@ Deno.serve(async (req) => {
       })
     }
 
-    // HubSpot OAuth scopes - include contacts access for CRM integration
-    const scopes = 'oauth crm.objects.contacts.read crm.objects.companies.read crm.objects.deals.read'
+    // HubSpot OAuth scopes - using correct scope format
+    const scopes = 'contacts'
 
     const redirectUri = `https://39ed96a2-ffc6-48c5-9851-b801787f8221.lovableproject.com/hubspot-callback`
     
