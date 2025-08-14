@@ -199,6 +199,43 @@ export default function HubSpotIntegration({ onSyncComplete }: HubSpotIntegratio
     }
   };
 
+  const handleDisconnect = async () => {
+    if (!user) return;
+
+    try {
+      // Delete tokens from database
+      const { error } = await supabase
+        .from('hubspot_tokens')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error disconnecting HubSpot:', error);
+        toast({
+          title: "Disconnect Failed",
+          description: "Failed to disconnect HubSpot. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsConnected(false);
+      setLastSyncTime(null);
+      
+      toast({
+        title: "Disconnected",
+        description: "HubSpot has been disconnected successfully.",
+      });
+    } catch (error) {
+      console.error('Error disconnecting HubSpot:', error);
+      toast({
+        title: "Disconnect Failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -259,9 +296,19 @@ export default function HubSpotIntegration({ onSyncComplete }: HubSpotIntegratio
         ) : (
           <div className="space-y-4">
             <div className="p-4 bg-green-50 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <h4 className="font-medium text-green-900">HubSpot Connected</h4>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <h4 className="font-medium text-green-900">HubSpot Connected</h4>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisconnect}
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  Disconnect
+                </Button>
               </div>
               <p className="text-sm text-green-700">
                 Your AI agent is ready to access HubSpot data for intelligent CRM operations.
