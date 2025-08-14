@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
-import { LogOut, User, Settings, Shield } from 'lucide-react';
+import { LogOut, User, Settings, Brain } from 'lucide-react';
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -22,11 +22,11 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-6">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-gradient-primary rounded-lg shadow-glow">
-            <Shield className="h-5 w-5 text-white" />
+            <Brain className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">IT AI Command Center</h1>
-            <p className="text-xs text-muted-foreground">Enterprise Intelligence Platform</p>
+            <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">CRM Intelligence Center</h1>
+            <p className="text-xs text-muted-foreground">AI Agentic Platform</p>
           </div>
         </div>
         
@@ -46,7 +46,7 @@ export function Header() {
                 <div className="flex flex-col space-y-1 leading-none">
                   <p className="font-medium">{user.email}</p>
                   <p className="text-xs text-muted-foreground">
-                    Command Officer
+                    CRM Intelligence Analyst
                   </p>
                 </div>
               </div>
