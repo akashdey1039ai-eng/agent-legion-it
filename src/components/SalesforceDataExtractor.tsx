@@ -20,10 +20,18 @@ export default function SalesforceDataExtractor() {
 
     setIsLoading(true);
     try {
+      // Map UI object types to API object types
+      const objectTypeMap: Record<string, string> = {
+        'leads': 'lead',
+        'contacts': 'contact', 
+        'opportunities': 'opportunity'
+      };
+
       const { data, error } = await supabase.functions.invoke('salesforce-sync', {
         body: {
-          objectType: objectType,
-          direction: 'from',
+          objectType: objectTypeMap[objectType] || objectType,
+          userId: user.id,
+          direction: 'from_salesforce',
           limit: 5 // Get only 5 records for testing
         },
         headers: {
