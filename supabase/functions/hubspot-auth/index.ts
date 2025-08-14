@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    const redirectUri = `${new URL(req.url).origin}/hubspot-callback`
+    const redirectUri = `https://39ed96a2-ffc6-48c5-9851-b801787f8221.lovableproject.com/hubspot-callback`
 
     // Exchange code for tokens
     const tokenResponse = await fetch('https://api.hubapi.com/oauth/v1/token', {

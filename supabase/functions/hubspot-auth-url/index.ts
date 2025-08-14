@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
       'crm.objects.deals.write'
     ].join('%20')
 
-    const redirectUri = `${new URL(req.url).origin}/hubspot-callback`
+    const redirectUri = `https://39ed96a2-ffc6-48c5-9851-b801787f8221.lovableproject.com/hubspot-callback`
     
     const authUrl = `https://app.hubspot.com/oauth/authorize?` +
       `client_id=${clientId}&` +
