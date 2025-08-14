@@ -12,14 +12,22 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🚀 Lead Intelligence Agent v2 Starting...');
+    console.log('🚀 Lead Intelligence Agent v3 Starting...');
     
-    // Get the OpenAI API key directly
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    // Debug all environment variables
+    console.log('🔍 All Deno.env variables:', Object.keys(Deno.env.toObject()));
     
-    console.log('🔑 API Key Status:', {
-      exists: !!openAIApiKey,
-      length: openAIApiKey?.length || 0,
+    // Try different possible names for the API key
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY') || 
+                        Deno.env.get('OPENAI_KEY') || 
+                        Deno.env.get('OPEN_AI_API_KEY');
+    
+    console.log('🔑 API Key Debug:', {
+      OPENAI_API_KEY: !!Deno.env.get('OPENAI_API_KEY'),
+      OPENAI_KEY: !!Deno.env.get('OPENAI_KEY'),
+      OPEN_AI_API_KEY: !!Deno.env.get('OPEN_AI_API_KEY'),
+      finalKey: !!openAIApiKey,
+      keyLength: openAIApiKey?.length || 0,
       firstChars: openAIApiKey?.substring(0, 7) || 'missing'
     });
 
