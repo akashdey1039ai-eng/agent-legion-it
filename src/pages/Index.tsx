@@ -24,8 +24,11 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -35,80 +38,80 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+          <p className="text-gray-600">
             Manage your CRM integrations and AI agents
           </p>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="integration">Integrations</TabsTrigger>
-            <TabsTrigger value="agents">AI Agents</TabsTrigger>
-            <TabsTrigger value="dashboard">Analytics</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-white border">
+            <TabsTrigger value="overview" className="text-gray-700">Overview</TabsTrigger>
+            <TabsTrigger value="integration" className="text-gray-700">Integrations</TabsTrigger>
+            <TabsTrigger value="agents" className="text-gray-700">AI Agents</TabsTrigger>
+            <TabsTrigger value="dashboard" className="text-gray-700">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Quick Stats */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
+              <Card className="bg-white border border-gray-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-sm font-medium text-gray-900">
                     Total Contacts
                   </CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-4 w-4 text-gray-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">2,103</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold text-gray-900">2,103</div>
+                  <p className="text-xs text-green-600">
                     +15% from last month
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white border border-gray-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-sm font-medium text-gray-900">
                     Active Integrations
                   </CardTitle>
-                  <Database className="h-4 w-4 text-muted-foreground" />
+                  <Database className="h-4 w-4 text-gray-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">2</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold text-gray-900">2</div>
+                  <p className="text-xs text-gray-500">
                     Salesforce & HubSpot
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white border border-gray-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-sm font-medium text-gray-900">
                     AI Accuracy
                   </CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
+                  <Target className="h-4 w-4 text-gray-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">94.2%</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold text-gray-900">94.2%</div>
+                  <p className="text-xs text-green-600">
                     +2.1% from last week
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white border border-gray-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-sm font-medium text-gray-900">
                     Data Sync
                   </CardTitle>
-                  <Activity className="h-4 w-4 text-muted-foreground" />
+                  <Activity className="h-4 w-4 text-gray-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">Real-time</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold text-gray-900">Real-time</div>
+                  <p className="text-xs text-gray-500">
                     Last sync 2min ago
                   </p>
                 </CardContent>
@@ -117,57 +120,57 @@ const Index = () => {
 
             {/* Platform Cards */}
             <div className="grid gap-6 md:grid-cols-2">
-              <Card>
+              <Card className="bg-white border border-gray-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <Database className="h-5 w-5 text-blue-600" />
                     Salesforce
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-gray-600">
                     Enterprise CRM platform integration
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Status</span>
+                      <span className="text-sm text-gray-600">Status</span>
                       <span className="text-sm font-medium text-green-600">Connected</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Contacts</span>
-                      <span className="text-sm font-medium">1,247</span>
+                      <span className="text-sm text-gray-600">Contacts</span>
+                      <span className="text-sm font-medium text-gray-900">1,247</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Last Sync</span>
-                      <span className="text-sm font-medium">2 minutes ago</span>
+                      <span className="text-sm text-gray-600">Last Sync</span>
+                      <span className="text-sm font-medium text-gray-900">2 minutes ago</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white border border-gray-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <Users className="h-5 w-5 text-orange-600" />
                     HubSpot
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-gray-600">
                     Marketing automation platform
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Status</span>
+                      <span className="text-sm text-gray-600">Status</span>
                       <span className="text-sm font-medium text-green-600">Connected</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Contacts</span>
-                      <span className="text-sm font-medium">856</span>
+                      <span className="text-sm text-gray-600">Contacts</span>
+                      <span className="text-sm font-medium text-gray-900">856</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Last Sync</span>
-                      <span className="text-sm font-medium">5 minutes ago</span>
+                      <span className="text-sm text-gray-600">Last Sync</span>
+                      <span className="text-sm font-medium text-gray-900">5 minutes ago</span>
                     </div>
                   </div>
                 </CardContent>
@@ -175,29 +178,29 @@ const Index = () => {
             </div>
 
             {/* Lead Intelligence Card */}
-            <Card>
+            <Card className="bg-white border border-gray-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-gray-900">
+                  <Brain className="h-5 w-5 text-purple-600" />
                   Lead Intelligence Agent
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600">
                   AI-powered lead analysis and scoring
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="text-2xl font-bold text-blue-600">2,341</div>
-                    <div className="text-sm text-muted-foreground">Leads Analyzed</div>
+                    <div className="text-sm text-blue-700">Leads Analyzed</div>
                   </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="text-2xl font-bold text-green-600">94%</div>
-                    <div className="text-sm text-muted-foreground">Accuracy Rate</div>
+                    <div className="text-sm text-green-700">Accuracy Rate</div>
                   </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-2xl font-bold text-purple-600">2.4s</div>
-                    <div className="text-sm text-muted-foreground">Avg Response</div>
+                    <div className="text-sm text-purple-700">Avg Response</div>
                   </div>
                 </div>
               </CardContent>
@@ -206,10 +209,10 @@ const Index = () => {
 
           <TabsContent value="integration" className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
-              <Card>
+              <Card className="bg-white border border-gray-200">
                 <CardHeader>
-                  <CardTitle>Salesforce Integration</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-gray-900">Salesforce Integration</CardTitle>
+                  <CardDescription className="text-gray-600">
                     Connect and sync your Salesforce CRM data
                   </CardDescription>
                 </CardHeader>
@@ -218,10 +221,10 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white border border-gray-200">
                 <CardHeader>
-                  <CardTitle>HubSpot Integration</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-gray-900">HubSpot Integration</CardTitle>
+                  <CardDescription className="text-gray-600">
                     Connect and sync your HubSpot marketing data
                   </CardDescription>
                 </CardHeader>
@@ -231,10 +234,10 @@ const Index = () => {
               </Card>
             </div>
 
-            <Card>
+            <Card className="bg-white border border-gray-200">
               <CardHeader>
-                <CardTitle>Lead Intelligence Agent</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-gray-900">Lead Intelligence Agent</CardTitle>
+                <CardDescription className="text-gray-600">
                   AI-powered lead analysis and insights
                 </CardDescription>
               </CardHeader>
@@ -245,13 +248,13 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="agents" className="space-y-6">
-            <Card>
+            <Card className="bg-white border border-gray-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-gray-900">
+                  <Bot className="h-5 w-5 text-blue-600" />
                   AI Agents
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600">
                   Manage your AI-powered automation agents
                 </CardDescription>
               </CardHeader>
@@ -262,13 +265,13 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="dashboard" className="space-y-6">
-            <Card>
+            <Card className="bg-white border border-gray-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-gray-900">
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
                   Analytics Dashboard
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600">
                   Real-time insights and analytics
                 </CardDescription>
               </CardHeader>
