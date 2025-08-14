@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Brain, Loader2, TrendingUp, AlertTriangle, Target, Clock, Key, Upload } from 'lucide-react';
+import { Brain, Loader2, TrendingUp, AlertTriangle, Target, Clock, Key, Upload, CheckSquare, Square } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +30,7 @@ export default function LeadIntelligenceAgent() {
   const [apiKey, setApiKey] = useState('');
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
+  const [selectedLeads, setSelectedLeads] = useState<any[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<'salesforce' | 'hubspot'>('salesforce');
   const { user } = useAuth();
   const { toast } = useToast();
@@ -131,6 +132,47 @@ export default function LeadIntelligenceAgent() {
       toast({
         title: "Export Failed",
         description: error.message || "Failed to export to HubSpot.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const exportToSalesforce = async () => {
+    if (!user || !analysis) {
+      toast({
+        title: "Export Failed",
+        description: "No analysis data to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('salesforce-export', {
+        body: {
+          leadData: JSON.parse(leadData),
+          analysis: analysis,
+          platform: selectedPlatform
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast({
+        title: "Export Successful",
+        description: "Analysis results exported to Salesforce.",
+      });
+
+    } catch (error) {
+      console.error('Error exporting to Salesforce:', error);
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to export to Salesforce.",
         variant: "destructive",
       });
     }
@@ -255,10 +297,92 @@ export default function LeadIntelligenceAgent() {
 
   const selectLead = (lead: any) => {
     setLeadData(JSON.stringify(lead, null, 2));
+    setSelectedLeads([lead]);
     toast({
       title: "Lead Selected",
       description: `Selected ${lead.first_name} ${lead.last_name} for analysis.`,
     });
+  };
+
+  const toggleLeadSelection = (lead: any) => {
+    setSelectedLeads(prev => {
+      const isSelected = prev.find(l => l.id === lead.id);
+      if (isSelected) {
+        return prev.filter(l => l.id !== lead.id);
+      } else {
+        return [...prev, lead];
+      }
+    });
+  };
+
+  const selectAllLeads = () => {
+    setSelectedLeads([...recentLeads]);
+    toast({
+      title: "All Leads Selected",
+      description: `Selected ${recentLeads.length} leads for bulk analysis.`,
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedLeads([]);
+    setLeadData('');
+  };
+
+  const analyzeBulkLeads = async () => {
+    if (selectedLeads.length === 0) {
+      toast({
+        title: "No Leads Selected",
+        description: "Please select leads for bulk analysis.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const session = await supabase.auth.getSession();
+      const authToken = session.data.session?.access_token;
+      
+      const analysisPromises = selectedLeads.map(lead => 
+        supabase.functions.invoke('lead-intelligence-agent', {
+          body: {
+            leadData: lead,
+            platform: selectedPlatform,
+            ...(apiKey && { apiKey })
+          },
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        })
+      );
+
+      const results = await Promise.all(analysisPromises);
+      
+      // Handle results and errors
+      const successful = results.filter(r => !r.error);
+      const failed = results.filter(r => r.error);
+
+      toast({
+        title: "Bulk Analysis Complete",
+        description: `Analyzed ${successful.length} leads successfully. ${failed.length} failed.`,
+      });
+
+      if (successful.length > 0) {
+        // Set the first successful analysis for display
+        setAnalysis(successful[0].data.analysis);
+        setLeadData(JSON.stringify(selectedLeads[0], null, 2));
+      }
+
+    } catch (error) {
+      console.error('Error in bulk analysis:', error);
+      toast({
+        title: "Bulk Analysis Failed",
+        description: "Failed to analyze selected leads.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -383,26 +507,92 @@ export default function LeadIntelligenceAgent() {
           {/* Recent Leads Selection */}
           {recentLeads.length > 0 && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Recent {selectedPlatform === 'hubspot' ? 'HubSpot' : 'Salesforce'} Leads</label>
-              <div className="grid gap-2 max-h-48 overflow-y-auto">
-                {recentLeads.map((lead) => (
-                  <div
-                    key={lead.id}
-                    onClick={() => selectLead(lead)}
-                    className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-medium">Recent {selectedPlatform === 'hubspot' ? 'HubSpot' : 'Salesforce'} Leads</label>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={selectAllLeads}
+                    variant="outline"
+                    size="sm"
+                    disabled={selectedLeads.length === recentLeads.length}
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h5 className="font-medium">{lead.first_name} {lead.last_name}</h5>
-                        <p className="text-sm text-gray-600">{lead.email}</p>
-                        <p className="text-xs text-gray-500">{lead.title} • {lead.company || 'No company'}</p>
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {lead.status}
+                    Select All ({recentLeads.length})
+                  </Button>
+                  <Button
+                    onClick={clearSelection}
+                    variant="outline"
+                    size="sm"
+                    disabled={selectedLeads.length === 0}
+                  >
+                    Clear ({selectedLeads.length})
+                  </Button>
+                </div>
+              </div>
+              
+              {selectedLeads.length > 0 && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-blue-700">
+                      {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} selected for bulk analysis
+                    </span>
+                    <Button
+                      onClick={analyzeBulkLeads}
+                      disabled={isAnalyzing || selectedLeads.length === 0}
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Brain className="w-4 h-4 mr-2" />
+                          Analyze {selectedLeads.length} Lead{selectedLeads.length > 1 ? 's' : ''}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-2 max-h-48 overflow-y-auto">
+                {recentLeads.map((lead) => {
+                  const isSelected = selectedLeads.find(l => l.id === lead.id);
+                  return (
+                    <div
+                      key={lead.id}
+                      className={`p-3 border rounded-lg transition-colors ${
+                        isSelected ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <button
+                          onClick={() => toggleLeadSelection(lead)}
+                          className="mt-1 text-blue-600 hover:text-blue-800"
+                        >
+                          {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                        </button>
+                        <div 
+                          className="flex-1 cursor-pointer"
+                          onClick={() => selectLead(lead)}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">{lead.first_name} {lead.last_name}</h5>
+                              <p className="text-sm text-gray-600">{lead.email}</p>
+                              <p className="text-xs text-gray-500">{lead.title} • {lead.company || 'No company'}</p>
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {lead.status}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -566,21 +756,42 @@ export default function LeadIntelligenceAgent() {
               </div>
             )}
 
-            {/* Export to HubSpot Button */}
-            {analysis && selectedPlatform === 'hubspot' && (
-              <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                <h4 className="font-medium text-orange-900 mb-2">Export to HubSpot</h4>
-                <p className="text-sm text-orange-700 mb-3">
-                  Send this analysis back to HubSpot as notes and update lead scoring.
-                </p>
-                <Button
-                  onClick={exportToHubSpot}
-                  variant="outline"
-                  className="border-orange-300 text-orange-700 hover:bg-orange-100"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Export Analysis to HubSpot
-                </Button>
+            {/* Export Buttons */}
+            {analysis && (
+              <div className="grid md:grid-cols-2 gap-4">
+                {selectedPlatform === 'hubspot' && (
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <h4 className="font-medium text-orange-900 mb-2">Export to HubSpot</h4>
+                    <p className="text-sm text-orange-700 mb-3">
+                      Send this analysis back to HubSpot as notes and update lead scoring.
+                    </p>
+                    <Button
+                      onClick={exportToHubSpot}
+                      variant="outline"
+                      className="w-full border-orange-300 text-orange-700 hover:bg-orange-100"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Export to HubSpot
+                    </Button>
+                  </div>
+                )}
+
+                {selectedPlatform === 'salesforce' && (
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <h4 className="font-medium text-green-900 mb-2">Export to Salesforce</h4>
+                    <p className="text-sm text-green-700 mb-3">
+                      Send this analysis to Salesforce as tasks and update lead ratings.
+                    </p>
+                    <Button
+                      onClick={exportToSalesforce}
+                      variant="outline"
+                      className="w-full border-green-300 text-green-700 hover:bg-green-100"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Export to Salesforce
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
