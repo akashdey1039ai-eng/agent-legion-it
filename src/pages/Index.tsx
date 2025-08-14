@@ -7,7 +7,7 @@ import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
-import { Terminal, Database, Shield, Bot, Zap, Brain } from "lucide-react";
+import { Terminal, Database, Shield, Bot, Zap, Brain, Cloud, Lock, Server, Network, Cpu, BarChart3 } from "lucide-react";
 
 // Clear previous test results on page load
 const clearTestResults = () => {
@@ -65,44 +65,161 @@ const Index = () => {
             </div>
             
             <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight">
-              <span className="bg-gradient-primary bg-clip-text text-transparent">Autonomous AI Agents</span>
+              <span className="bg-gradient-primary bg-clip-text text-transparent">Enterprise IT AI</span>
               <br />
-              <span className="text-foreground">for Salesforce CRM</span>
+              <span className="text-foreground">Solutions Portfolio</span>
             </h1>
             
             <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-              Enterprise-grade AI automation platform that connects to your Salesforce Developer Sandbox 
-              and deploys intelligent agents to autonomously manage CRM operations, leads, and opportunities.
+              Comprehensive AI automation platform for enterprise IT operations. Deploy intelligent agents 
+              for cybersecurity, cloud management, infrastructure monitoring, CRM automation, and business intelligence.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button variant="primary" size="lg" className="min-w-52 h-12">
                 <Bot className="h-5 w-5" />
-                Deploy AI Agents
+                Deploy AI Solutions
               </Button>
               <Button variant="professional" size="lg" className="min-w-52 h-12">
-                <Database className="h-5 w-5" />
-                Connect Salesforce
+                <Shield className="h-5 w-5" />
+                View Portfolio
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Professional Integration Section */}
+      {/* AI Solutions Portfolio Grid */}
+      <section className="py-20 border-b border-border/30">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-6 py-3 mb-8 shadow-md">
+              <Brain className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-primary tracking-wide">AI Solutions Portfolio</span>
+            </div>
+            <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+              Enterprise AI Capabilities
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Comprehensive suite of AI-powered solutions for modern enterprise IT operations, 
+              security, and business intelligence.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {/* Cybersecurity AI */}
+            <div className="bg-card border border-border/50 rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+              <div className="p-3 bg-destructive/10 rounded-lg w-fit mb-6">
+                <Shield className="h-8 w-8 text-destructive" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Cybersecurity AI</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Autonomous threat detection, incident response, and security monitoring with real-time vulnerability assessment and automated remediation.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-destructive/10 text-destructive text-xs rounded-full">Threat Detection</span>
+                <span className="px-3 py-1 bg-destructive/10 text-destructive text-xs rounded-full">Auto Remediation</span>
+                <span className="px-3 py-1 bg-destructive/10 text-destructive text-xs rounded-full">SOC Integration</span>
+              </div>
+            </div>
+
+            {/* Cloud Infrastructure AI */}
+            <div className="bg-card border border-border/50 rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+              <div className="p-3 bg-blue-500/10 rounded-lg w-fit mb-6">
+                <Cloud className="h-8 w-8 text-blue-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Cloud Infrastructure AI</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Intelligent cloud resource management, cost optimization, and auto-scaling across AWS, Azure, and GCP environments.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-blue-500/10 text-blue-500 text-xs rounded-full">Auto-Scaling</span>
+                <span className="px-3 py-1 bg-blue-500/10 text-blue-500 text-xs rounded-full">Cost Optimization</span>
+                <span className="px-3 py-1 bg-blue-500/10 text-blue-500 text-xs rounded-full">Multi-Cloud</span>
+              </div>
+            </div>
+
+            {/* Network Operations AI */}
+            <div className="bg-card border border-border/50 rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+              <div className="p-3 bg-purple-500/10 rounded-lg w-fit mb-6">
+                <Network className="h-8 w-8 text-purple-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Network Operations AI</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Automated network monitoring, performance optimization, and predictive maintenance for enterprise network infrastructure.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-purple-500/10 text-purple-500 text-xs rounded-full">Traffic Analysis</span>
+                <span className="px-3 py-1 bg-purple-500/10 text-purple-500 text-xs rounded-full">Predictive Maintenance</span>
+                <span className="px-3 py-1 bg-purple-500/10 text-purple-500 text-xs rounded-full">Auto-Remediation</span>
+              </div>
+            </div>
+
+            {/* Server Management AI */}
+            <div className="bg-card border border-border/50 rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+              <div className="p-3 bg-orange-500/10 rounded-lg w-fit mb-6">
+                <Server className="h-8 w-8 text-orange-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Server Management AI</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Intelligent server provisioning, health monitoring, and automated maintenance for physical and virtual server environments.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-orange-500/10 text-orange-500 text-xs rounded-full">Health Monitoring</span>
+                <span className="px-3 py-1 bg-orange-500/10 text-orange-500 text-xs rounded-full">Auto Provisioning</span>
+                <span className="px-3 py-1 bg-orange-500/10 text-orange-500 text-xs rounded-full">Load Balancing</span>
+              </div>
+            </div>
+
+            {/* CRM Automation AI */}
+            <div className="bg-card border border-border/50 rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+              <div className="p-3 bg-primary/10 rounded-lg w-fit mb-6">
+                <Database className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">CRM Automation AI</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Salesforce integration with intelligent lead scoring, opportunity management, and automated customer engagement workflows.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full">Lead Scoring</span>
+                <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full">Salesforce Integration</span>
+                <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full">Auto Workflows</span>
+              </div>
+            </div>
+
+            {/* Business Intelligence AI */}
+            <div className="bg-card border border-border/50 rounded-lg p-8 hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+              <div className="p-3 bg-success/10 rounded-lg w-fit mb-6">
+                <BarChart3 className="h-8 w-8 text-success" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Business Intelligence AI</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Advanced analytics, predictive insights, and automated reporting across all enterprise systems and data sources.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-success/10 text-success text-xs rounded-full">Predictive Analytics</span>
+                <span className="px-3 py-1 bg-success/10 text-success text-xs rounded-full">Auto Reporting</span>
+                <span className="px-3 py-1 bg-success/10 text-success text-xs rounded-full">Data Integration</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CRM Integration Section */}
       <section className="py-20 border-b border-border/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-6 py-3 mb-8 shadow-md">
               <Database className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary tracking-wide">Enterprise Integration</span>
+              <span className="text-sm font-semibold text-primary tracking-wide">CRM Integration</span>
             </div>
             <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-              Salesforce Developer Sandbox
+              Salesforce Developer Integration
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Seamlessly integrate with your Salesforce Developer environment to enable 
-              enterprise-grade AI automation and intelligent CRM management.
+              Live demonstration of Salesforce Developer Sandbox integration with AI-powered 
+              lead management and automated CRM operations.
             </p>
           </div>
           <SalesforceIntegration />
@@ -158,15 +275,15 @@ const Index = () => {
                 <Shield className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                IT AI Command Center
+                Enterprise IT AI Portfolio
               </span>
             </div>
             <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Enterprise AI automation platform powered by OpenAI and advanced machine learning. 
-              Designed for professional Salesforce environments and business intelligence operations.
+              Comprehensive AI automation platform for enterprise IT operations. Powered by OpenAI and advanced 
+              machine learning for cybersecurity, cloud management, infrastructure, and business intelligence.
             </p>
             <div className="mt-6 text-sm text-muted-foreground/70">
-              © 2024 IT AI Command Center. Professional AI Solutions.
+              © 2024 Enterprise IT AI Portfolio. Professional AI Solutions for Modern IT Operations.
             </div>
           </div>
         </div>
