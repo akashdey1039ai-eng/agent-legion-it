@@ -303,12 +303,40 @@ export default function LeadIntelligenceAgent() {
     }
   };
 
+  const loadAllSalesforceLeads = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .not('salesforce_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(50); // Load more records for browsing
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setRecentLeads(data || []);
+      toast({
+        title: "Records Loaded",
+        description: `Loaded ${data?.length || 0} Salesforce records for selection.`,
+      });
+    } catch (error) {
+      console.error('Error loading all Salesforce leads:', error);
+      toast({
+        title: "Load Failed",
+        description: "Failed to load Salesforce records.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const selectLead = (lead: any) => {
     setLeadData(JSON.stringify(lead, null, 2));
     setSelectedLeads([lead]);
     toast({
-      title: "Lead Selected",
-      description: `Selected ${lead.first_name} ${lead.last_name} for analysis.`,
+      title: "Record Selected",
+      description: `Selected ${lead.first_name} ${lead.last_name} for single analysis.`,
     });
   };
 
@@ -326,8 +354,8 @@ export default function LeadIntelligenceAgent() {
   const selectAllLeads = () => {
     setSelectedLeads([...recentLeads]);
     toast({
-      title: "All Leads Selected",
-      description: `Selected ${recentLeads.length} leads for bulk analysis.`,
+      title: "All Records Selected",
+      description: `Selected ${recentLeads.length} records for bulk analysis.`,
     });
   };
 
@@ -614,7 +642,7 @@ export default function LeadIntelligenceAgent() {
               <p className="text-sm text-green-700">
                 Sync and analyze leads directly from your Salesforce CRM
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={() => syncSalesforceData('contact')}
                   variant="outline"
@@ -625,12 +653,29 @@ export default function LeadIntelligenceAgent() {
                   {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sync Contacts'}
                 </Button>
                 <Button
+                  onClick={() => syncSalesforceData('lead')}
+                  variant="outline"
+                  size="sm"
+                  disabled={isSyncing}
+                  className="border-green-300 text-green-700 hover:bg-green-100"
+                >
+                  {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sync Leads'}
+                </Button>
+                <Button
                   onClick={() => loadRecentSalesforceLeads()}
                   variant="outline"
                   size="sm" 
                   className="border-green-300 text-green-700 hover:bg-green-100"
                 >
-                  Load Recent Leads
+                  Load Recent Records
+                </Button>
+                <Button
+                  onClick={() => loadAllSalesforceLeads()}
+                  variant="outline"
+                  size="sm" 
+                  className="border-green-300 text-green-700 hover:bg-green-100"
+                >
+                  Browse All Records
                 </Button>
               </div>
             </div>
@@ -653,7 +698,10 @@ export default function LeadIntelligenceAgent() {
           {recentLeads.length > 0 && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">Recent {selectedPlatform === 'hubspot' ? 'HubSpot' : 'Salesforce'} Leads</label>
+                <label className="text-sm font-medium">
+                  {selectedPlatform === 'hubspot' ? 'HubSpot' : 'Salesforce'} Records 
+                  ({recentLeads.length} loaded)
+                </label>
                 <div className="flex gap-2">
                   <Button
                     onClick={selectAllLeads}
@@ -678,10 +726,11 @@ export default function LeadIntelligenceAgent() {
                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-blue-700">
-                      {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} selected for bulk analysis
+                      {selectedLeads.length} record{selectedLeads.length > 1 ? 's' : ''} selected 
+                      {selectedLeads.length === 1 ? ' for single analysis' : ' for bulk analysis'}
                     </span>
                     <Button
-                      onClick={analyzeBulkLeads}
+                      onClick={selectedLeads.length === 1 ? handleAnalyze : analyzeBulkLeads}
                       disabled={isAnalyzing || selectedLeads.length === 0}
                       size="sm"
                       className="bg-blue-600 hover:bg-blue-700"
@@ -694,7 +743,7 @@ export default function LeadIntelligenceAgent() {
                       ) : (
                         <>
                           <Brain className="w-4 h-4 mr-2" />
-                          Analyze {selectedLeads.length} Lead{selectedLeads.length > 1 ? 's' : ''}
+                          {selectedLeads.length === 1 ? 'Analyze Single Record' : `Analyze ${selectedLeads.length} Records`}
                         </>
                       )}
                     </Button>
@@ -702,7 +751,7 @@ export default function LeadIntelligenceAgent() {
                 </div>
               )}
 
-              <div className="grid gap-2 max-h-48 overflow-y-auto">
+              <div className="grid gap-2 max-h-60 overflow-y-auto">
                 {recentLeads.map((lead) => {
                   const isSelected = selectedLeads.find(l => l.id === lead.id);
                   return (
@@ -716,21 +765,30 @@ export default function LeadIntelligenceAgent() {
                         <button
                           onClick={() => toggleLeadSelection(lead)}
                           className="mt-1 text-blue-600 hover:text-blue-800"
+                          title={isSelected ? "Remove from selection" : "Add to selection"}
                         >
                           {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
                         </button>
                         <div 
                           className="flex-1 cursor-pointer"
                           onClick={() => selectLead(lead)}
+                          title="Click to select for single analysis"
                         >
                           <div className="flex justify-between items-start">
                             <div>
                               <h5 className="font-medium">{lead.first_name} {lead.last_name}</h5>
                               <p className="text-sm text-gray-600">{lead.email}</p>
-                              <p className="text-xs text-gray-500">{lead.title} • {lead.company || 'No company'}</p>
+                              <p className="text-xs text-gray-500">
+                                {lead.title ? `${lead.title} • ` : ''}
+                                {lead.company || 'No company'} 
+                                {lead.salesforce_id && <span className="ml-2 text-green-600">• SF: {lead.salesforce_type}</span>}
+                              </p>
                             </div>
                             <div className="text-xs text-gray-400">
-                              {lead.status}
+                              <div>{lead.status}</div>
+                              {lead.lead_score > 0 && (
+                                <div className="text-blue-600 font-medium">Score: {lead.lead_score}</div>
+                              )}
                             </div>
                           </div>
                         </div>
