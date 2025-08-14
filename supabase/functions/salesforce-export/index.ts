@@ -59,13 +59,15 @@ serve(async (req) => {
     const userId = user.id;
     console.log(`✅ User authenticated: ${userId}`);
 
-    // Get Salesforce tokens
+    // Get Salesforce tokens (most recent valid token)
     console.log('🔑 Fetching Salesforce tokens');
     const { data: tokenData, error: tokenError } = await supabase
       .from('salesforce_tokens')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (tokenError || !tokenData) {
       console.error('❌ No Salesforce tokens found for user:', userId, tokenError);
