@@ -17,18 +17,21 @@ serve(async (req) => {
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'); 
-    // Try multiple possible API key names
-    let openAIApiKey = Deno.env.get('OPENAI_API_KEY') || 
-                      Deno.env.get('OPEN_AI_API_KEY') ||
-                      Deno.env.get('OPENAI_KEY');
+    // Get environment variables
+    let openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    
+    // If not found, try to get it from the environment object directly
+    if (!openAIApiKey) {
+      const envObject = Deno.env.toObject();
+      openAIApiKey = envObject['OPENAI_API_KEY'];
+    }
     
     console.log('Environment variables status:', {
       supabaseUrl: !!supabaseUrl,
       supabaseServiceKey: !!supabaseServiceKey,
       openAIApiKey: !!openAIApiKey,
       openAIKeyLength: openAIApiKey ? openAIApiKey.length : 0,
-      openAIKeyStart: openAIApiKey ? openAIApiKey.substring(0, 7) : 'none',
-      allEnvKeys: Object.keys(Deno.env.toObject()).filter(k => k.toLowerCase().includes('openai'))
+      openAIKeyStart: openAIApiKey ? openAIApiKey.substring(0, 7) : 'none'
     });
 
     if (!openAIApiKey) {
