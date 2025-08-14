@@ -74,7 +74,7 @@ const Index = () => {
             <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-primary bg-clip-text text-transparent">Universal CRM</span>
               <br />
-              <span className="text-foreground">AI Intelligence Platform</span>
+              <span className="text-foreground">AI CRM Intelligence Platform</span>
             </h1>
             
             <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
