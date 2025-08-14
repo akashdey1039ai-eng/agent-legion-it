@@ -18,9 +18,9 @@ serve(async (req) => {
     console.log('🔍 All Deno.env variables:', Object.keys(Deno.env.toObject()));
     
     // Try different possible names for the API key
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY') || 
-                        Deno.env.get('OPENAI_KEY') || 
-                        Deno.env.get('OPEN_AI_API_KEY');
+    let openAIApiKey = Deno.env.get('OPENAI_API_KEY') || 
+                      Deno.env.get('OPENAI_KEY') || 
+                      Deno.env.get('OPEN_AI_API_KEY');
     
     console.log('🔑 API Key Debug:', {
       OPENAI_API_KEY: !!Deno.env.get('OPENAI_API_KEY'),
@@ -31,19 +31,25 @@ serve(async (req) => {
       firstChars: openAIApiKey?.substring(0, 7) || 'missing'
     });
 
+    const { leadData, platform, apiKey } = await req.json();
+    console.log('📊 Processing lead:', leadData?.first_name, leadData?.last_name);
+    
+    // Use provided API key if environment key is not available
+    if (!openAIApiKey && apiKey) {
+      console.log('🔄 Using provided API key instead of environment variable');
+      openAIApiKey = apiKey;
+    }
+
     if (!openAIApiKey) {
-      console.error('❌ OpenAI API key missing');
+      console.error('❌ OpenAI API key missing from both environment and request');
       return new Response(JSON.stringify({ 
-        error: 'OpenAI API key not configured',
+        error: 'OpenAI API key not configured in environment and not provided in request',
         success: false
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    const { leadData, platform } = await req.json();
-    console.log('📊 Processing lead:', leadData?.first_name, leadData?.last_name);
 
     // Create AI analysis request
     const prompt = `Analyze this sales lead and provide insights:

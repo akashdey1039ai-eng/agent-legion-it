@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Brain, Loader2, TrendingUp, AlertTriangle, Target, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Brain, Loader2, TrendingUp, AlertTriangle, Target, Clock, Key } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +26,7 @@ interface AnalysisResult {
 export default function LeadIntelligenceAgent() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [leadData, setLeadData] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<'salesforce' | 'hubspot'>('salesforce');
   const { user } = useAuth();
@@ -53,7 +55,8 @@ export default function LeadIntelligenceAgent() {
       const { data, error } = await supabase.functions.invoke('lead-intelligence-agent', {
         body: {
           leadData: parsedLeadData,
-          platform: selectedPlatform
+          platform: selectedPlatform,
+          ...(apiKey && { apiKey })
         },
         headers: {
           Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
@@ -149,6 +152,23 @@ export default function LeadIntelligenceAgent() {
               onChange={(e) => setLeadData(e.target.value)}
               rows={6}
             />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="apiKey" className="text-sm font-medium flex items-center gap-2">
+              <Key className="w-4 h-4" />
+              OpenAI API Key (Optional - if Supabase secret not working)
+            </label>
+            <Input
+              id="apiKey"
+              type="password"
+              placeholder="sk-..."
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Only needed if the system's OpenAI key isn't configured properly. This is temporary and will be stored securely in Supabase.
+            </p>
           </div>
 
           <Button 
