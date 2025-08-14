@@ -9,7 +9,13 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY')!;
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
+console.log('Environment check:', {
+  supabaseUrl: !!supabaseUrl,
+  supabaseServiceKey: !!supabaseServiceKey,
+  openAIApiKey: !!openAIApiKey
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -20,6 +26,11 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
+    }
+
+    if (!openAIApiKey) {
+      console.error('OpenAI API key not found in environment');
+      throw new Error('OpenAI API key not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
