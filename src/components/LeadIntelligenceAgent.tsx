@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Brain, Loader2, TrendingUp, AlertTriangle, Target, Clock, Key } from 'lucide-react';
+import { Brain, Loader2, TrendingUp, AlertTriangle, Target, Clock, Key, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -90,6 +90,47 @@ export default function LeadIntelligenceAgent() {
       });
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const exportToHubSpot = async () => {
+    if (!user || !analysis) {
+      toast({
+        title: "Export Failed",
+        description: "No analysis data to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('hubspot-export', {
+        body: {
+          leadData: JSON.parse(leadData),
+          analysis: analysis,
+          platform: selectedPlatform
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast({
+        title: "Export Successful",
+        description: "Analysis results exported to HubSpot.",
+      });
+
+    } catch (error) {
+      console.error('Error exporting to HubSpot:', error);
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to export to HubSpot.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -305,6 +346,24 @@ export default function LeadIntelligenceAgent() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* Export to HubSpot Button */}
+            {analysis && selectedPlatform === 'hubspot' && (
+              <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <h4 className="font-medium text-orange-900 mb-2">Export to HubSpot</h4>
+                <p className="text-sm text-orange-700 mb-3">
+                  Send this analysis back to HubSpot as notes and update lead scoring.
+                </p>
+                <Button
+                  onClick={exportToHubSpot}
+                  variant="outline"
+                  className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Export Analysis to HubSpot
+                </Button>
               </div>
             )}
           </CardContent>
