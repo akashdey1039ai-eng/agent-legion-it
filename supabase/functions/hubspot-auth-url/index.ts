@@ -59,8 +59,14 @@ Deno.serve(async (req) => {
       })
     }
 
-    // HubSpot OAuth scopes - using correct official scope names
-    const scopes = 'crm.objects.contacts.read crm.objects.companies.read crm.objects.deals.read'
+    // HubSpot OAuth scopes - include all required granular scopes
+    const scopes = [
+      'crm.objects.contacts.read',
+      'crm.objects.companies.read', 
+      'crm.objects.deals.read',
+      'crm.schemas.companies.read',
+      'crm.schemas.deals.read'
+    ].join(' ')
 
     const redirectUri = `https://39ed96a2-ffc6-48c5-9851-b801787f8221.lovableproject.com/hubspot-callback`
     
