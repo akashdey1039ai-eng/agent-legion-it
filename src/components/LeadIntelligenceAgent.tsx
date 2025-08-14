@@ -482,6 +482,8 @@ export default function LeadIntelligenceAgent() {
     if (!user) return;
     
     try {
+      console.log('🚀 Starting Salesforce export for:', lead.first_name, lead.last_name);
+      
       const { data, error } = await supabase.functions.invoke('salesforce-export', {
         body: {
           leadData: lead,
@@ -493,7 +495,12 @@ export default function LeadIntelligenceAgent() {
         },
       });
 
-      if (error) throw new Error(error.message);
+      console.log('📤 Export response:', { data, error });
+
+      if (error) {
+        console.error('❌ Export error details:', error);
+        throw new Error(error.message);
+      }
 
       toast({
         title: "Export Successful",
