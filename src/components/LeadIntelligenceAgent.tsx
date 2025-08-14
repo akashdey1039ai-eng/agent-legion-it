@@ -502,6 +502,16 @@ export default function LeadIntelligenceAgent() {
         throw new Error(error.message);
       }
 
+      // Handle successful response or graceful handling of missing records
+      if (data?.success === false && data?.action === 'cleared_invalid_id') {
+        toast({
+          title: "Salesforce Record Not Found",
+          description: "The Salesforce record was not found and has been cleared from the contact. Please sync with Salesforce again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Export Successful",
         description: `${lead.first_name} ${lead.last_name}'s analysis exported to Salesforce.`,
