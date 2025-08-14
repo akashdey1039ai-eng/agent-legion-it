@@ -65,14 +65,14 @@ const Index = () => {
             </div>
             
             <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight">
-              <span className="bg-gradient-primary bg-clip-text text-transparent">CRM Intelligence</span>
+              <span className="bg-gradient-primary bg-clip-text text-transparent">Universal CRM</span>
               <br />
-              <span className="text-foreground">AI Agentic Center</span>
+              <span className="text-foreground">AI Intelligence Platform</span>
             </h1>
             
             <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-              Transform your CRM workflows with autonomous AI agents. Intelligent lead scoring, 
-              pipeline forecasting, automated insights, and predictive analytics powered by advanced machine learning.
+              Connect any CRM platform or use our independent CRM system. Autonomous AI agents work across 
+              Salesforce, HubSpot, Pipedrive, and more - plus our native CRM intelligence layer.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -206,22 +206,55 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Salesforce Data Integration */}
+      {/* Multi-CRM Platform Integration */}
       <section className="py-20 border-b border-border/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-6 py-3 mb-8 shadow-md">
               <Database className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary tracking-wide">Data Integration</span>
+              <span className="text-sm font-semibold text-primary tracking-wide">Multi-Platform Integration</span>
             </div>
             <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-              Salesforce CRM Data Pipeline
+              Connect Any CRM Platform
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Connect your Salesforce environment to enable AI-powered intelligence. Sync leads, opportunities, 
-              and activities for real-time analysis and automated insights.
+              Connect Salesforce, HubSpot, Pipedrive, or use our independent CRM system. 
+              AI agents work across all platforms with unified intelligence layer.
             </p>
           </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {/* Salesforce Integration */}
+            <div className="bg-card border border-border/50 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300">
+              <div className="w-12 h-12 bg-blue-600 rounded-lg mx-auto mb-4 flex items-center justify-center text-white font-bold">SF</div>
+              <h3 className="font-semibold mb-2">Salesforce</h3>
+              <p className="text-sm text-muted-foreground">Complete integration with leads, opportunities, accounts</p>
+            </div>
+            
+            {/* HubSpot Integration */}
+            <div className="bg-card border border-border/50 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300">
+              <div className="w-12 h-12 bg-orange-500 rounded-lg mx-auto mb-4 flex items-center justify-center text-white font-bold">HS</div>
+              <h3 className="font-semibold mb-2">HubSpot</h3>
+              <p className="text-sm text-muted-foreground">Full pipeline integration and contact management</p>
+            </div>
+            
+            {/* Pipedrive Integration */}
+            <div className="bg-card border border-border/50 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300">
+              <div className="w-12 h-12 bg-green-600 rounded-lg mx-auto mb-4 flex items-center justify-center text-white font-bold">PD</div>
+              <h3 className="font-semibold mb-2">Pipedrive</h3>
+              <p className="text-sm text-muted-foreground">Sales pipeline and deal management integration</p>
+            </div>
+            
+            {/* Independent CRM */}
+            <div className="bg-card border border-primary/50 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 bg-primary/5">
+              <div className="w-12 h-12 bg-gradient-primary rounded-lg mx-auto mb-4 flex items-center justify-center">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold mb-2">Native CRM</h3>
+              <p className="text-sm text-muted-foreground">Built-in CRM with AI-first architecture</p>
+            </div>
+          </div>
+          
           <SalesforceIntegration />
         </div>
       </section>
@@ -235,11 +268,11 @@ const Index = () => {
               <span className="text-sm font-semibold text-accent tracking-wide">AI Agent Control Center</span>
             </div>
             <h2 className="text-4xl font-bold mb-6">
-              CRM Intelligence Testing Suite
+              AI Agent Testing & Control Center
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Test and validate your CRM AI agents with real Salesforce data. Enable autonomous actions, 
-              monitor performance, and fine-tune intelligence algorithms for optimal results.
+              Test and validate AI agents across all connected CRM platforms. Enable autonomous actions, 
+              monitor cross-platform performance, and fine-tune intelligence algorithms for optimal results.
             </p>
           </div>
           <EnhancedAIAgentTester />
@@ -255,11 +288,11 @@ const Index = () => {
               <span className="text-sm font-semibold text-success tracking-wide">CRM Intelligence Dashboard</span>
             </div>
             <h2 className="text-4xl font-bold mb-6">
-              Real-Time CRM Intelligence
+              Unified CRM Intelligence Dashboard
             </h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Live intelligence dashboard powered by AI analysis of your CRM data. Track lead performance, 
-              pipeline health, and AI-generated insights from your connected Salesforce environment.
+              Live intelligence dashboard powered by AI analysis across all connected CRM platforms. 
+              Track performance, pipeline health, and insights from Salesforce, HubSpot, Pipedrive, and native CRM.
             </p>
           </div>
           <CrmDashboard />
@@ -275,15 +308,15 @@ const Index = () => {
                 <Brain className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                CRM Intelligence AI Agentic Center
+                Universal CRM AI Intelligence Platform
               </span>
             </div>
             <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Transform your CRM workflows with autonomous AI agents. Powered by OpenAI and advanced 
-              machine learning for lead intelligence, pipeline forecasting, and predictive analytics.
+              Transform any CRM workflow with autonomous AI agents. Works across Salesforce, HubSpot, Pipedrive, 
+              plus native CRM. Powered by OpenAI for universal lead intelligence and predictive analytics.
             </p>
             <div className="mt-6 text-sm text-muted-foreground/70">
-              © 2024 CRM Intelligence AI Agentic Center. Intelligent CRM Automation for Modern Sales Teams.
+              © 2024 Universal CRM AI Intelligence Platform. Multi-Platform CRM Automation for Modern Sales Teams.
             </div>
           </div>
         </div>

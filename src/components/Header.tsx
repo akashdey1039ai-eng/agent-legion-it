@@ -25,8 +25,8 @@ export function Header() {
             <Brain className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">CRM Intelligence Center</h1>
-            <p className="text-xs text-muted-foreground">AI Agentic Platform</p>
+            <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">Universal CRM AI Platform</h1>
+            <p className="text-xs text-muted-foreground">Multi-Platform Intelligence</p>
           </div>
         </div>
         
@@ -46,7 +46,7 @@ export function Header() {
                 <div className="flex flex-col space-y-1 leading-none">
                   <p className="font-medium">{user.email}</p>
                   <p className="text-xs text-muted-foreground">
-                    CRM Intelligence Analyst
+                    Universal CRM AI Analyst
                   </p>
                 </div>
               </div>
