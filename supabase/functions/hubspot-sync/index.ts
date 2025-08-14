@@ -13,14 +13,22 @@ interface HubSpotRecord {
 }
 
 Deno.serve(async (req) => {
+  console.log('=== HubSpot Sync Function Started ===')
+  console.log('Request method:', req.method)
+  console.log('Request URL:', req.url)
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request')
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('HubSpot sync function started')
-    const { objectType, direction = 'from' } = await req.json()
+    console.log('Processing POST request')
+    const body = await req.text()
+    console.log('Raw request body:', body)
+    
+    const { objectType, direction = 'from' } = JSON.parse(body)
     console.log(`Sync request for objectType: ${objectType}, direction: ${direction}`)
     
     if (!objectType) {
