@@ -77,13 +77,78 @@ serve(async (req) => {
       });
     }
 
-    // Check if token is expired
+    // Check if token is expired and refresh if needed
     if (new Date(tokenData.expires_at) <= new Date()) {
-      console.error('❌ Salesforce token expired for user:', userId);
-      return new Response(JSON.stringify({ error: 'Salesforce token expired' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      console.log('🔄 Token expired, attempting refresh...');
+      
+      if (!tokenData.refresh_token) {
+        console.error('❌ No refresh token available for user:', userId);
+        return new Response(JSON.stringify({ error: 'Salesforce token expired - please reconnect' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Refresh the token
+      const clientId = Deno.env.get('SALESFORCE_CLIENT_ID');
+      const clientSecret = Deno.env.get('SALESFORCE_CLIENT_SECRET');
+      
+      try {
+        const refreshResponse = await fetch(`${tokenData.instance_url}/services/oauth2/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            client_id: clientId!,
+            client_secret: clientSecret!,
+            refresh_token: tokenData.refresh_token,
+          }),
+        });
+
+        if (!refreshResponse.ok) {
+          const errorText = await refreshResponse.text();
+          console.error('❌ Token refresh failed:', errorText);
+          return new Response(JSON.stringify({ error: 'Failed to refresh Salesforce token - please reconnect' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        const refreshData = await refreshResponse.json();
+        
+        // Update the token in database
+        const expiresAt = new Date(Date.now() + 3600 * 1000).toISOString(); // 1 hour from now
+        
+        const { error: updateError } = await supabase
+          .from('salesforce_tokens')
+          .update({
+            access_token: refreshData.access_token,
+            expires_at: expiresAt,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', tokenData.id);
+
+        if (updateError) {
+          console.error('❌ Failed to update refreshed token:', updateError);
+          return new Response(JSON.stringify({ error: 'Failed to save refreshed token' }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Update tokenData with new access token
+        tokenData.access_token = refreshData.access_token;
+        console.log('✅ Token refreshed successfully');
+        
+      } catch (error) {
+        console.error('❌ Token refresh error:', error);
+        return new Response(JSON.stringify({ error: 'Token refresh failed - please reconnect' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     console.log('📤 Starting export to Salesforce...');
