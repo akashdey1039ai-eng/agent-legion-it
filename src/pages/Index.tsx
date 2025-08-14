@@ -268,14 +268,290 @@ const Index = () => {
 
             {/* AI Agents Tab */}
             <TabsContent value="agents" className="mt-8">
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-4">AI Agent Control Center</h2>
-                  <p className="text-muted-foreground mb-8">
-                    Test and deploy autonomous AI agents across your CRM platforms
-                  </p>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-3xl font-bold tracking-tight">AI Agents</h2>
+                    <p className="text-muted-foreground">
+                      Autonomous AI agents for your CRM operations
+                    </p>
+                  </div>
+                  <Button>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Configure Agents
+                  </Button>
                 </div>
-                <EnhancedAIAgentTester />
+
+                {/* Stats Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-card border border-border/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">Active Agents</p>
+                        <p className="text-2xl font-bold">2</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-card border border-border/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <Bot className="h-4 w-4 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">Total Agents</p>
+                        <p className="text-2xl font-bold">5</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-card border border-border/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">Avg Success Rate</p>
+                        <p className="text-2xl font-bold">92.5%</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-card border border-border/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">Actions Today</p>
+                        <p className="text-2xl font-bold">147</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Agents Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Lead Intelligence Agent */}
+                  <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Brain className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">Lead Intelligence Agent</h3>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Active
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Automatically scores and prioritizes leads using AI analysis
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium mb-2">Capabilities</p>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Lead Scoring</span>
+                          <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Priority Assignment</span>
+                          <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Follow-up Tasks</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span><strong>Last Run:</strong> 2 hours ago</span>
+                        <span><strong>Success:</strong> 94%</span>
+                      </div>
+                      <Button className="w-full">
+                        <Brain className="h-4 w-4 mr-2" />
+                        Manage Agent
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Pipeline Analysis Agent */}
+                  <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <TrendingUp className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">Pipeline Analysis Agent</h3>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Active
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Analyzes deal risks and adjusts probability forecasts
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium mb-2">Capabilities</p>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Risk Analysis</span>
+                          <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Probability Updates</span>
+                          <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Review Scheduling</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span><strong>Last Run:</strong> 1 hour ago</span>
+                        <span><strong>Success:</strong> 91%</span>
+                      </div>
+                      <Button className="w-full">
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Manage Agent
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Smart Follow-up Agent */}
+                  <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-muted/10 rounded-lg">
+                          <Zap className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">Smart Follow-up Agent</h3>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                            Draft
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Generates personalized email sequences based on lead behavior
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium mb-2">Capabilities</p>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Email Generation</span>
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Timing Optimization</span>
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Engagement Tracking</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span><strong>Last Run:</strong> Never</span>
+                        <span><strong>Success:</strong> N/A</span>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Configure Agent
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Meeting Scheduler Agent */}
+                  <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-muted/10 rounded-lg">
+                          <Users className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">Meeting Scheduler Agent</h3>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                            Draft
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Books meetings based on lead scoring and availability
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium mb-2">Capabilities</p>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Calendar Integration</span>
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Optimal Timing</span>
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Agenda Creation</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span><strong>Last Run:</strong> Never</span>
+                        <span><strong>Success:</strong> N/A</span>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Configure Agent
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Cross-Platform Sync Agent */}
+                  <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-muted/10 rounded-lg">
+                          <Target className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">Cross-Platform Sync Agent</h3>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                            Draft
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Syncs data between Salesforce and HubSpot intelligently
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium mb-2">Capabilities</p>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Data Synchronization</span>
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Conflict Resolution</span>
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Duplicate Detection</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span><strong>Last Run:</strong> Never</span>
+                        <span><strong>Success:</strong> N/A</span>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Configure Agent
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Revenue Forecasting Agent */}
+                  <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-muted/10 rounded-lg">
+                          <BarChart3 className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">Revenue Forecasting Agent</h3>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                            Draft
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Predicts monthly/quarterly revenue using pipeline data
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium mb-2">Capabilities</p>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Revenue Prediction</span>
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Historical Analysis</span>
+                          <span className="px-2 py-1 bg-muted/10 text-muted-foreground text-xs rounded-full">Forecast Adjustment</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span><strong>Last Run:</strong> Never</span>
+                        <span><strong>Success:</strong> N/A</span>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Configure Agent
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
 
