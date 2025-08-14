@@ -20,33 +20,50 @@ export default function SalesforceDataExtractor() {
 
     setIsLoading(true);
     try {
-      // Map UI object types to API object types
-      const objectTypeMap: Record<string, string> = {
-        'leads': 'contact',        // Leads are stored as contacts in the sync function
-        'contacts': 'contact', 
-        'opportunities': 'opportunity'
+      // Map UI object types to API object types and database tables
+      const objectTypeMap: Record<string, { apiType: string, table: 'contacts' | 'opportunities' }> = {
+        'leads': { apiType: 'contact', table: 'contacts' },
+        'contacts': { apiType: 'contact', table: 'contacts' }, 
+        'opportunities': { apiType: 'opportunity', table: 'opportunities' }
       };
 
-      const { data, error } = await supabase.functions.invoke('salesforce-sync', {
+      const config = objectTypeMap[objectType];
+      if (!config) {
+        throw new Error(`Unsupported object type: ${objectType}`);
+      }
+
+      // First, sync data from Salesforce
+      const { error: syncError } = await supabase.functions.invoke('salesforce-sync', {
         body: {
-          objectType: objectTypeMap[objectType] || objectType,
+          objectType: config.apiType,
           userId: user.id,
-          direction: 'from_salesforce',
-          limit: 5 // Get only 5 records for testing
+          direction: 'from_salesforce'
         }
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (syncError) {
+        throw new Error(syncError.message);
+      }
+
+      // Then, fetch the synced data from our database
+      const { data: records, error: fetchError } = await supabase
+        .from(config.table)
+        .select('*')
+        .not('salesforce_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (fetchError) {
+        throw new Error(fetchError.message);
       }
 
       // Format the data nicely
-      const formattedData = JSON.stringify(data, null, 2);
+      const formattedData = JSON.stringify({ records: records || [] }, null, 2);
       setSalesforceData(formattedData);
       
       toast({
         title: "Data Retrieved",
-        description: `Successfully fetched ${objectType} from Salesforce sandbox.`,
+        description: `Successfully fetched ${records?.length || 0} ${objectType} from Salesforce sandbox.`,
       });
 
     } catch (error) {
