@@ -23,6 +23,13 @@ interface AnalysisResult {
   summary: string;
 }
 
+interface BulkAnalysisResult {
+  lead: any;
+  analysis: AnalysisResult;
+  success: boolean;
+  error?: string;
+}
+
 export default function LeadIntelligenceAgent() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -32,6 +39,7 @@ export default function LeadIntelligenceAgent() {
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [selectedLeads, setSelectedLeads] = useState<any[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<'salesforce' | 'hubspot'>('salesforce');
+  const [bulkResults, setBulkResults] = useState<BulkAnalysisResult[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -358,20 +366,31 @@ export default function LeadIntelligenceAgent() {
 
       const results = await Promise.all(analysisPromises);
       
-      // Handle results and errors
-      const successful = results.filter(r => !r.error);
-      const failed = results.filter(r => r.error);
+      // Process results into structured format
+      const bulkAnalysisResults: BulkAnalysisResult[] = selectedLeads.map((lead, index) => {
+        const result = results[index];
+        return {
+          lead,
+          analysis: result.error ? null : result.data.analysis,
+          success: !result.error,
+          error: result.error?.message
+        };
+      });
+      
+      // Store bulk results
+      setBulkResults(bulkAnalysisResults);
+      
+      const successful = bulkAnalysisResults.filter(r => r.success);
+      const failed = bulkAnalysisResults.filter(r => !r.success);
 
       toast({
         title: "Bulk Analysis Complete",
         description: `Analyzed ${successful.length} leads successfully. ${failed.length} failed.`,
       });
 
-      if (successful.length > 0) {
-        // Set the first successful analysis for display
-        setAnalysis(successful[0].data.analysis);
-        setLeadData(JSON.stringify(selectedLeads[0], null, 2));
-      }
+      // Clear single analysis display since we now have bulk results
+      setAnalysis(null);
+      setLeadData('');
 
     } catch (error) {
       console.error('Error in bulk analysis:', error);
@@ -398,6 +417,132 @@ export default function LeadIntelligenceAgent() {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';
+  };
+
+  const exportIndividualToHubSpot = async (lead: any, analysis: AnalysisResult) => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('hubspot-export', {
+        body: {
+          leadData: lead,
+          analysis: analysis,
+          platform: selectedPlatform
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) throw new Error(error.message);
+
+      toast({
+        title: "Export Successful",
+        description: `${lead.first_name} ${lead.last_name}'s analysis exported to HubSpot.`,
+      });
+    } catch (error) {
+      console.error('Error exporting to HubSpot:', error);
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to export to HubSpot.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const exportIndividualToSalesforce = async (lead: any, analysis: AnalysisResult) => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('salesforce-export', {
+        body: {
+          leadData: lead,
+          analysis: analysis,
+          platform: selectedPlatform
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) throw new Error(error.message);
+
+      toast({
+        title: "Export Successful",
+        description: `${lead.first_name} ${lead.last_name}'s analysis exported to Salesforce.`,
+      });
+    } catch (error) {
+      console.error('Error exporting to Salesforce:', error);
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to export to Salesforce.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const viewDetailedAnalysis = (lead: any, analysis: AnalysisResult) => {
+    setLeadData(JSON.stringify(lead, null, 2));
+    setAnalysis(analysis);
+    setBulkResults([]); // Clear bulk results to show single analysis
+    toast({
+      title: "Viewing Details",
+      description: `Showing detailed analysis for ${lead.first_name} ${lead.last_name}.`,
+    });
+  };
+
+  const exportAllSuccessfulResults = async () => {
+    if (!user) return;
+    
+    const successfulResults = bulkResults.filter(r => r.success);
+    if (successfulResults.length === 0) return;
+
+    try {
+      const session = await supabase.auth.getSession();
+      const authToken = session.data.session?.access_token;
+
+      const exportPromises = successfulResults.map(result => {
+        if (selectedPlatform === 'hubspot') {
+          return supabase.functions.invoke('hubspot-export', {
+            body: {
+              leadData: result.lead,
+              analysis: result.analysis,
+              platform: selectedPlatform
+            },
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+        } else {
+          return supabase.functions.invoke('salesforce-export', {
+            body: {
+              leadData: result.lead,
+              analysis: result.analysis,
+              platform: selectedPlatform
+            },
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+        }
+      });
+
+      const results = await Promise.all(exportPromises);
+      const successful = results.filter(r => !r.error).length;
+      const failed = results.filter(r => r.error).length;
+
+      toast({
+        title: "Bulk Export Complete",
+        description: `Exported ${successful} results successfully. ${failed} failed.`,
+      });
+    } catch (error) {
+      console.error('Error in bulk export:', error);
+      toast({
+        title: "Bulk Export Failed",
+        description: "Failed to export results.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -794,6 +939,168 @@ export default function LeadIntelligenceAgent() {
                 )}
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Bulk Analysis Results */}
+      {bulkResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Bulk Analysis Results
+              <Badge variant="outline">
+                {bulkResults.filter(r => r.success).length} / {bulkResults.length} Successful
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
+              {bulkResults.map((result, index) => (
+                <Card key={index} className={`${result.success ? 'border-green-200' : 'border-red-200'}`}>
+                  <CardContent className="pt-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h5 className="font-medium">{result.lead.first_name} {result.lead.last_name}</h5>
+                        <p className="text-sm text-muted-foreground">{result.lead.email}</p>
+                        <p className="text-xs text-muted-foreground">{result.lead.title} • {result.lead.company || 'No company'}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {result.success ? (
+                          <>
+                            <Badge className={getPriorityColor(result.analysis.priorityLevel)}>
+                              {result.analysis.priorityLevel}
+                            </Badge>
+                            <div className={`text-lg font-semibold ${getScoreColor(result.analysis.leadScore)}`}>
+                              {result.analysis.leadScore}/100
+                            </div>
+                          </>
+                        ) : (
+                          <Badge variant="destructive">Failed</Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {result.success ? (
+                      <div className="space-y-3">
+                        <div className="p-3 bg-muted rounded-lg">
+                          <p className="text-sm">{result.analysis.summary}</p>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-3 gap-3">
+                          <div className="text-center p-2 bg-green-50 rounded">
+                            <div className="text-xs text-green-600 font-medium">Revenue Potential</div>
+                            <div className="text-sm font-semibold text-green-700">
+                              {result.analysis.opportunityAssessment.revenuePotential}
+                            </div>
+                          </div>
+                          <div className="text-center p-2 bg-blue-50 rounded">
+                            <div className="text-xs text-blue-600 font-medium">Timeline</div>
+                            <div className="text-sm font-semibold text-blue-700">
+                              {result.analysis.opportunityAssessment.timeline}
+                            </div>
+                          </div>
+                          <div className="text-center p-2 bg-purple-50 rounded">
+                            <div className="text-xs text-purple-600 font-medium">Confidence</div>
+                            <div className="text-sm font-semibold text-purple-700">
+                              {result.analysis.opportunityAssessment.confidence}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-3">
+                          <div>
+                            <h6 className="text-xs font-medium text-muted-foreground mb-1">Key Insights</h6>
+                            <ul className="space-y-1">
+                              {result.analysis.keyInsights.slice(0, 2).map((insight, idx) => (
+                                <li key={idx} className="text-xs flex items-start gap-1">
+                                  <div className="w-1 h-1 bg-blue-600 rounded-full mt-1.5 flex-shrink-0" />
+                                  <span>{insight}</span>
+                                </li>
+                              ))}
+                              {result.analysis.keyInsights.length > 2 && (
+                                <li className="text-xs text-muted-foreground">
+                                  +{result.analysis.keyInsights.length - 2} more insights
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                          <div>
+                            <h6 className="text-xs font-medium text-muted-foreground mb-1">Recommended Actions</h6>
+                            <ul className="space-y-1">
+                              {result.analysis.recommendedActions.slice(0, 2).map((action, idx) => (
+                                <li key={idx} className="text-xs flex items-start gap-1">
+                                  <div className="w-1 h-1 bg-green-600 rounded-full mt-1.5 flex-shrink-0" />
+                                  <span>{action}</span>
+                                </li>
+                              ))}
+                              {result.analysis.recommendedActions.length > 2 && (
+                                <li className="text-xs text-muted-foreground">
+                                  +{result.analysis.recommendedActions.length - 2} more actions
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+
+                        {/* Individual Export Buttons */}
+                        <div className="flex gap-2 pt-2">
+                          {selectedPlatform === 'hubspot' && (
+                            <Button
+                              onClick={() => exportIndividualToHubSpot(result.lead, result.analysis)}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs border-orange-300 text-orange-700 hover:bg-orange-100"
+                            >
+                              Export to HubSpot
+                            </Button>
+                          )}
+                          {selectedPlatform === 'salesforce' && (
+                            <Button
+                              onClick={() => exportIndividualToSalesforce(result.lead, result.analysis)}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs border-green-300 text-green-700 hover:bg-green-100"
+                            >
+                              Export to Salesforce
+                            </Button>
+                          )}
+                          <Button
+                            onClick={() => viewDetailedAnalysis(result.lead, result.analysis)}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs"
+                          >
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-red-50 rounded-lg">
+                        <p className="text-sm text-red-700">Analysis failed: {result.error}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Bulk Export Actions */}
+            <div className="flex gap-2 pt-4 border-t">
+              <Button
+                onClick={exportAllSuccessfulResults}
+                disabled={bulkResults.filter(r => r.success).length === 0}
+                className="flex-1"
+              >
+                Export All Successful Results ({bulkResults.filter(r => r.success).length})
+              </Button>
+              <Button
+                onClick={() => setBulkResults([])}
+                variant="outline"
+              >
+                Clear Results
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
