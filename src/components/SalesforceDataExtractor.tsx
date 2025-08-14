@@ -22,7 +22,7 @@ export default function SalesforceDataExtractor() {
     try {
       // Map UI object types to API object types
       const objectTypeMap: Record<string, string> = {
-        'leads': 'lead',
+        'leads': 'contact',        // Leads are stored as contacts in the sync function
         'contacts': 'contact', 
         'opportunities': 'opportunity'
       };
