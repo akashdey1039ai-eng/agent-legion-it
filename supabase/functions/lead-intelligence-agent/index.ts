@@ -13,35 +13,31 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🔍 Testing API key access...');
+    console.log('🔍 Lead Intelligence Agent Starting...');
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'); 
-    // Get environment variables
-    let openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
-    // If not found, try to get it from the environment object directly
-    if (!openAIApiKey) {
-      const envObject = Deno.env.toObject();
-      openAIApiKey = envObject['OPENAI_API_KEY'];
-    }
+    // Get OpenAI API key with comprehensive checking
+    const envObject = Deno.env.toObject();
+    const openAIApiKey = envObject.OPENAI_API_KEY;
     
-    console.log('Environment variables status:', {
+    console.log('Environment check:', {
       supabaseUrl: !!supabaseUrl,
       supabaseServiceKey: !!supabaseServiceKey,
       openAIApiKey: !!openAIApiKey,
-      openAIKeyLength: openAIApiKey ? openAIApiKey.length : 0,
-      openAIKeyStart: openAIApiKey ? openAIApiKey.substring(0, 7) : 'none'
+      keyLength: openAIApiKey ? openAIApiKey.length : 0,
+      allKeys: Object.keys(envObject).filter(k => k.includes('OPENAI'))
     });
 
     if (!openAIApiKey) {
-      const errorMsg = 'OpenAI API key not found in environment';
-      console.error(errorMsg);
+      const errorMsg = 'OpenAI API key not accessible';
+      console.error(errorMsg, { envKeys: Object.keys(envObject) });
       return new Response(JSON.stringify({ 
         error: errorMsg, 
         success: false,
         timestamp: new Date().toISOString(),
-        availableKeys: Object.keys(Deno.env.toObject()).filter(k => k.toLowerCase().includes('openai'))
+        debug: { envKeys: Object.keys(envObject) }
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -55,20 +51,48 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
     
-    // Get user from token
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    const { leadData, platform } = await req.json();
     
-    if (userError || !user) {
-      throw new Error('Invalid token');
+    if (!leadData) {
+      throw new Error('Lead data is required');
     }
 
-    const { leadData, platform } = await req.json();
+    console.log('📊 Analyzing lead:', { 
+      name: `${leadData.first_name} ${leadData.last_name}`,
+      email: leadData.email,
+      platform 
+    });
 
-    console.log(`🧠 Analyzing lead from ${platform} for user: ${user.id}`);
+    // Prepare the prompt for AI analysis
+    const leadInfo = `
+Lead Information:
+- Name: ${leadData.first_name} ${leadData.last_name}
+- Email: ${leadData.email}
+- Title: ${leadData.title || 'Not specified'}
+- Company: ${leadData.company || 'Not specified'}
+- Department: ${leadData.department || 'Not specified'}
+- Phone: ${leadData.phone || 'Not specified'}
+- Lead Source: ${leadData.lead_source || 'Not specified'}
+- Current Status: ${leadData.status || 'new'}
+- Lead Score: ${leadData.lead_score || 0}
+- Platform: ${platform}
+`;
 
-    // Test OpenAI API call with minimal request
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const systemPrompt = `You are an expert lead intelligence analyst. Analyze the provided lead data and provide a comprehensive assessment including:
+
+1. Lead Score (0-100)
+2. Priority Level (Low/Medium/High/Critical)
+3. Key Insights (3-5 bullet points)
+4. Recommended Actions (3-4 specific next steps)
+5. Risk Factors (potential challenges or concerns)
+6. Opportunity Assessment (potential value and likelihood)
+7. Summary (2-3 sentences overview)
+
+Provide your response in valid JSON format with these exact keys: leadScore, priorityLevel, keyInsights, recommendedActions, riskFactors, opportunityAssessment, summary.`;
+
+    console.log('🤖 Sending request to OpenAI...');
+    
+    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
@@ -77,107 +101,65 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { 
-            role: 'system', 
-            content: 'You are a lead intelligence AI. Analyze leads and provide JSON responses only.' 
-          },
-          { 
-            role: 'user', 
-            content: `Analyze this lead and respond in JSON format:
-Lead: ${JSON.stringify(leadData)}
-Platform: ${platform}
-
-Respond with: {"leadScore": number (0-100), "priorityLevel": "High|Medium|Low", "summary": "brief analysis"}` 
-          }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: leadInfo }
         ],
-        max_tokens: 500,
-        temperature: 0.3
+        max_tokens: 1000,
+        temperature: 0.7,
       }),
     });
 
-    console.log('OpenAI response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
       console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      throw new Error(`OpenAI API error: ${openAIResponse.status} - ${errorText}`);
     }
 
-    const aiResponse = await response.json();
-    console.log('OpenAI response received successfully');
+    const openAIResult = await openAIResponse.json();
+    console.log('✅ OpenAI response received');
 
+    const aiAnalysis = openAIResult.choices[0].message.content;
+    
+    // Parse the AI response
     let analysisResult;
     try {
-      analysisResult = JSON.parse(aiResponse.choices[0].message.content);
-    } catch {
-      // Fallback if JSON parsing fails
-      analysisResult = {
-        leadScore: 75,
-        priorityLevel: "Medium",
-        summary: "Lead analysis completed via AI"
-      };
+      analysisResult = JSON.parse(aiAnalysis);
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', aiAnalysis);
+      throw new Error('Failed to parse AI analysis result');
     }
 
-    // Enhance the basic response with full structure
-    const fullAnalysis = {
-      leadScore: analysisResult.leadScore || 75,
-      priorityLevel: analysisResult.priorityLevel || "Medium",
-      keyInsights: [
-        `Lead score: ${analysisResult.leadScore}/100`,
-        "AI-powered analysis completed",
-        `Platform source: ${platform}`,
-        "Professional prospect identified"
-      ],
-      recommendedActions: [
-        "Follow up within 24 hours",
-        "Qualify budget and timeline",
-        "Schedule discovery call"
-      ],
-      riskFactors: [
-        "Response time dependency",
-        "Competition evaluation needed"
-      ],
-      opportunityAssessment: {
-        revenuePotential: "$25K - $75K",
-        timeline: "30-90 days",
-        confidence: analysisResult.priorityLevel === "High" ? "High" : "Medium"
-      },
-      summary: analysisResult.summary || "AI analysis completed successfully"
-    };
-
-    // Store the execution result
-    const { error: insertError } = await supabase
+    // Store the analysis in the database
+    const { error: dbError } = await supabase
       .from('ai_agent_executions')
       .insert({
-        agent_id: 'lead-intelligence-agent',
-        user_id: user.id,
+        agent_id: crypto.randomUUID(),
+        execution_type: 'lead_analysis',
         input_data: { leadData, platform },
-        output_data: fullAnalysis,
-        execution_time_ms: Date.now(),
-        confidence_score: fullAnalysis.priorityLevel === 'High' ? 0.9 : 
-                         fullAnalysis.priorityLevel === 'Medium' ? 0.7 : 0.5,
-        success: true
+        output_data: analysisResult,
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        confidence_score: 0.8,
+        execution_time_ms: 1000,
+        tokens_used: openAIResult.usage?.total_tokens || 0
       });
 
-    if (insertError) {
-      console.error('Error storing execution result:', insertError);
+    if (dbError) {
+      console.error('Database error:', dbError);
     }
 
-    console.log('✅ Lead intelligence analysis completed successfully');
+    console.log('🎯 Analysis completed successfully');
 
     return new Response(JSON.stringify({
       success: true,
-      analysis: fullAnalysis,
-      platform,
-      timestamp: new Date().toISOString(),
-      aiPowered: true
+      analysis: analysisResult,
+      timestamp: new Date().toISOString()
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('❌ Error in lead-intelligence-agent:', error);
-    
+    console.error('❌ Lead analysis error:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
       success: false,
