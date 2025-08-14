@@ -59,19 +59,16 @@ Deno.serve(async (req) => {
       })
     }
 
-    // HubSpot OAuth scopes - using standard available scopes
-    const scopes = [
-      'contacts',
-      'content'
-    ].join('%20')
+    // HubSpot OAuth - no scopes for basic connection
+    const scopes = ''
 
     const redirectUri = `https://39ed96a2-ffc6-48c5-9851-b801787f8221.lovableproject.com/hubspot-callback`
     
     const authUrl = `https://app.hubspot.com/oauth/authorize?` +
       `client_id=${clientId}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-      `scope=${scopes}&` +
-      `state=${state}`
+      `state=${state}` +
+      (scopes ? `&scope=${scopes}` : '')
 
     console.log('Generated HubSpot auth URL for user:', user.id)
 
