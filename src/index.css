@@ -1,58 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Professional Enterprise Design System */
+
 @layer base {
   :root {
-    /* Clean, readable color palette using proper HSL values */
-    --background: 0 0% 100%;
-    --foreground: 222 84% 5%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 84% 5%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 5%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
-    --chart-1: 221 83% 53%;
-    --chart-2: 142 76% 36%;
-    --chart-3: 25 95% 53%;
-    --chart-4: 262 83% 58%;
-    --chart-5: 336 75% 40%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222 84% 5%;
+    /* Professional Color Palette */
+    --background: 222 25% 4%;
     --foreground: 210 40% 98%;
-    --card: 222 84% 5%;
+
+    /* Enterprise Cards */
+    --card: 222 25% 8%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 84% 5%;
+
+    /* Surface Layers */
+    --popover: 222 25% 10%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 92% 76%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 217 92% 76%;
+
+    /* Professional Primary - Deep Blue */
+    --primary: 210 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary Surfaces */
+    --secondary: 222 25% 12%;
+    --secondary-foreground: 210 25% 88%;
+
+    /* Subtle Elements */
+    --muted: 222 25% 10%;
+    --muted-foreground: 210 15% 70%;
+
+    /* Accent Highlights */
+    --accent: 200 80% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Alert States */
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Interface Borders */
+    --border: 222 25% 15%;
+    --input: 222 25% 10%;
+    --ring: 210 85% 55%;
+
+    /* Success States */
+    --success: 142 76% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning States */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Design Tokens */
+    --radius: 0.5rem;
+
+    /* Professional Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(210 85% 55%), hsl(200 80% 60%));
+    --gradient-surface: linear-gradient(180deg, hsl(222 25% 8%), hsl(222 25% 4%));
+    --gradient-subtle: linear-gradient(45deg, hsl(222 25% 8% / 0.5), hsl(210 85% 55% / 0.1));
+
+    /* Enterprise Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(222 25% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(222 25% 0% / 0.1), 0 2px 4px -2px hsl(222 25% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(222 25% 0% / 0.1), 0 4px 6px -4px hsl(222 25% 0% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(222 25% 0% / 0.1), 0 8px 10px -6px hsl(222 25% 0% / 0.1);
+    --shadow-glow: 0 0 20px hsl(210 85% 55% / 0.3);
+
+    /* Smooth Transitions */
+    --transition-default: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -60,18 +76,8 @@
   * {
     @apply border-border;
   }
-  
-  body {
-    @apply bg-background text-foreground font-inter;
-  }
-  
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
-  }
-}
 
-@layer components {
-  .card-clean {
-    @apply bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+  body {
+    @apply bg-background text-foreground;
   }
 }
