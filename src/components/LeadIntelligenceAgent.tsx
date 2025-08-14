@@ -25,9 +25,11 @@ interface AnalysisResult {
 
 export default function LeadIntelligenceAgent() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [leadData, setLeadData] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<'salesforce' | 'hubspot'>('salesforce');
   const { user } = useAuth();
   const { toast } = useToast();
@@ -134,6 +136,131 @@ export default function LeadIntelligenceAgent() {
     }
   };
 
+  const syncHubSpotData = async (objectType: string) => {
+    if (!user) return;
+
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('hubspot-sync', {
+        body: {
+          objectType,
+          direction: 'from'
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast({
+        title: "Sync Complete",
+        description: `HubSpot ${objectType} synced successfully.`,
+      });
+
+      // Load recent leads after sync
+      await loadRecentHubSpotLeads();
+
+    } catch (error) {
+      console.error('Error syncing HubSpot data:', error);
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync HubSpot data.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const syncSalesforceData = async (objectType: string) => {
+    if (!user) return;
+
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('salesforce-sync', {
+        body: {
+          objectType,
+          userId: user.id,
+          direction: 'from_salesforce'
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast({
+        title: "Sync Complete",
+        description: `Salesforce ${objectType} synced successfully.`,
+      });
+
+      // Load recent leads after sync
+      await loadRecentSalesforceLeads();
+
+    } catch (error) {
+      console.error('Error syncing Salesforce data:', error);
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync Salesforce data.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const loadRecentHubSpotLeads = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .is('salesforce_id', null)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setRecentLeads(data || []);
+    } catch (error) {
+      console.error('Error loading HubSpot leads:', error);
+    }
+  };
+
+  const loadRecentSalesforceLeads = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .not('salesforce_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setRecentLeads(data || []);
+    } catch (error) {
+      console.error('Error loading Salesforce leads:', error);
+    }
+  };
+
+  const selectLead = (lead: any) => {
+    setLeadData(JSON.stringify(lead, null, 2));
+    toast({
+      title: "Lead Selected",
+      description: `Selected ${lead.first_name} ${lead.last_name} for analysis.`,
+    });
+  };
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'High': return 'bg-red-100 text-red-800 border-red-200';
@@ -182,9 +309,67 @@ export default function LeadIntelligenceAgent() {
             </div>
           </div>
 
+          {/* HubSpot Data Import */}
+          {selectedPlatform === 'hubspot' && (
+            <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-900">Import from HubSpot</h4>
+              <p className="text-sm text-blue-700">
+                Sync and analyze leads directly from your HubSpot CRM
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => syncHubSpotData('contacts')}
+                  variant="outline"
+                  size="sm"
+                  disabled={isSyncing}
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sync Contacts'}
+                </Button>
+                <Button
+                  onClick={() => loadRecentHubSpotLeads()}
+                  variant="outline" 
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  Load Recent Leads
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Salesforce Data Import */}
+          {selectedPlatform === 'salesforce' && (
+            <div className="space-y-3 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="font-medium text-green-900">Import from Salesforce</h4>
+              <p className="text-sm text-green-700">
+                Sync and analyze leads directly from your Salesforce CRM
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => syncSalesforceData('contact')}
+                  variant="outline"
+                  size="sm"
+                  disabled={isSyncing}
+                  className="border-green-300 text-green-700 hover:bg-green-100"
+                >
+                  {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sync Contacts'}
+                </Button>
+                <Button
+                  onClick={() => loadRecentSalesforceLeads()}
+                  variant="outline"
+                  size="sm" 
+                  className="border-green-300 text-green-700 hover:bg-green-100"
+                >
+                  Load Recent Leads
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <label htmlFor="leadData" className="text-sm font-medium">
-              Lead Data (JSON or Text)
+              Lead Data (JSON or select from synced data)
             </label>
             <Textarea
               id="leadData"
@@ -194,6 +379,33 @@ export default function LeadIntelligenceAgent() {
               rows={6}
             />
           </div>
+
+          {/* Recent Leads Selection */}
+          {recentLeads.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Recent {selectedPlatform === 'hubspot' ? 'HubSpot' : 'Salesforce'} Leads</label>
+              <div className="grid gap-2 max-h-48 overflow-y-auto">
+                {recentLeads.map((lead) => (
+                  <div
+                    key={lead.id}
+                    onClick={() => selectLead(lead)}
+                    className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h5 className="font-medium">{lead.first_name} {lead.last_name}</h5>
+                        <p className="text-sm text-gray-600">{lead.email}</p>
+                        <p className="text-xs text-gray-500">{lead.title} • {lead.company || 'No company'}</p>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {lead.status}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <label htmlFor="apiKey" className="text-sm font-medium flex items-center gap-2">
@@ -214,13 +426,18 @@ export default function LeadIntelligenceAgent() {
 
           <Button 
             onClick={handleAnalyze} 
-            disabled={isAnalyzing || !leadData.trim()}
+            disabled={isAnalyzing || isSyncing || !leadData.trim()}
             className="w-full"
           >
             {isAnalyzing ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Analyzing Lead...
+              </>
+            ) : isSyncing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Syncing Data...
               </>
             ) : (
               <>
