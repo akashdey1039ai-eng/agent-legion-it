@@ -670,6 +670,84 @@ export type Database = {
         }
         Relationships: []
       }
+      hubspot_sync_log: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          data_payload: Json | null
+          error_message: string | null
+          hubspot_id: string | null
+          id: string
+          local_id: string | null
+          object_type: string
+          operation: string
+          status: string
+          sync_direction: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          data_payload?: Json | null
+          error_message?: string | null
+          hubspot_id?: string | null
+          id?: string
+          local_id?: string | null
+          object_type: string
+          operation: string
+          status?: string
+          sync_direction: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          data_payload?: Json | null
+          error_message?: string | null
+          hubspot_id?: string | null
+          id?: string
+          local_id?: string | null
+          object_type?: string
+          operation?: string
+          status?: string
+          sync_direction?: string
+        }
+        Relationships: []
+      }
+      hubspot_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string
+          id: string
+          instance_url: string
+          refresh_token: string | null
+          token_type: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          instance_url: string
+          refresh_token?: string | null
+          token_type?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          instance_url?: string
+          refresh_token?: string | null
+          token_type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       knowledge_articles: {
         Row: {
           article_number: string | null
