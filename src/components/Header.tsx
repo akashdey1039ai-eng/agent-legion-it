@@ -6,11 +6,9 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel
+  DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
-import { LogOut, User, Settings, Brain, Bell, HelpCircle, Palette } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { LogOut, User, Settings, Brain } from 'lucide-react';
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -19,119 +17,55 @@ export function Header() {
     return email.split('@')[0].slice(0, 2).toUpperCase();
   };
 
-  const handleThemeToggle = () => {
-    // Theme toggle functionality can be implemented here
-    console.log('Theme toggle clicked');
-  };
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-6">
-        {/* Logo Section */}
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-3">
-            <div className="relative p-2.5 bg-gradient-hero rounded-xl shadow-glow">
-              <Brain className="h-6 w-6 text-white" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gradient-hero leading-none">
-                Universal CRM AI
-              </h1>
-              <p className="text-xs text-muted-foreground font-medium">
-                Enterprise Intelligence Platform
-              </p>
-            </div>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 max-w-screen-2xl items-center">
+        <div className="mr-4 flex">
+          <div className="flex items-center space-x-2">
+            <Brain className="h-6 w-6 text-primary" />
+            <span className="font-bold">Universal CRM AI</span>
           </div>
         </div>
-
-        {/* Center Navigation - Optional for future use */}
-        <div className="hidden md:flex items-center space-x-1">
-          <Badge variant="outline" className="text-xs font-medium border-primary/20 text-primary">
-            v2.1.0
-          </Badge>
-        </div>
         
-        {/* User Section */}
-        {user && (
-          <div className="flex items-center space-x-3">
-            {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative h-9 w-9 rounded-full">
-              <Bell className="h-4 w-4" />
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-            </Button>
-
-            {/* Help */}
-            <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full">
-              <HelpCircle className="h-4 w-4" />
-            </Button>
-
-            {/* User Dropdown */}
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full border-2 border-primary/10 hover:border-primary/20 transition-colors">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-primary text-white font-semibold text-sm">
+                    <AvatarFallback>
                       {getUserInitials(user.email || 'U')}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gradient-primary text-white text-xs">
-                          {getUserInitials(user.email || 'U')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <p className="text-sm font-medium leading-none">{user.email}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          CRM AI Analyst
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary" className="text-xs">Pro Plan</Badge>
-                      <Badge variant="outline" className="text-xs border-green-200 text-green-700">
-                        Online
-                      </Badge>
-                    </div>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium">{user.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      CRM AI Analyst
+                    </p>
                   </div>
-                </DropdownMenuLabel>
-                
-                <DropdownMenuSeparator className="my-2" />
-                
-                <DropdownMenuItem className="rounded-md">
-                  <User className="mr-3 h-4 w-4" />
-                  <span>Profile & Account</span>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
                 </DropdownMenuItem>
-                
-                <DropdownMenuItem className="rounded-md">
-                  <Settings className="mr-3 h-4 w-4" />
-                  <span>Preferences</span>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
                 </DropdownMenuItem>
-                
-                <DropdownMenuItem className="rounded-md" onClick={handleThemeToggle}>
-                  <Palette className="mr-3 h-4 w-4" />
-                  <span>Appearance</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator className="my-2" />
-                
-                <DropdownMenuItem 
-                  className="rounded-md text-red-600 focus:text-red-600 focus:bg-red-50" 
-                  onClick={signOut}
-                >
-                  <LogOut className="mr-3 h-4 w-4" />
-                  <span>Sign Out</span>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );
