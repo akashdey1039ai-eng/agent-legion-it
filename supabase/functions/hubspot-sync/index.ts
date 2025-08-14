@@ -19,10 +19,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { objectType, userId, direction = 'from' } = await req.json()
+    const { objectType, direction = 'from' } = await req.json()
     
-    if (!objectType || !userId) {
-      return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
+    if (!objectType) {
+      return new Response(JSON.stringify({ error: 'Missing objectType parameter' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -31,6 +31,20 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Get the auth header to verify the user
+    const authHeader = req.headers.get('Authorization')!
+    const token = authHeader.replace('Bearer ', '')
+    
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const userId = user.id
 
     // Get HubSpot tokens
     const { data: tokenData, error: tokenError } = await supabase

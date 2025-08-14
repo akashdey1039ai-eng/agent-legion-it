@@ -163,7 +163,6 @@ export default function HubSpotIntegration({ onSyncComplete }: HubSpotIntegratio
       const { data, error } = await supabase.functions.invoke('hubspot-sync', {
         body: {
           objectType,
-          userId: user.id,
           direction: 'from'
         },
         headers: {
