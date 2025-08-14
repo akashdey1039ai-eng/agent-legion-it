@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, ExternalLink, Loader2, Download, RefreshCw, Database } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -210,6 +210,104 @@ export default function HubSpotIntegration({ onSyncComplete }: HubSpotIntegratio
     }
   };
 
+  const handleLoadRecentRecords = async (objectType: string) => {
+    if (!user) return;
+
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('hubspot-sync', {
+        body: {
+          objectType,
+          direction: 'from',
+          limit: 50, // Load only recent 50 records
+          recent: true
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error loading recent HubSpot records:', error);
+        toast({
+          title: "Load Failed",
+          description: `Failed to load recent ${objectType}. Please try again.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        console.log('Recent records loaded:', data);
+        toast({
+          title: "Recent Records Loaded",
+          description: `Successfully loaded recent ${objectType} records.`,
+        });
+      }
+
+      setLastSyncTime(new Date().toLocaleString());
+      onSyncComplete?.();
+    } catch (error) {
+      console.error('Error loading recent HubSpot records:', error);
+      toast({
+        title: "Load Failed",
+        description: "An unexpected error occurred while loading recent records.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleBrowseAllRecords = async (objectType: string) => {
+    if (!user) return;
+
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('hubspot-sync', {
+        body: {
+          objectType,
+          direction: 'from',
+          full: true // Full sync of all records
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error browsing all HubSpot records:', error);
+        toast({
+          title: "Browse Failed",
+          description: `Failed to browse all ${objectType}. Please try again.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        console.log('All records browsed:', data);
+        toast({
+          title: "All Records Loaded",
+          description: `Successfully loaded all ${objectType} records.`,
+        });
+      }
+
+      setLastSyncTime(new Date().toLocaleString());
+      onSyncComplete?.();
+    } catch (error) {
+      console.error('Error browsing all HubSpot records:', error);
+      toast({
+        title: "Browse Failed",
+        description: "An unexpected error occurred while browsing all records.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+
+  };
+
   const handleDisconnect = async () => {
     if (!user) return;
 
@@ -349,6 +447,66 @@ export default function HubSpotIntegration({ onSyncComplete }: HubSpotIntegratio
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         'Sync Now'
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-medium">Load Recent Records</h4>
+              <p className="text-sm text-muted-foreground">Load the 50 most recent records from HubSpot</p>
+              <div className="grid gap-3">
+                {syncOptions.map((option) => (
+                  <div key={`recent-${option.id}`} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <h5 className="font-medium">Recent {option.name}</h5>
+                      <p className="text-sm text-muted-foreground">Load last 50 {option.name.toLowerCase()}</p>
+                    </div>
+                    <Button
+                      onClick={() => handleLoadRecentRecords(option.id)}
+                      disabled={isSyncing}
+                      size="sm"
+                      variant="outline"
+                    >
+                      {isSyncing ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Load Recent
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-medium">Browse All Records</h4>
+              <p className="text-sm text-muted-foreground">Load all records from HubSpot (may take longer)</p>
+              <div className="grid gap-3">
+                {syncOptions.map((option) => (
+                  <div key={`all-${option.id}`} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <h5 className="font-medium">All {option.name}</h5>
+                      <p className="text-sm text-muted-foreground">Full synchronization of all {option.name.toLowerCase()}</p>
+                    </div>
+                    <Button
+                      onClick={() => handleBrowseAllRecords(option.id)}
+                      disabled={isSyncing}
+                      size="sm"
+                      variant="secondary"
+                    >
+                      {isSyncing ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Database className="w-4 h-4 mr-2" />
+                          Browse All
+                        </>
                       )}
                     </Button>
                   </div>
