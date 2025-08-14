@@ -179,6 +179,16 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
         phone: 'phone',
         jobtitle: 'title',
         lifecyclestage: 'status'
+      },
+      statusMapping: {
+        'subscriber': 'new',
+        'lead': 'new', 
+        'marketingqualifiedlead': 'qualified',
+        'salesqualifiedlead': 'qualified',
+        'opportunity': 'working',
+        'customer': 'converted',
+        'evangelist': 'converted',
+        'other': 'new'
       }
     },
     'companies': {
@@ -259,7 +269,12 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
     for (const [hubspotField, localField] of Object.entries(mapping.fieldMapping)) {
       const value = record.properties[hubspotField]
       if (value !== null && value !== undefined) {
-        transformed[localField] = value
+        // Special handling for status field with mapping
+        if (localField === 'status' && mapping.statusMapping) {
+          transformed[localField] = mapping.statusMapping[value] || 'new'
+        } else {
+          transformed[localField] = value
+        }
       }
     }
 
