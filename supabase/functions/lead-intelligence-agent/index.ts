@@ -17,13 +17,15 @@ serve(async (req) => {
     // Debug all environment variables
     console.log('🔍 All Deno.env variables:', Object.keys(Deno.env.toObject()));
     
-    // Try different possible names for the API key
+    // Try different possible names for the API key - including the one from Supabase
     let openAIApiKey = Deno.env.get('OPENAI_API_KEY') || 
+                      Deno.env.get('OpenAI_key') ||
                       Deno.env.get('OPENAI_KEY') || 
                       Deno.env.get('OPEN_AI_API_KEY');
     
     console.log('🔑 API Key Debug:', {
       OPENAI_API_KEY: !!Deno.env.get('OPENAI_API_KEY'),
+      'OpenAI_key': !!Deno.env.get('OpenAI_key'),
       OPENAI_KEY: !!Deno.env.get('OPENAI_KEY'),
       OPEN_AI_API_KEY: !!Deno.env.get('OPEN_AI_API_KEY'),
       finalKey: !!openAIApiKey,
