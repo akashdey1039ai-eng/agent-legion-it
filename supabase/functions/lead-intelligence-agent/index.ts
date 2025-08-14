@@ -17,18 +17,32 @@ serve(async (req) => {
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'); 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    // Try multiple possible API key names
+    let openAIApiKey = Deno.env.get('OPENAI_API_KEY') || 
+                      Deno.env.get('OPEN_AI_API_KEY') ||
+                      Deno.env.get('OPENAI_KEY');
     
     console.log('Environment variables status:', {
       supabaseUrl: !!supabaseUrl,
       supabaseServiceKey: !!supabaseServiceKey,
       openAIApiKey: !!openAIApiKey,
       openAIKeyLength: openAIApiKey ? openAIApiKey.length : 0,
-      openAIKeyStart: openAIApiKey ? openAIApiKey.substring(0, 7) : 'none'
+      openAIKeyStart: openAIApiKey ? openAIApiKey.substring(0, 7) : 'none',
+      allEnvKeys: Object.keys(Deno.env.toObject()).filter(k => k.toLowerCase().includes('openai'))
     });
 
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key not found in environment');
+      const errorMsg = 'OpenAI API key not found in environment';
+      console.error(errorMsg);
+      return new Response(JSON.stringify({ 
+        error: errorMsg, 
+        success: false,
+        timestamp: new Date().toISOString(),
+        availableKeys: Object.keys(Deno.env.toObject()).filter(k => k.toLowerCase().includes('openai'))
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const authHeader = req.headers.get('Authorization');
