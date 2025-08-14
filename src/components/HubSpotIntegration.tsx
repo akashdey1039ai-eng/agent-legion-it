@@ -172,18 +172,29 @@ export default function HubSpotIntegration({ onSyncComplete }: HubSpotIntegratio
 
       if (error) {
         console.error('Error syncing HubSpot data:', error);
+        console.error('Full error details:', JSON.stringify(error, null, 2));
+        
+        // Try to get more details from the error
+        let errorMessage = `Failed to sync ${objectType}. Please try again.`;
+        if (error.message) {
+          errorMessage = error.message;
+        }
+        
         toast({
           title: "Sync Failed",
-          description: `Failed to sync ${objectType}. Please try again.`,
+          description: errorMessage,
           variant: "destructive",
         });
         return;
       }
 
-      toast({
-        title: "Sync Successful",
-        description: `Successfully synced ${objectType} from HubSpot.`,
-      });
+      if (data) {
+        console.log('Sync response data:', data);
+        toast({
+          title: "Sync Successful",
+          description: `Successfully synced ${objectType} data.`,
+        });
+      }
 
       setLastSyncTime(new Date().toLocaleString());
       onSyncComplete?.();
