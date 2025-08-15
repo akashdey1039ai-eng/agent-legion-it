@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useSecurityContext } from '@/components/SecurityProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -106,6 +107,7 @@ interface Task {
 
 const CRM = () => {
   const { user, loading: authLoading } = useAuth();
+  const { logSecurityEvent } = useSecurityContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLeadForm, setShowLeadForm] = useState(false);
@@ -133,15 +135,17 @@ const CRM = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
+      logSecurityEvent('UNAUTHORIZED_CRM_ACCESS');
       navigate('/auth');
       return;
     }
     
     if (user) {
+      logSecurityEvent('CRM_ACCESS', { userId: user.id });
       fetchDashboardStats();
       fetchAllData();
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, logSecurityEvent]);
 
   const fetchDashboardStats = async () => {
     try {

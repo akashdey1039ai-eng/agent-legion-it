@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
+import { SecurityProvider } from "@/components/SecurityProvider";
+import { ProductionReadyWrapper } from "@/components/ProductionReadyWrapper";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -19,21 +21,25 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/crm" element={<CRM />} />
-            <Route path="/ai-agents" element={<AIAgents />} />
-            <Route path="/salesforce-callback" element={<SalesforceCallback />} />
-            <Route path="/hubspot-callback" element={<HubSpotCallback />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <SecurityProvider>
+        <ProductionReadyWrapper>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/crm" element={<CRM />} />
+                <Route path="/ai-agents" element={<AIAgents />} />
+                <Route path="/salesforce-callback" element={<SalesforceCallback />} />
+                <Route path="/hubspot-callback" element={<HubSpotCallback />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+        </ProductionReadyWrapper>
+      </SecurityProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

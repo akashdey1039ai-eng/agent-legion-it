@@ -69,6 +69,53 @@
     /* Smooth Transitions */
     --transition-default: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Mobile-first responsive breakpoints */
+    --mobile-width: 768px;
+    --tablet-width: 1024px;
+    --desktop-width: 1280px;
+  }
+}
+
+/* Mobile-first responsive utilities */
+@layer utilities {
+  .mobile-safe-area {
+    padding-left: max(env(safe-area-inset-left), 1rem);
+    padding-right: max(env(safe-area-inset-right), 1rem);
+    padding-top: max(env(safe-area-inset-top), 1rem);
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+
+  .mobile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .mobile-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .mobile-stack {
+    flex-direction: column;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-stack {
+      flex-direction: row;
+    }
   }
 }
 

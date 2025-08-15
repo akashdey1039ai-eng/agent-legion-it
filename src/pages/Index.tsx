@@ -1,660 +1,167 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
-import { CrmDashboard } from "@/components/CrmDashboard";
-import { SalesforceIntegration } from "@/components/SalesforceIntegration";
-import HubSpotIntegration from "@/components/HubSpotIntegration";
-import { AgentConfiguration } from "@/components/AgentConfiguration";
-import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
-import { AgentExecutionPanel } from "@/components/AgentExecutionPanel";
-import { AgentConfigurationSelector } from "@/components/AgentConfigurationSelector";
-
-import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
-import { Header } from "@/components/Header";
-import heroCommand from "@/assets/hero-command.jpg";
-import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Clear previous test results on page load
-const clearTestResults = () => {
-  const testResults = localStorage.getItem('aiAgentTestResults');
-  if (testResults) {
-    localStorage.removeItem('aiAgentTestResults');
-  }
-};
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Brain, Database, Shield, Zap, Smartphone, Monitor } from "lucide-react";
+import { Link } from "react-router-dom";
+import { SandboxConnector } from "@/components/SandboxConnector";
+import heroImage from "@/assets/hero-command.jpg";
 
 const Index = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
-  const [activeAgent, setActiveAgent] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [showAgentConfig, setShowAgentConfig] = useState<{platform: 'salesforce' | 'hubspot'; agentType: string} | null>(null);
-  const [showAgentSelector, setShowAgentSelector] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Clear previous test results on page load
-    clearTestResults();
-    
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-
-    // Handle navigation state for agent management
-    const state = location.state as { activeTab?: string; openAgent?: string } | null;
-    console.log('Navigation state:', state);
-    
-    if (state?.activeTab) {
-      console.log('Setting active tab:', state.activeTab);
-      setActiveTab(state.activeTab);
-    }
-    if (state?.openAgent) {
-      console.log('Opening agent:', state.openAgent);
-      setActiveTab('agents');
-      setActiveAgent(state.openAgent);
-    }
-  }, [user, loading, navigate, location.state]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Shield className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-          <p className="text-muted-foreground">Authenticating...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-surface">
+      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 mobile-safe-area">
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-          style={{ backgroundImage: `url(${heroCommand})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/70" />
-        </div>
-        
-        <div className="relative container mx-auto px-6 py-16 lg:py-24">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-6 py-3 mb-8 shadow-lg">
-              <Brain className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary tracking-wide">Universal CRM AI Platform</span>
-            </div>
-            
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-primary bg-clip-text text-transparent">Universal CRM</span>
-              <br />
-              <span className="text-foreground">AI CRM Intelligence Platform</span>
-            </h1>
-            
-            <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-              Connect any CRM platform or use our independent CRM system. Autonomous AI agents work across 
-              Salesforce, HubSpot, Pipedrive, and more - plus our native CRM intelligence layer.
-            </p>
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `url(${heroImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
+          <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
+            AI CRM Intelligence Platform
+          </h1>
+          <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Deploy intelligent automation on top of your existing CRM. Advanced AI agents that learn, adapt, and optimize your sales pipeline.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-6 w-full sm:w-auto">
+              <Link to="/crm">Launch CRM Platform</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-6 w-full sm:w-auto">
+              <Link to="/ai-agents">Explore AI Agents</Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Main Navigation Tabs */}
-      <section className="py-12">
-        <div className="container mx-auto px-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="integration" className="flex items-center gap-2">
-                <Database className="h-4 w-4" />
-                CRM Integration
-              </TabsTrigger>
-              <TabsTrigger value="crm" className="flex items-center gap-2" onClick={() => navigate('/crm')}>
-                <Users className="h-4 w-4" />
-                Native CRM
-              </TabsTrigger>
-              <TabsTrigger value="agents" className="flex items-center gap-2">
-                <Bot className="h-4 w-4" />
-                AI Agents
-              </TabsTrigger>
-              <TabsTrigger value="dashboard" className="flex items-center gap-2">
-                <PieChart className="h-4 w-4" />
-                Intelligence Dashboard
-              </TabsTrigger>
-            </TabsList>
+      {/* Features Section */}
+      <section className="py-16 lg:py-24 px-4 mobile-safe-area">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">Enterprise-Grade Intelligence</h2>
+            <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
+              Transform your CRM into an intelligent command center with AI-powered insights and automation.
+            </p>
+          </div>
+          
+          <div className="grid mobile-grid gap-6 lg:gap-8">
+            <Card className="bg-gradient-to-br from-card to-card/50 border-primary/20">
+              <CardHeader>
+                <Brain className="h-10 lg:h-12 w-10 lg:w-12 text-primary mb-4" />
+                <CardTitle className="text-lg lg:text-xl">AI-Powered Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-sm lg:text-base">
+                  Advanced machine learning algorithms analyze your data to provide actionable insights and predictions.
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="mt-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Lead Intelligence */}
-                <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
-                  <div className="p-3 bg-primary/10 rounded-lg w-fit mb-4">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">Lead Intelligence</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    AI-powered lead scoring and qualification with automated prioritization.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Lead Scoring</span>
-                    <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Auto Qualification</span>
-                  </div>
-                </div>
+            <Card className="bg-gradient-to-br from-card to-card/50 border-accent/20">
+              <CardHeader>
+                <Database className="h-10 lg:h-12 w-10 lg:w-12 text-accent mb-4" />
+                <CardTitle className="text-lg lg:text-xl">Universal Integration</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-sm lg:text-base">
+                  Seamlessly connect with Salesforce, HubSpot, Pipedrive, and 100+ other CRM platforms.
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-                {/* Pipeline Forecasting */}
-                <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
-                  <div className="p-3 bg-accent/10 rounded-lg w-fit mb-4">
-                    <Target className="h-6 w-6 text-accent" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">Pipeline Forecasting</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Predictive analytics for revenue forecasting and risk assessment.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">Revenue Prediction</span>
-                    <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">Risk Analysis</span>
-                  </div>
-                </div>
+            <Card className="bg-gradient-to-br from-card to-card/50 border-success/20">
+              <CardHeader>
+                <Shield className="h-10 lg:h-12 w-10 lg:w-12 text-success mb-4" />
+                <CardTitle className="text-lg lg:text-xl">Enterprise Security</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-sm lg:text-base">
+                  Bank-grade encryption, audit trails, and compliance with SOC 2, GDPR, and industry standards.
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-                {/* Activity Intelligence */}
-                <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
-                  <div className="p-3 bg-success/10 rounded-lg w-fit mb-4">
-                    <Activity className="h-6 w-6 text-success" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">Activity Intelligence</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Smart recommendations for next best actions and optimal timing.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-success/10 text-success text-xs rounded-full">Next Best Action</span>
-                    <span className="px-2 py-1 bg-success/10 text-success text-xs rounded-full">Optimal Timing</span>
-                  </div>
-                </div>
+            <Card className="bg-gradient-to-br from-card to-card/50 border-warning/20">
+              <CardHeader>
+                <Zap className="h-10 lg:h-12 w-10 lg:w-12 text-warning mb-4" />
+                <CardTitle className="text-lg lg:text-xl">Real-time Intelligence</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-sm lg:text-base">
+                  Live data processing, instant notifications, and automated actions based on customer behavior.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile Responsiveness Section */}
+      <section className="py-16 lg:py-24 px-4 bg-muted/30 mobile-safe-area">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6">Mobile-First Design</h2>
+          <p className="text-lg lg:text-xl text-muted-foreground mb-8">
+            Optimized for all devices - Windows, macOS, Android, and iOS.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <div className="flex items-center justify-center p-8 bg-card rounded-lg border">
+              <div className="text-center">
+                <Smartphone className="h-16 w-16 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Mobile Optimized</h3>
+                <p className="text-sm text-muted-foreground">
+                  Native mobile experience on iOS and Android
+                </p>
               </div>
-            </TabsContent>
-
-            {/* CRM Integration Tab */}
-            <TabsContent value="integration" className="mt-8">
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-4">Connect Your CRM Platform</h2>
-                  <p className="text-muted-foreground mb-8">
-                    Integrate with your existing CRM or use our native platform
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                  {/* Platform Cards */}
-                  <button
-                    onClick={() => setSelectedPlatform('salesforce')}
-                    className={`bg-card border rounded-lg p-4 text-center transition-all hover:shadow-lg hover:scale-105 ${
-                      selectedPlatform === 'salesforce' 
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
-                        : 'border-border/50 hover:border-border'
-                    }`}
-                  >
-                    <div className="w-12 h-12 bg-blue-600 rounded-lg mx-auto mb-3 flex items-center justify-center text-white font-bold">SF</div>
-                    <h3 className="font-medium mb-1">Salesforce</h3>
-                    <p className="text-xs text-muted-foreground">Enterprise CRM</p>
-                  </button>
-                  
-                  <button
-                    onClick={() => setSelectedPlatform('hubspot')}
-                    className={`bg-card border rounded-lg p-4 text-center transition-all hover:shadow-lg hover:scale-105 ${
-                      selectedPlatform === 'hubspot' 
-                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-950' 
-                        : 'border-border/50 hover:border-border'
-                    }`}
-                  >
-                    <div className="w-12 h-12 bg-orange-500 rounded-lg mx-auto mb-3 flex items-center justify-center text-white font-bold">HS</div>
-                    <h3 className="font-medium mb-1">HubSpot</h3>
-                    <p className="text-xs text-muted-foreground">Inbound Marketing</p>
-                  </button>
-                  
-                  <button
-                    onClick={() => setSelectedPlatform('pipedrive')}
-                    className={`bg-card border rounded-lg p-4 text-center transition-all hover:shadow-lg hover:scale-105 opacity-50 cursor-not-allowed ${
-                      selectedPlatform === 'pipedrive' 
-                        ? 'border-green-500 bg-green-50 dark:bg-green-950' 
-                        : 'border-border/50'
-                    }`}
-                    disabled
-                  >
-                    <div className="w-12 h-12 bg-green-600 rounded-lg mx-auto mb-3 flex items-center justify-center text-white font-bold">PD</div>
-                    <h3 className="font-medium mb-1">Pipedrive</h3>
-                    <p className="text-xs text-muted-foreground">Coming Soon</p>
-                  </button>
-                  
-                  <button
-                    onClick={() => setSelectedPlatform('native')}
-                    className={`bg-card border rounded-lg p-4 text-center transition-all hover:shadow-lg hover:scale-105 ${
-                      selectedPlatform === 'native' 
-                        ? 'border-primary bg-primary/10' 
-                        : 'border-primary/50 bg-primary/5 hover:border-primary'
-                    }`}
-                  >
-                    <div className="w-12 h-12 bg-gradient-primary rounded-lg mx-auto mb-3 flex items-center justify-center">
-                      <Brain className="h-6 w-6 text-white" />
-                    </div>
-                    <h3 className="font-medium mb-1">Native CRM</h3>
-                    <p className="text-xs text-muted-foreground">AI-First Platform</p>
-                  </button>
-                </div>
-                
-                {/* Show integration details based on selected platform */}
-                {selectedPlatform === 'salesforce' && !showAgentConfig && <SalesforceIntegration />}
-                {selectedPlatform === 'hubspot' && !showAgentConfig && <HubSpotIntegration />}
-                {selectedPlatform === 'pipedrive' && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Target className="h-8 w-8 text-green-600" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">Pipedrive Integration</h3>
-                    <p className="text-muted-foreground mb-4">Coming soon! Pipedrive integration is currently in development.</p>
-                    <Button disabled className="opacity-50">
-                      Connect Pipedrive (Coming Soon)
-                    </Button>
-                  </div>
-                )}
-                {selectedPlatform === 'native' && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Brain className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">Native AI-First CRM</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Our built-in CRM system designed specifically for AI automation and intelligence.
-                    </p>
-                    <Button className="bg-gradient-primary hover:opacity-90" onClick={() => navigate('/crm')}>
-                      Explore Native CRM
-                    </Button>
-                  </div>
-                )}
-                {!selectedPlatform && !showAgentConfig && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Database className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">Select a CRM Platform</h3>
-                    <p className="text-muted-foreground">
-                      Choose a CRM platform above to view integration details and setup instructions.
-                    </p>
-                  </div>
-                )}
+            </div>
+            
+            <div className="flex items-center justify-center p-8 bg-card rounded-lg border">
+              <div className="text-center">
+                <Monitor className="h-16 w-16 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Desktop Ready</h3>
+                <p className="text-sm text-muted-foreground">
+                  Full-featured desktop application for Windows and macOS
+                </p>
               </div>
-            </TabsContent>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {/* AI Agents Tab */}
-            <TabsContent value="agents" className="mt-8">
-              {showAgentConfig ? (
-                <AgentConfiguration 
-                  platform={showAgentConfig.platform}
-                  agentType={showAgentConfig.agentType}
-                  onClose={() => setShowAgentConfig(null)}
-                />
-              ) : showAgentSelector ? (
-                <AgentConfigurationSelector
-                  agentType={showAgentSelector}
-                  onSelectPlatform={(platform) => {
-                    setShowAgentConfig({ platform, agentType: showAgentSelector });
-                    setShowAgentSelector(null);
-                  }}
-                  onBack={() => setShowAgentSelector(null)}
-                  onQuickRun={(platform?: 'salesforce' | 'hubspot') => {
-                    setShowAgentSelector(null);
-                    setActiveAgent(showAgentSelector);
-                    if (platform) {
-                      setSelectedPlatform(platform);
-                    }
-                  }}
-                />
-              ) : activeAgent ? (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-3xl font-bold tracking-tight">
-                        {activeAgent === 'lead-intelligence' && 'Lead Intelligence Agent'}
-                        {activeAgent === 'pipeline-analysis' && 'Pipeline Analysis Agent'}
-                        {activeAgent && !['lead-intelligence', 'pipeline-analysis'].includes(activeAgent) && 'AI Agent'}
-                      </h2>
-                      <p className="text-muted-foreground">
-                        {activeAgent === 'lead-intelligence' && 'Analyze and score leads using AI'}
-                        {activeAgent === 'pipeline-analysis' && 'Analyze sales pipeline performance and forecast revenue'}
-                        {activeAgent && !['lead-intelligence', 'pipeline-analysis'].includes(activeAgent) && 'Manage your AI agent'}
-                      </p>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setActiveAgent(null)}
-                    >
-                      <Shield className="h-4 w-4 mr-2" />
-                      Back to Agents
-                    </Button>
-                  </div>
-                  
-                  {activeAgent === 'lead-intelligence' && <LeadIntelligenceAgent />}
-                  {activeAgent === 'pipeline-analysis' && <AgentExecutionPanel agentType="pipeline-analysis" platform={(selectedPlatform as 'salesforce' | 'hubspot') || "salesforce"} onBack={() => setActiveAgent(null)} />}
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-3xl font-bold tracking-tight">AI Agents</h2>
-                      <p className="text-muted-foreground">
-                        Autonomous AI agents for your CRM operations
-                      </p>
-                    </div>
-                    <Button>
-                      <Shield className="h-4 w-4 mr-2" />
-                      Configure Agents
-                    </Button>
-                  </div>
+      {/* Sandbox Connector Section */}
+      <section className="py-16 lg:py-24 px-4 mobile-safe-area">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">Connect Your Sandbox</h2>
+            <p className="text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Test our platform with your existing CRM sandbox before deploying to production. 
+              Ensure seamless integration and validate all features in your environment.
+            </p>
+          </div>
+          
+          <SandboxConnector />
+        </div>
+      </section>
 
-                  {/* Stats Overview */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-card border border-border/50 rounded-lg p-4">
-                      <div className="flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-primary" />
-                        <div>
-                          <p className="text-sm font-medium">Active Agents</p>
-                          <p className="text-2xl font-bold">2</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-card border border-border/50 rounded-lg p-4">
-                      <div className="flex items-center gap-2">
-                        <Bot className="h-4 w-4 text-primary" />
-                        <div>
-                          <p className="text-sm font-medium">Total Agents</p>
-                          <p className="text-2xl font-bold">5</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-card border border-border/50 rounded-lg p-4">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-primary" />
-                        <div>
-                          <p className="text-sm font-medium">Avg Success Rate</p>
-                          <p className="text-2xl font-bold">92.5%</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-card border border-border/50 rounded-lg p-4">
-                      <div className="flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-primary" />
-                        <div>
-                          <p className="text-sm font-medium">Actions Today</p>
-                          <p className="text-2xl font-bold">147</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* AI Agents Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Lead Intelligence Agent */}
-                    <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <Brain className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Lead Intelligence Agent</h3>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Active
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Automatically scores and prioritizes leads using AI analysis
-                      </p>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium mb-2">Capabilities</p>
-                          <div className="flex flex-wrap gap-1">
-                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Lead Scoring</span>
-                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Priority Assignment</span>
-                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Follow-up Tasks</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span><strong>Last Run:</strong> 2 hours ago</span>
-                          <span><strong>Success:</strong> 94%</span>
-                        </div>
-                        <Button 
-                          className="w-full"
-                          onClick={() => setShowAgentSelector('lead-intelligence')}
-                        >
-                          <Brain className="h-4 w-4 mr-2" />
-                          Manage Agent
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Pipeline Analysis Agent */}
-                    <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-accent/10 rounded-lg">
-                            <TrendingUp className="h-5 w-5 text-accent" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Pipeline Analysis Agent</h3>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Active
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Analyzes sales pipeline performance and provides revenue forecasting
-                      </p>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium mb-2">Capabilities</p>
-                          <div className="flex flex-wrap gap-1">
-                            <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">Pipeline Analytics</span>
-                            <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">Revenue Forecasting</span>
-                            <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">Risk Assessment</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span><strong>Last Run:</strong> 1 hour ago</span>
-                          <span><strong>Success:</strong> 96%</span>
-                        </div>
-                        <Button 
-                          className="w-full"
-                          onClick={() => setShowAgentSelector('pipeline-analysis')}
-                        >
-                          <TrendingUp className="h-4 w-4 mr-2" />
-                          Manage Agent
-                        </Button>
-                      </div>
-                    </div>
-
-
-                    {/* Smart Follow-up Agent */}
-                    <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300 opacity-75">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-muted rounded-lg">
-                            <Sparkles className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Smart Follow-up Agent</h3>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                              Draft
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Automated personalized follow-ups based on lead behavior
-                      </p>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium mb-2">Capabilities</p>
-                          <div className="flex flex-wrap gap-1">
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Email Automation</span>
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Timing Optimization</span>
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">A/B Testing</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span><strong>Status:</strong> In Development</span>
-                          <span><strong>ETA:</strong> Q2 2024</span>
-                        </div>
-                        <Button variant="outline" className="w-full">
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Configure Agent
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Meeting Scheduler Agent */}
-                    <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300 opacity-75">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-muted rounded-lg">
-                            <Target className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Meeting Scheduler Agent</h3>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                              Draft
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Intelligent meeting coordination and calendar optimization
-                      </p>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium mb-2">Capabilities</p>
-                          <div className="flex flex-wrap gap-1">
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Calendar Sync</span>
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Optimal Timing</span>
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Auto Booking</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span><strong>Status:</strong> In Development</span>
-                          <span><strong>ETA:</strong> Q2 2024</span>
-                        </div>
-                        <Button variant="outline" className="w-full">
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Configure Agent
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Cross-Platform Sync Agent */}
-                    <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300 opacity-75">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-muted rounded-lg">
-                            <Activity className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Cross-Platform Sync Agent</h3>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                              Draft
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Keep data synchronized across all connected CRM platforms
-                      </p>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium mb-2">Capabilities</p>
-                          <div className="flex flex-wrap gap-1">
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Real-time Sync</span>
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Conflict Resolution</span>
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Data Mapping</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span><strong>Status:</strong> In Development</span>
-                          <span><strong>ETA:</strong> Q3 2024</span>
-                        </div>
-                        <Button variant="outline" className="w-full">
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Configure Agent
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Revenue Forecasting Agent */}
-                    <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300 opacity-75">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-muted rounded-lg">
-                            <BarChart3 className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Revenue Forecasting Agent</h3>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                              Draft
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Advanced revenue predictions based on pipeline analysis
-                      </p>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium mb-2">Capabilities</p>
-                          <div className="flex flex-wrap gap-1">
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Revenue Prediction</span>
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Trend Analysis</span>
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">Goal Tracking</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span><strong>Status:</strong> In Development</span>
-                          <span><strong>ETA:</strong> Q3 2024</span>
-                        </div>
-                        <Button variant="outline" className="w-full">
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Configure Agent
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-
-
-            {/* Intelligence Dashboard Tab */}
-            <TabsContent value="dashboard" className="mt-8">
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-4">Real-Time CRM Intelligence</h2>
-                  <p className="text-muted-foreground mb-8">
-                    Live analytics and insights from your connected CRM data
-                  </p>
-                </div>
-                <CrmDashboard />
-              </div>
-            </TabsContent>
-          </Tabs>
+      {/* Call to Action */}
+      <section className="py-16 lg:py-24 px-4 bg-primary/5 mobile-safe-area">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6">Ready to Transform Your CRM?</h2>
+          <p className="text-lg lg:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Start with our sandbox environment, test your integrations, and deploy an intelligent layer 
+            on top of your existing CRM infrastructure.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-6 w-full sm:w-auto">
+              <Link to="/crm">Start Free Trial</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-6 w-full sm:w-auto">
+              <Link to="/ai-agents">View Documentation</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </div>
