@@ -11,7 +11,7 @@ interface AgentConfigurationSelectorProps {
   agentType: string;
   onSelectPlatform: (platform: 'salesforce' | 'hubspot') => void;
   onBack: () => void;
-  onQuickRun?: () => void;
+  onQuickRun?: (platform?: 'salesforce' | 'hubspot') => void;
 }
 
 export function AgentConfigurationSelector({ 
@@ -80,7 +80,7 @@ export function AgentConfigurationSelector({
       case 'analysis':
         // Quick launch analysis using callback instead of navigation
         if (onQuickRun) {
-          onQuickRun();
+          onQuickRun('salesforce');
         }
         break;
     }
@@ -115,7 +115,7 @@ export function AgentConfigurationSelector({
       case 'analysis':
         // Quick launch analysis using callback instead of navigation
         if (onQuickRun) {
-          onQuickRun();
+          onQuickRun('hubspot');
         }
         break;
     }

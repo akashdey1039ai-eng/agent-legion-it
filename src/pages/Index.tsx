@@ -306,9 +306,12 @@ const Index = () => {
                     setShowAgentSelector(null);
                   }}
                   onBack={() => setShowAgentSelector(null)}
-                  onQuickRun={() => {
+                  onQuickRun={(platform?: 'salesforce' | 'hubspot') => {
                     setShowAgentSelector(null);
                     setActiveAgent(showAgentSelector);
+                    if (platform) {
+                      setSelectedPlatform(platform);
+                    }
                   }}
                 />
               ) : activeAgent ? (
@@ -336,7 +339,7 @@ const Index = () => {
                   </div>
                   
                   {activeAgent === 'lead-intelligence' && <LeadIntelligenceAgent />}
-                  {activeAgent === 'pipeline-analysis' && <AgentExecutionPanel agentType="pipeline-analysis" platform="salesforce" onBack={() => setActiveAgent(null)} />}
+                  {activeAgent === 'pipeline-analysis' && <AgentExecutionPanel agentType="pipeline-analysis" platform={(selectedPlatform as 'salesforce' | 'hubspot') || "salesforce"} onBack={() => setActiveAgent(null)} />}
                 </div>
               ) : (
                 <div className="space-y-6">
