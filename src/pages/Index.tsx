@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { CrmDashboard } from "@/components/CrmDashboard";
 import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import HubSpotIntegration from "@/components/HubSpotIntegration";
+import { AgentConfiguration } from "@/components/AgentConfiguration";
 import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
 
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
 import heroCommand from "@/assets/hero-command.jpg";
-import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles } from "lucide-react";
+import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Clear previous test results on page load
@@ -28,6 +29,7 @@ const Index = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showAgentConfig, setShowAgentConfig] = useState<'salesforce' | 'hubspot' | null>(null);
 
   useEffect(() => {
     // Clear previous test results on page load
@@ -243,8 +245,40 @@ const Index = () => {
                 </div>
                 
                 {/* Show integration details based on selected platform */}
-                {selectedPlatform === 'salesforce' && <SalesforceIntegration />}
-                {selectedPlatform === 'hubspot' && <HubSpotIntegration />}
+                {selectedPlatform === 'salesforce' && !showAgentConfig && (
+                  <div className="space-y-4">
+                    <SalesforceIntegration />
+                    <div className="text-center">
+                      <Button
+                        onClick={() => setShowAgentConfig('salesforce')}
+                        className="bg-gradient-primary hover:opacity-90"
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Configure AI Agents
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {selectedPlatform === 'hubspot' && !showAgentConfig && (
+                  <div className="space-y-4">
+                    <HubSpotIntegration />
+                    <div className="text-center">
+                      <Button
+                        onClick={() => setShowAgentConfig('hubspot')}
+                        className="bg-gradient-primary hover:opacity-90"
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Configure AI Agents
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {showAgentConfig && (
+                  <AgentConfiguration 
+                    platform={showAgentConfig} 
+                    onClose={() => setShowAgentConfig(null)}
+                  />
+                )}
                 {selectedPlatform === 'pipedrive' && (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -271,7 +305,7 @@ const Index = () => {
                     </Button>
                   </div>
                 )}
-                {!selectedPlatform && (
+                {!selectedPlatform && !showAgentConfig && (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
                       <Database className="h-8 w-8 text-primary" />
