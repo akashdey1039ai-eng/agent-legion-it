@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, ArrowLeft } from 'lucide-react';
+import { Settings, ArrowLeft, Database, Zap, Brain, Activity, Users, Target } from 'lucide-react';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { useToast } from '@/hooks/use-toast';
 
 interface AgentConfigurationSelectorProps {
   agentType: string;
@@ -14,6 +17,14 @@ export function AgentConfigurationSelector({
   onSelectPlatform, 
   onBack 
 }: AgentConfigurationSelectorProps) {
+  const [realtimeSyncEnabled, setRealtimeSyncEnabled] = useState(false);
+  const { toast } = useToast();
+  
+  // Enable real-time sync for relevant tables
+  const { isConnected, lastSyncTime } = useRealtimeSync({
+    enabled: realtimeSyncEnabled,
+    tables: ['opportunities', 'contacts', 'companies']
+  });
   const getAgentTitle = () => {
     switch (agentType) {
       case 'pipeline-analysis':
@@ -33,6 +44,48 @@ export function AgentConfigurationSelector({
         return 'Intelligent lead scoring and qualification';
       default:
         return 'AI-powered CRM automation';
+    }
+  };
+
+  const handleSalesforceAction = (action: 'sandbox' | 'sync' | 'analysis') => {
+    switch (action) {
+      case 'sandbox':
+        onSelectPlatform('salesforce');
+        break;
+      case 'sync':
+        // Toggle real-time sync
+        if (!realtimeSyncEnabled) {
+          setRealtimeSyncEnabled(true);
+          toast({
+            title: "Real-time Sync Enabled",
+            description: "Now monitoring Salesforce data for live updates",
+          });
+        } else {
+          setRealtimeSyncEnabled(false);
+          toast({
+            title: "Real-time Sync Disabled",
+            description: "Live monitoring has been turned off",
+          });
+        }
+        break;
+      case 'analysis':
+        // Quick launch analysis
+        window.location.href = '/?tab=agents&agent=pipeline-analysis';
+        break;
+    }
+  };
+
+  const handleHubSpotAction = (action: 'pipeline' | 'scoring' | 'automation') => {
+    switch (action) {
+      case 'pipeline':
+        onSelectPlatform('hubspot');
+        break;
+      case 'scoring':
+        alert('Contact scoring will be available after HubSpot integration');
+        break;
+      case 'automation':
+        alert('Marketing automation features coming soon');
+        break;
     }
   };
 
@@ -75,14 +128,38 @@ export function AgentConfigurationSelector({
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
                       Connect to your Salesforce developer sandbox and analyze real opportunity data
                     </p>
-                    <div className="flex flex-wrap gap-1">
-                      <Badge variant="secondary" className="text-xs">Developer Sandbox</Badge>
-                      <Badge variant="secondary" className="text-xs">Real-time Sync</Badge>
-                      <Badge variant="secondary" className="text-xs">AI Analysis</Badge>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex items-center gap-1 text-xs"
+                        onClick={() => handleSalesforceAction('sandbox')}
+                      >
+                        <Database className="h-3 w-3" />
+                        Developer Sandbox
+                      </Button>
+                      <Button
+                        variant={realtimeSyncEnabled ? "default" : "secondary"}
+                        size="sm"
+                        className="flex items-center gap-1 text-xs"
+                        onClick={() => handleSalesforceAction('sync')}
+                      >
+                        <Zap className="h-3 w-3" />
+                        {realtimeSyncEnabled ? 'Sync Active' : 'Real-time Sync'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex items-center gap-1 text-xs"
+                        onClick={() => handleSalesforceAction('analysis')}
+                      >
+                        <Brain className="h-3 w-3" />
+                        AI Analysis
+                      </Button>
                     </div>
                   </div>
                   
@@ -111,14 +188,38 @@ export function AgentConfigurationSelector({
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
                       Connect to your HubSpot account and analyze deals, contacts, and pipeline data
                     </p>
-                    <div className="flex flex-wrap gap-1">
-                      <Badge variant="secondary" className="text-xs">Deal Pipeline</Badge>
-                      <Badge variant="secondary" className="text-xs">Contact Scoring</Badge>
-                      <Badge variant="secondary" className="text-xs">Marketing Automation</Badge>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex items-center gap-1 text-xs"
+                        onClick={() => handleHubSpotAction('pipeline')}
+                      >
+                        <Target className="h-3 w-3" />
+                        Deal Pipeline
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex items-center gap-1 text-xs"
+                        onClick={() => handleHubSpotAction('scoring')}
+                      >
+                        <Users className="h-3 w-3" />
+                        Contact Scoring
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex items-center gap-1 text-xs"
+                        onClick={() => handleHubSpotAction('automation')}
+                      >
+                        <Activity className="h-3 w-3" />
+                        Marketing Automation
+                      </Button>
                     </div>
                   </div>
                   
