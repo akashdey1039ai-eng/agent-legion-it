@@ -285,19 +285,46 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
     console.log(`Upserting ${transformedRecords.length} records to ${mapping.table}`)
     console.log('Sample record:', JSON.stringify(transformedRecords[0], null, 2))
     
-    // For contacts, we need to handle both salesforce_id and email conflicts
-    const conflictColumns = objectType === 'contacts' ? 'salesforce_id,email' : 'salesforce_id'
-    
-    const { error } = await supabase
-      .from(mapping.table)
-      .upsert(transformedRecords, { 
-        onConflict: conflictColumns,
-        ignoreDuplicates: false 
-      })
+    // For contacts, handle email conflicts by updating existing records
+    if (objectType === 'contacts') {
+      // First, try to update existing records by email
+      for (const record of transformedRecords) {
+        const { error } = await supabase
+          .from(mapping.table)
+          .upsert(record, { 
+            onConflict: 'email',
+            ignoreDuplicates: false 
+          })
+        
+        if (error) {
+          console.error('Database upsert error for record:', record, error)
+          // If email conflict still fails, try by salesforce_id only
+          const { error: salesforceError } = await supabase
+            .from(mapping.table)
+            .upsert(record, { 
+              onConflict: 'salesforce_id',
+              ignoreDuplicates: false 
+            })
+          
+          if (salesforceError) {
+            console.error('Failed to upsert record even by salesforce_id:', salesforceError)
+            throw new Error(`Database upsert failed: ${salesforceError.message}`)
+          }
+        }
+      }
+    } else {
+      // For non-contact objects, use salesforce_id conflict resolution
+      const { error } = await supabase
+        .from(mapping.table)
+        .upsert(transformedRecords, { 
+          onConflict: 'salesforce_id',
+          ignoreDuplicates: false 
+        })
 
-    if (error) {
-      console.error('Database upsert error details:', error)
-      throw new Error(`Database upsert failed: ${error.message}`)
+      if (error) {
+        console.error('Database upsert error details:', error)
+        throw new Error(`Database upsert failed: ${error.message}`)
+      }
     }
 
     console.log(`Successfully synced ${transformedRecords.length} ${objectType} records`)
