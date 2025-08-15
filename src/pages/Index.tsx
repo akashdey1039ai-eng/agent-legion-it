@@ -15,6 +15,7 @@ import { Header } from "@/components/Header";
 import { SandboxConnector } from "@/components/SandboxConnector";
 import { TestDataGenerator } from '@/components/TestDataGenerator';
 import { CustomerIntelligenceTestSuite } from '@/components/CustomerIntelligenceTestSuite';
+import { SalesforceDebugger } from '@/components/SalesforceDebugger';
 import { AISecurityMonitor } from '@/components/AISecurityMonitor';
 import heroCommand from "@/assets/hero-command.jpg";
 import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings, Smartphone, Monitor } from "lucide-react";
@@ -361,6 +362,7 @@ const Index = () => {
                     <TestDataGenerator />
                     <CustomerIntelligenceTestSuite />
                   </div>
+                  <SalesforceDebugger />
                   <AISecurityMonitor />
                 </div>
               )}
