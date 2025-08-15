@@ -131,7 +131,7 @@ Respond in valid JSON format with an array of analyses.`;
         messages: [
           {
             role: 'system',
-            content: 'You are a Pipeline Analysis Agent. Respond only with valid JSON. No markdown, no explanations, just pure JSON.'
+            content: 'You are a Pipeline Analysis Agent. Respond only with valid JSON array. No markdown, no explanations, just pure JSON.'
           },
           {
             role: 'user',
