@@ -163,6 +163,15 @@ Deno.serve(async (req) => {
         case 'pipeline_analysis':
           result = await executeEnhancedPipelineAnalysis(supabaseClient, inputData, enableActions, openaiApiKey, salesforceAPI)
           break
+        case 'customer_sentiment':
+          result = await executeCustomerSentimentAnalysis(supabaseClient, inputData, enableActions, openaiApiKey)
+          break
+        case 'churn_prediction':
+          result = await executeChurnPredictionAnalysis(supabaseClient, inputData, enableActions, openaiApiKey)
+          break
+        case 'customer_segmentation':
+          result = await executeCustomerSegmentationAnalysis(supabaseClient, inputData, enableActions, openaiApiKey)
+          break
         default:
           throw new Error(`Unsupported agent type: ${agent.type}`)
       }
@@ -686,5 +695,519 @@ Respond in JSON format:
     tokensUsed: opportunities.length * 400,
     cost: opportunities.length * 0.020,
     agentCapabilities: enableActions ? 'Full Autonomous Actions' : 'Analysis Only'
+  }
+}
+
+// Customer Sentiment Analysis with HubSpot Support
+async function executeCustomerSentimentAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string) {
+  console.log('🎭 Executing Customer Sentiment Analysis')
+  
+  const { platform, contactIds } = inputData
+  
+  if (!contactIds || !Array.isArray(contactIds)) {
+    throw new Error('Invalid contact IDs provided')
+  }
+
+  // Fetch contact data based on platform
+  let contacts = []
+  
+  if (platform === 'hubspot') {
+    // For HubSpot, get contacts with HubSpot IDs
+    const { data: hubspotContacts, error } = await supabaseClient
+      .from('contacts')
+      .select(`
+        id, first_name, last_name, email, phone, title, 
+        status, lead_score, created_at, salesforce_id
+      `)
+      .in('id', contactIds)
+
+    if (error) throw new Error(`Failed to fetch HubSpot contacts: ${error.message}`)
+    contacts = hubspotContacts || []
+  } else {
+    // Default/Salesforce contacts
+    const { data: defaultContacts, error } = await supabaseClient
+      .from('contacts')
+      .select(`
+        id, first_name, last_name, email, phone, title, 
+        status, lead_score, created_at, salesforce_id
+      `)
+      .in('id', contactIds)
+
+    if (error) throw new Error(`Failed to fetch contacts: ${error.message}`)
+    contacts = defaultContacts || []
+  }
+
+  if (!contacts || contacts.length === 0) {
+    return {
+      analysis: 'No contacts found for sentiment analysis',
+      confidence: 0,
+      actionsExecuted: 0,
+      platform: platform || 'unknown'
+    }
+  }
+
+  console.log(`📊 Analyzing sentiment for ${contacts.length} contacts on ${platform}`)
+
+  const analysisResults = []
+  let actionsExecuted = 0
+
+  for (const contact of contacts) {
+    const aiPrompt = `
+You are an expert customer sentiment analysis AI. Analyze this customer profile and determine their sentiment and satisfaction level.
+
+Customer Data:
+- Name: ${contact.first_name} ${contact.last_name}
+- Email: ${contact.email}
+- Title: ${contact.title || 'Unknown'}
+- Status: ${contact.status}
+- Lead Score: ${contact.lead_score || 0}
+- Platform: ${platform}
+
+Analyze and provide:
+1. Sentiment Score (-100 to 100, where -100 is very negative, 0 is neutral, 100 is very positive)
+2. Satisfaction Level (Low/Medium/High)
+3. Risk Level (Low/Medium/High)
+4. Recommended Actions
+5. Reason for sentiment assessment
+
+Respond in JSON format:
+{
+  "sentimentScore": number,
+  "satisfactionLevel": "Low|Medium|High",
+  "riskLevel": "Low|Medium|High",
+  "reasoning": "detailed explanation",
+  "recommendedActions": ["action1", "action2"],
+  "confidence": number
+}
+`
+
+    try {
+      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-2025-08-07',
+          messages: [
+            { role: 'system', content: 'You are an expert customer sentiment analysis AI specialized in CRM data analysis.' },
+            { role: 'user', content: aiPrompt }
+          ],
+          max_completion_tokens: 500
+        }),
+      })
+
+      const aiData = await aiResponse.json()
+      let aiAnalysis
+
+      try {
+        aiAnalysis = JSON.parse(aiData.choices[0].message.content)
+      } catch {
+        aiAnalysis = {
+          sentimentScore: 0,
+          satisfactionLevel: 'Medium',
+          riskLevel: 'Medium',
+          reasoning: 'Unable to parse AI response, using default values',
+          recommendedActions: ['Schedule follow-up call'],
+          confidence: 0.5
+        }
+      }
+
+      if (enableActions) {
+        // Update contact with sentiment data
+        await supabaseClient
+          .from('contacts')
+          .update({ 
+            lead_score: Math.max(0, Math.min(100, contact.lead_score + (aiAnalysis.sentimentScore / 10))),
+            status: aiAnalysis.riskLevel === 'High' ? 'at_risk' : contact.status
+          })
+          .eq('id', contact.id)
+        
+        actionsExecuted++
+
+        // Create task for high-risk customers
+        if (aiAnalysis.riskLevel === 'High') {
+          await supabaseClient
+            .from('tasks')
+            .insert({
+              subject: `URGENT: High-risk customer - ${contact.first_name} ${contact.last_name}`,
+              description: `Customer sentiment analysis indicates high risk: ${aiAnalysis.reasoning}`,
+              priority: 'high',
+              status: 'open',
+              related_to_type: 'contact',
+              related_to_id: contact.id,
+              due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            })
+          
+          actionsExecuted++
+        }
+      }
+
+      analysisResults.push({
+        contactId: contact.id,
+        name: `${contact.first_name} ${contact.last_name}`,
+        platform: platform,
+        sentimentScore: aiAnalysis.sentimentScore,
+        satisfactionLevel: aiAnalysis.satisfactionLevel,
+        riskLevel: aiAnalysis.riskLevel,
+        reasoning: aiAnalysis.reasoning,
+        recommendedActions: aiAnalysis.recommendedActions,
+        confidence: aiAnalysis.confidence
+      })
+
+    } catch (error) {
+      console.error('Sentiment analysis failed for contact:', contact.id, error)
+      analysisResults.push({
+        contactId: contact.id,
+        name: `${contact.first_name} ${contact.last_name}`,
+        platform: platform,
+        sentimentScore: 0,
+        satisfactionLevel: 'Medium',
+        riskLevel: 'Medium',
+        reasoning: 'Analysis failed - using default values',
+        confidence: 0.3
+      })
+    }
+  }
+
+  const avgConfidence = analysisResults.reduce((sum, r) => sum + r.confidence, 0) / analysisResults.length
+
+  return {
+    analysis: analysisResults,
+    confidence: avgConfidence,
+    summary: `🎭 Customer Sentiment Analysis completed for ${contacts.length} customers on ${platform}. ${actionsExecuted} actions executed.`,
+    platform: platform,
+    actionsExecuted
+  }
+}
+
+// Churn Prediction Analysis
+async function executeChurnPredictionAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string) {
+  console.log('📈 Executing Churn Prediction Analysis')
+  
+  const { platform, contactIds } = inputData
+  
+  if (!contactIds || !Array.isArray(contactIds)) {
+    throw new Error('Invalid contact IDs provided')
+  }
+
+  // Fetch contacts with recent activity data
+  const { data: contacts, error } = await supabaseClient
+    .from('contacts')
+    .select(`
+      id, first_name, last_name, email, status, lead_score, created_at,
+      companies(name, industry, size)
+    `)
+    .in('id', contactIds)
+
+  if (error) throw new Error(`Failed to fetch contacts: ${error.message}`)
+
+  if (!contacts || contacts.length === 0) {
+    return {
+      analysis: 'No contacts found for churn prediction',
+      confidence: 0,
+      actionsExecuted: 0,
+      platform: platform || 'unknown'
+    }
+  }
+
+  console.log(`📊 Predicting churn for ${contacts.length} customers on ${platform}`)
+
+  const analysisResults = []
+  let actionsExecuted = 0
+
+  for (const contact of contacts) {
+    const daysSinceCreated = Math.floor((Date.now() - new Date(contact.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    
+    const aiPrompt = `
+You are an expert churn prediction AI. Analyze this customer and predict their likelihood of churning.
+
+Customer Data:
+- Name: ${contact.first_name} ${contact.last_name}
+- Status: ${contact.status}
+- Lead Score: ${contact.lead_score || 0}
+- Days Since Created: ${daysSinceCreated}
+- Company: ${contact.companies?.name || 'Unknown'}
+- Industry: ${contact.companies?.industry || 'Unknown'}
+- Platform: ${platform}
+
+Analyze and provide:
+1. Churn Risk Score (0-100, where 100 is highest risk)
+2. Risk Category (Low/Medium/High)
+3. Time to Churn (days estimate)
+4. Key Risk Factors
+5. Retention Actions
+
+Respond in JSON format:
+{
+  "churnRisk": number,
+  "riskCategory": "Low|Medium|High",
+  "timeToChurn": number,
+  "riskFactors": ["factor1", "factor2"],
+  "retentionActions": ["action1", "action2"],
+  "confidence": number
+}
+`
+
+    try {
+      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-2025-08-07',
+          messages: [
+            { role: 'system', content: 'You are an expert churn prediction AI specialized in customer retention analysis.' },
+            { role: 'user', content: aiPrompt }
+          ],
+          max_completion_tokens: 500
+        }),
+      })
+
+      const aiData = await aiResponse.json()
+      let aiAnalysis
+
+      try {
+        aiAnalysis = JSON.parse(aiData.choices[0].message.content)
+      } catch {
+        aiAnalysis = {
+          churnRisk: 50,
+          riskCategory: 'Medium',
+          timeToChurn: 30,
+          riskFactors: ['Low engagement'],
+          retentionActions: ['Schedule check-in call'],
+          confidence: 0.5
+        }
+      }
+
+      if (enableActions && aiAnalysis.riskCategory === 'High') {
+        // Create retention task for high-risk customers
+        await supabaseClient
+          .from('tasks')
+          .insert({
+            subject: `RETENTION: High churn risk - ${contact.first_name} ${contact.last_name}`,
+            description: `Churn prediction shows ${aiAnalysis.churnRisk}% risk. Factors: ${aiAnalysis.riskFactors.join(', ')}`,
+            priority: 'high',
+            status: 'open',
+            related_to_type: 'contact',
+            related_to_id: contact.id,
+            due_date: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+          })
+        
+        actionsExecuted++
+      }
+
+      analysisResults.push({
+        contactId: contact.id,
+        name: `${contact.first_name} ${contact.last_name}`,
+        platform: platform,
+        churnRisk: aiAnalysis.churnRisk,
+        riskCategory: aiAnalysis.riskCategory,
+        timeToChurn: aiAnalysis.timeToChurn,
+        riskFactors: aiAnalysis.riskFactors,
+        retentionActions: aiAnalysis.retentionActions,
+        confidence: aiAnalysis.confidence
+      })
+
+    } catch (error) {
+      console.error('Churn prediction failed for contact:', contact.id, error)
+      analysisResults.push({
+        contactId: contact.id,
+        name: `${contact.first_name} ${contact.last_name}`,
+        platform: platform,
+        churnRisk: 50,
+        riskCategory: 'Medium',
+        timeToChurn: 30,
+        confidence: 0.3
+      })
+    }
+  }
+
+  const avgConfidence = analysisResults.reduce((sum, r) => sum + r.confidence, 0) / analysisResults.length
+
+  return {
+    analysis: analysisResults,
+    confidence: avgConfidence,
+    summary: `📈 Churn Prediction Analysis completed for ${contacts.length} customers on ${platform}. ${actionsExecuted} actions executed.`,
+    platform: platform,
+    actionsExecuted
+  }
+}
+
+// Customer Segmentation Analysis
+async function executeCustomerSegmentationAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string) {
+  console.log('🎯 Executing Customer Segmentation Analysis')
+  
+  const { platform, contactIds } = inputData
+  
+  if (!contactIds || !Array.isArray(contactIds)) {
+    throw new Error('Invalid contact IDs provided')
+  }
+
+  const { data: contacts, error } = await supabaseClient
+    .from('contacts')
+    .select(`
+      id, first_name, last_name, email, status, lead_score, title, 
+      created_at, companies(name, industry, size, revenue)
+    `)
+    .in('id', contactIds)
+
+  if (error) throw new Error(`Failed to fetch contacts: ${error.message}`)
+
+  if (!contacts || contacts.length === 0) {
+    return {
+      analysis: 'No contacts found for segmentation',
+      confidence: 0,
+      actionsExecuted: 0,
+      platform: platform || 'unknown'
+    }
+  }
+
+  console.log(`📊 Segmenting ${contacts.length} customers on ${platform}`)
+
+  const analysisResults = []
+  let actionsExecuted = 0
+
+  for (const contact of contacts) {
+    const aiPrompt = `
+You are an expert customer segmentation AI. Analyze this customer and assign them to appropriate segments.
+
+Customer Data:
+- Name: ${contact.first_name} ${contact.last_name}
+- Title: ${contact.title || 'Unknown'}
+- Status: ${contact.status}
+- Lead Score: ${contact.lead_score || 0}
+- Company: ${contact.companies?.name || 'Unknown'}
+- Industry: ${contact.companies?.industry || 'Unknown'}
+- Company Size: ${contact.companies?.size || 'Unknown'}
+- Platform: ${platform}
+
+Analyze and provide:
+1. Primary Segment (Enterprise/Mid-Market/SMB/Individual)
+2. Behavioral Segment (Champion/Supporter/Neutral/Detractor)
+3. Value Tier (High/Medium/Low)
+4. Engagement Level (High/Medium/Low)
+5. Recommended Strategy
+
+Respond in JSON format:
+{
+  "primarySegment": "Enterprise|Mid-Market|SMB|Individual",
+  "behavioralSegment": "Champion|Supporter|Neutral|Detractor",
+  "valueTier": "High|Medium|Low",
+  "engagementLevel": "High|Medium|Low",
+  "recommendedStrategy": "specific strategy",
+  "reasoning": "explanation",
+  "confidence": number
+}
+`
+
+    try {
+      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-2025-08-07',
+          messages: [
+            { role: 'system', content: 'You are an expert customer segmentation AI specialized in B2B customer analysis.' },
+            { role: 'user', content: aiPrompt }
+          ],
+          max_completion_tokens: 500
+        }),
+      })
+
+      const aiData = await aiResponse.json()
+      let aiAnalysis
+
+      try {
+        aiAnalysis = JSON.parse(aiData.choices[0].message.content)
+      } catch {
+        aiAnalysis = {
+          primarySegment: 'SMB',
+          behavioralSegment: 'Neutral',
+          valueTier: 'Medium',
+          engagementLevel: 'Medium',
+          recommendedStrategy: 'Standard nurturing approach',
+          reasoning: 'Default segmentation applied',
+          confidence: 0.5
+        }
+      }
+
+      if (enableActions) {
+        // Update contact tags based on segmentation
+        const segmentTags = [
+          aiAnalysis.primarySegment,
+          aiAnalysis.behavioralSegment,
+          `Value-${aiAnalysis.valueTier}`,
+          `Engagement-${aiAnalysis.engagementLevel}`
+        ]
+
+        await supabaseClient
+          .from('contacts')
+          .update({ 
+            tags: segmentTags,
+            status: aiAnalysis.behavioralSegment === 'Champion' ? 'qualified' : contact.status
+          })
+          .eq('id', contact.id)
+        
+        actionsExecuted++
+
+        // Create strategy task for high-value segments
+        if (aiAnalysis.valueTier === 'High' || aiAnalysis.primarySegment === 'Enterprise') {
+          await supabaseClient
+            .from('tasks')
+            .insert({
+              subject: `STRATEGY: High-value customer - ${contact.first_name} ${contact.last_name}`,
+              description: `Customer segmentation: ${aiAnalysis.primarySegment} | ${aiAnalysis.behavioralSegment}. Strategy: ${aiAnalysis.recommendedStrategy}`,
+              priority: 'high',
+              status: 'open',
+              related_to_type: 'contact',
+              related_to_id: contact.id,
+              due_date: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString()
+            })
+          
+          actionsExecuted++
+        }
+      }
+
+      analysisResults.push({
+        contactId: contact.id,
+        name: `${contact.first_name} ${contact.last_name}`,
+        platform: platform,
+        primarySegment: aiAnalysis.primarySegment,
+        behavioralSegment: aiAnalysis.behavioralSegment,
+        valueTier: aiAnalysis.valueTier,
+        engagementLevel: aiAnalysis.engagementLevel,
+        recommendedStrategy: aiAnalysis.recommendedStrategy,
+        reasoning: aiAnalysis.reasoning,
+        confidence: aiAnalysis.confidence
+      })
+
+    } catch (error) {
+      console.error('Segmentation failed for contact:', contact.id, error)
+      analysisResults.push({
+        contactId: contact.id,
+        name: `${contact.first_name} ${contact.last_name}`,
+        platform: platform,
+        primarySegment: 'SMB',
+        behavioralSegment: 'Neutral',
+        confidence: 0.3
+      })
+    }
+  }
+
+  const avgConfidence = analysisResults.reduce((sum, r) => sum + r.confidence, 0) / analysisResults.length
+
+  return {
+    analysis: analysisResults,
+    confidence: avgConfidence,
+    summary: `🎯 Customer Segmentation Analysis completed for ${contacts.length} customers on ${platform}. ${actionsExecuted} actions executed.`,
+    platform: platform,
+    actionsExecuted
   }
 }
