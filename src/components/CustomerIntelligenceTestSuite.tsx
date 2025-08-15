@@ -30,6 +30,8 @@ interface AgentTestResult {
   logs?: string[];
   rawResponse?: any;
   results?: any;
+  salesforceData?: any;
+  aiAnalysis?: any;
 }
 
 export function CustomerIntelligenceTestSuite() {
@@ -320,14 +322,16 @@ export function CustomerIntelligenceTestSuite() {
 
           console.log(`✅ Real Salesforce AI analysis completed:`, salesforceResult);
           testResult = {
-            confidence: 0.95, // High confidence for real data
-            insights: salesforceResult.analysis || [],
-            recommendations: [`Analyzed ${salesforceResult.recordsAnalyzed} real Salesforce records`, 'Real API integration successful'],
+            confidence: salesforceResult.confidence || 0.95,
+            insights: salesforceResult.insights || salesforceResult.analysis || [],
+            recommendations: salesforceResult.recommendations || [`Analyzed ${salesforceResult.recordsAnalyzed} real Salesforce records`, 'Real API integration successful'],
             actionsExecuted: salesforceResult.recordsAnalyzed || 0,
             securityScore: 98,
             riskLevel: 'low',
             dataSource: 'salesforce_sandbox',
-            timestamp: salesforceResult.timestamp
+            timestamp: salesforceResult.timestamp,
+            rawSalesforceData: salesforceResult.rawSalesforceData,
+            salesforceAnalysis: salesforceResult.analysis
           };
         } catch (error) {
           console.error(`❌ Real Salesforce test failed for ${agent.id}:`, error);
@@ -374,7 +378,9 @@ export function CustomerIntelligenceTestSuite() {
         riskLevel: testResult.riskLevel || 'low',
         summary: `${agent.name} completed successfully`,
         analysis: testResult.insights || [],
-        rawResponse: testResult
+        rawResponse: testResult,
+        salesforceData: testResult.rawSalesforceData,
+        aiAnalysis: testResult.salesforceAnalysis
       };
 
     } catch (error) {

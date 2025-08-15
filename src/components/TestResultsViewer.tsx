@@ -36,6 +36,8 @@ interface TestResult {
   analysis?: any[];
   logs?: string[];
   rawResponse?: any;
+  salesforceData?: any;
+  aiAnalysis?: any;
 }
 
 interface TestResultsViewerProps {
@@ -307,14 +309,39 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
                     
                      <TabsContent value="raw" className="mt-4">
                        <ScrollArea className="h-96 w-full rounded-md border p-4">
-                         <div className="space-y-2">
+                         <div className="space-y-4">
                            <h4 className="font-medium flex items-center gap-2">
                              <Code className="h-4 w-4" />
                              Raw Response Data
                            </h4>
-                           <pre className="bg-gray-50 p-3 rounded-md text-xs overflow-auto">
-                             {JSON.stringify(result.rawResponse || result, null, 2)}
-                           </pre>
+                           
+                           {/* Salesforce Data Section */}
+                           {result.platform === 'salesforce' && result.salesforceData && (
+                             <div className="space-y-2">
+                               <h5 className="text-sm font-medium text-blue-600">📊 Real Salesforce Data ({result.salesforceData.length} records)</h5>
+                               <pre className="bg-blue-50 p-3 rounded-md text-xs overflow-auto border-l-4 border-blue-400">
+                                 {JSON.stringify(result.salesforceData, null, 2)}
+                               </pre>
+                             </div>
+                           )}
+                           
+                           {/* AI Analysis Section */}
+                           {result.platform === 'salesforce' && result.aiAnalysis && (
+                             <div className="space-y-2">
+                               <h5 className="text-sm font-medium text-green-600">🧠 AI Analysis Results</h5>
+                               <pre className="bg-green-50 p-3 rounded-md text-xs overflow-auto border-l-4 border-green-400">
+                                 {typeof result.aiAnalysis === 'string' ? result.aiAnalysis : JSON.stringify(result.aiAnalysis, null, 2)}
+                               </pre>
+                             </div>
+                           )}
+                           
+                           {/* Complete Raw Response */}
+                           <div className="space-y-2">
+                             <h5 className="text-sm font-medium text-gray-600">📋 Complete Test Result</h5>
+                             <pre className="bg-gray-50 p-3 rounded-md text-xs overflow-auto">
+                               {JSON.stringify(result.rawResponse || result, null, 2)}
+                             </pre>
+                           </div>
                          </div>
                        </ScrollArea>
                      </TabsContent>
