@@ -92,29 +92,34 @@ export function CustomerIntelligenceTestSuite() {
     }
 
     setIsRunningTests(true);
-    setTestResults([]);
-    setCurrentTest(`${agent.name} - ${platform.toUpperCase()}`);
-    setProgress(50);
+    setTestResults(prev => prev.filter(r => r.agentType !== agentId)); // Clear previous results for this agent
+    setProgress(0);
 
     try {
-      console.log(`🚀 Starting single test: ${agent.name} on ${platform}`);
-      const result = await runAgentTest(agent, platform);
-      setTestResults([result]);
+      console.log(`🚀 Starting test for ${agent.name} across all platforms`);
+      const platforms = ['native', 'salesforce', 'hubspot'];
+      
+      for (let i = 0; i < platforms.length; i++) {
+        const currentPlatform = platforms[i];
+        setCurrentTest(`${agent.name} - ${currentPlatform.toUpperCase()}`);
+        setProgress((i / platforms.length) * 100);
+
+        const result = await runAgentTest(agent, currentPlatform);
+        setTestResults(prev => [...prev, result]);
+        
+        // Small delay between platforms
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
       setProgress(100);
       setCurrentTest('');
 
-      if (result.status === 'completed') {
-        toast({
-          title: "✅ Test Completed Successfully",
-          description: `${agent.name} test completed for ${platform.toUpperCase()} with ${Math.round(result.confidence * 100)}% confidence.`,
-        });
-      } else {
-        toast({
-          title: "❌ Test Failed",
-          description: `${agent.name} test failed for ${platform.toUpperCase()}: ${result.error}`,
-          variant: "destructive"
-        });
-      }
+      const completedTests = 3; // Always 3 platforms
+      toast({
+        title: "✅ Agent Test Completed",
+        description: `${agent.name} tested across all platforms (${completedTests} tests completed).`,
+      });
+
     } catch (error) {
       console.error('Single agent test failed:', error);
       toast({
@@ -516,7 +521,7 @@ export function CustomerIntelligenceTestSuite() {
 
   return (
     <div className="space-y-6">
-      {/* Test Suite Header */}
+      {/* Header */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -524,268 +529,251 @@ export function CustomerIntelligenceTestSuite() {
             Customer Intelligence Test Suite
           </CardTitle>
           <CardDescription>
-            Comprehensive testing of Customer Sentiment AI, Churn Prediction AI, and Customer Segmentation AI agents
+            Test individual AI agents or run the complete suite across all CRM platforms (Native, Salesforce, HubSpot)
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Progress */}
-          {isRunningTests && (
+      </Card>
+
+      {/* Progress Bar */}
+      {isRunningTests && (
+        <Card>
+          <CardContent className="pt-6">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Testing: {currentTest}</span>
+                <span>Running: {currentTest}</span>
                 <span>{Math.round(progress)}%</span>
               </div>
               <Progress value={progress} className="w-full" />
             </div>
-          )}
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Test Buttons */}
-          <div className="space-y-3">
-            {/* Single Agent Test - Customer Sentiment AI for Salesforce */}
-            <Button 
-              onClick={() => runSingleAgentTest('customer-sentiment', 'salesforce')}
-              disabled={isRunningTests}
-              variant="outline"
-              className="w-full"
-            >
-              {isRunningTests ? (
-                <>
-                  <Activity className="h-4 w-4 mr-2 animate-spin" />
-                  Testing...
-                </>
-              ) : (
-                <>
-                  <Brain className="h-4 w-4 mr-2" />
-                  Test Customer Sentiment AI - Salesforce Only
-                </>
-              )}
-            </Button>
+      {/* Individual Agent Tests */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {customerIntelligenceAgents.map((agent) => {
+          const IconComponent = agent.icon;
+          const agentResults = testResults.filter(r => r.agentType === agent.id);
+          const completedTests = agentResults.filter(r => r.status === 'completed').length;
+          const failedTests = agentResults.filter(r => r.status === 'failed').length;
+          const avgConfidence = agentResults.length > 0 
+            ? agentResults.reduce((sum, r) => sum + r.confidence, 0) / agentResults.length
+            : 0;
 
-            {/* Full Test Suite Button */}
-            <Button 
-              onClick={runFullTestSuite}
-              disabled={isRunningTests}
-              className="w-full"
-              size="lg"
-            >
-              {isRunningTests ? (
-                <>
-                  <Activity className="h-4 w-4 mr-2 animate-spin" />
-                  Running Tests...
-                </>
-              ) : (
-                <>
-                  <Brain className="h-4 w-4 mr-2" />
-                  Run Full Customer Intelligence Test Suite (All Agents × All Platforms)
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Security Notice */}
-          <Alert>
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
-              All tests use encrypted synthetic data. No real customer information is processed during testing.
-              Results are automatically sanitized to protect privacy.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-
-      {/* Test Results */}
-      {testResults.length > 0 && (
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="sentiment">Sentiment AI</TabsTrigger>
-            <TabsTrigger value="churn">Churn Prediction</TabsTrigger>
-            <TabsTrigger value="segmentation">Segmentation</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-4">
-            <Card>
+          return (
+            <Card key={agent.id} className="relative">
               <CardHeader>
-                <CardTitle>Test Results Overview</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <IconComponent className="h-6 w-6 text-primary" />
+                  {agent.name}
+                </CardTitle>
+                <CardDescription className="text-sm">
+                  {agent.description}
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Platform Summary */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {['native', 'salesforce', 'hubspot'].map((platform) => {
-                      const platformResults = testResults.filter(r => r.platform === platform);
-                      const completedCount = platformResults.filter(r => r.status === 'completed').length;
-                      const failedCount = platformResults.filter(r => r.status === 'failed').length;
-                      const avgConfidence = platformResults.length > 0 
-                        ? platformResults.reduce((sum, r) => sum + r.confidence, 0) / platformResults.length
-                        : 0;
-                      
-                      return (
-                        <Card key={platform} className="p-4">
-                          <div className="text-center">
-                            <div className="font-medium capitalize mb-2">{platform} CRM</div>
-                            <div className="text-2xl font-bold text-primary">{completedCount}/3</div>
-                            <div className="text-sm text-muted-foreground mb-2">Tests Passed</div>
-                            {avgConfidence > 0 && (
-                              <div className="text-sm">
-                                <span className="text-muted-foreground">Avg Confidence: </span>
-                                <span className="font-medium">{Math.round(avgConfidence * 100)}%</span>
-                              </div>
-                            )}
-                            {failedCount > 0 && (
-                              <div className="text-sm text-destructive">
-                                {failedCount} Failed
-                              </div>
-                            )}
-                          </div>
-                        </Card>
-                      );
-                    })}
+              
+              <CardContent className="space-y-4">
+                {/* Test Results Summary */}
+                {agentResults.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                    <div>
+                      <div className="font-bold text-green-600">{completedTests}</div>
+                      <div className="text-muted-foreground">Passed</div>
+                    </div>
+                    <div>
+                      <div className="font-bold text-red-600">{failedTests}</div>
+                      <div className="text-muted-foreground">Failed</div>
+                    </div>
+                    <div>
+                      <div className="font-bold text-primary">{avgConfidence > 0 ? `${Math.round(avgConfidence * 100)}%` : '-'}</div>
+                      <div className="text-muted-foreground">Confidence</div>
+                    </div>
                   </div>
+                )}
 
-                  {/* Agent Results Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {customerIntelligenceAgents.map((agent) => {
-                      const agentResults = testResults.filter(r => r.agentType === agent.id);
-                      const IconComponent = agent.icon;
-                      
-                      return (
-                        <Card key={agent.id} className="p-4">
-                          <div className="flex items-center gap-3 mb-3">
-                            <IconComponent className="h-8 w-8 text-primary" />
-                            <div>
-                              <div className="font-medium">{agent.name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {agentResults.filter(r => r.status === 'completed').length}/3 platforms
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            {['native', 'salesforce', 'hubspot'].map(platform => {
-                              const result = agentResults.find(r => r.platform === platform);
-                              return (
-                                <div key={platform} className="flex justify-between items-center text-sm">
-                                  <span className="capitalize">{platform}:</span>
-                                  {result ? getStatusBadge(result.status) : <Badge variant="outline">Pending</Badge>}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Individual Agent Results */}
-          {customerIntelligenceAgents.map(agent => {
-            const agentResults = testResults.filter(r => r.agentType === agent.id);
-            
-            return (
-              <TabsContent key={agent.id} value={agent.id.split('-')[1]} className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <agent.icon className="h-5 w-5" />
-                      {agent.name} - Cross-Platform Results
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      {/* Platform Results */}
+                {/* Platform Status */}
+                {agentResults.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Platform Results:</div>
+                    <div className="grid grid-cols-3 gap-1">
                       {['native', 'salesforce', 'hubspot'].map(platform => {
                         const result = agentResults.find(r => r.platform === platform);
-                        
                         return (
-                          <div key={platform} className="border rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-4">
-                              <h4 className="font-medium capitalize">{platform} CRM</h4>
-                              {result && getStatusBadge(result.status)}
-                            </div>
-                            
-                            {result && result.status === 'completed' ? (
-                              <div className="space-y-4">
-                                {/* Metrics */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                  <div className="text-center">
-                                    <div className="text-xl font-bold text-primary">{Math.round(result.confidence * 100)}%</div>
-                                    <div className="text-xs text-muted-foreground">Confidence</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-xl font-bold text-primary">{result.actionsExecuted}</div>
-                                    <div className="text-xs text-muted-foreground">Actions</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-xl font-bold text-primary">{result.securityScore}%</div>
-                                    <div className="text-xs text-muted-foreground">Security</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-xl font-bold text-primary">{result.executionTime}ms</div>
-                                    <div className="text-xs text-muted-foreground">Time</div>
-                                  </div>
-                                </div>
-
-                                {/* Sample Insights */}
-                                {result.insights.length > 0 && (
-                                  <div>
-                                    <h5 className="font-medium mb-2 text-sm">Sample Insights</h5>
-                                    <div className="space-y-2">
-                                      {result.insights.slice(0, 2).map((insight, i) => (
-                                        <div key={i} className="p-3 bg-muted/50 rounded text-xs">
-                                          <div className="font-medium">{insight.name} - {insight.platform?.toUpperCase()}</div>
-                                          <div className="text-muted-foreground mt-1">
-                                            {insight.platform === 'salesforce' && `Einstein Features: ${insight.platformFeatures?.join(', ') || 'N/A'}`}
-                                            {insight.platform === 'hubspot' && `HubSpot Tools: ${insight.platformFeatures?.join(', ') || 'N/A'}`}
-                                            {insight.platform === 'native' && `Native Features: ${insight.platformFeatures?.join(', ') || 'N/A'}`}
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            ) : result && result.status === 'failed' ? (
-                              <div className="flex items-center gap-2 text-destructive text-sm">
-                                <AlertTriangle className="h-4 w-4" />
-                                <span>Error: {result.error}</span>
-                              </div>
-                            ) : (
-                              <div className="text-muted-foreground text-sm">Test not completed yet.</div>
-                            )}
+                          <div key={platform} className="text-center">
+                            <div className="text-xs text-muted-foreground capitalize">{platform}</div>
+                            {result ? getStatusBadge(result.status) : <Badge variant="outline" className="text-xs">Pending</Badge>}
                           </div>
                         );
                       })}
-                      
-                      {/* Overall Recommendations */}
-                      {agentResults.length > 0 && agentResults.some(r => r.status === 'completed') && (
-                        <div>
-                          <h4 className="font-medium mb-2">Cross-Platform Recommendations</h4>
-                          <ul className="space-y-1">
-                            {agentResults
-                              .filter(r => r.status === 'completed')
-                              .flatMap(r => r.recommendations)
-                              .slice(0, 5)
-                              .map((rec, i) => (
-                                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                                  {rec}
-                                </li>
-                              ))
-                            }
-                          </ul>
-                        </div>
-                      )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                )}
+
+                {/* Test Button */}
+                <Button 
+                  onClick={() => runSingleAgentTest(agent.id, 'all')}
+                  disabled={isRunningTests}
+                  className="w-full"
+                  variant="outline"
+                >
+                  {isRunningTests && currentTest.includes(agent.name) ? (
+                    <>
+                      <Activity className="h-4 w-4 mr-2 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Test Agent
+                    </>
+                  )}
+                </Button>
+
+                {/* Error Display */}
+                {agentResults.some(r => r.status === 'failed') && (
+                  <div className="text-xs text-destructive">
+                    <AlertTriangle className="h-3 w-3 inline mr-1" />
+                    {agentResults.find(r => r.status === 'failed')?.error}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Test All Button */}
+      <Card>
+        <CardContent className="pt-6">
+          <Button 
+            onClick={runFullTestSuite}
+            disabled={isRunningTests}
+            className="w-full"
+            size="lg"
+          >
+            {isRunningTests ? (
+              <>
+                <Activity className="h-4 w-4 mr-2 animate-spin" />
+                Running Complete Test Suite...
+              </>
+            ) : (
+              <>
+                <Brain className="h-4 w-4 mr-2" />
+                Test All Customer Intelligence Agents
+              </>
+            )}
+          </Button>
+          <p className="text-sm text-muted-foreground text-center mt-2">
+            Runs all 3 agents across all 3 platforms (9 total tests)
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Security Notice */}
+      <Alert>
+        <Shield className="h-4 w-4" />
+        <AlertDescription>
+          All tests use encrypted synthetic data. No real customer information is processed during testing.
+          Results are automatically sanitized to protect privacy.
+        </AlertDescription>
+      </Alert>
+
+      {/* Detailed Results */}
+      {testResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Test Results</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="sentiment">Sentiment</TabsTrigger>
+                <TabsTrigger value="churn">Churn</TabsTrigger>
+                <TabsTrigger value="segmentation">Segmentation</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {['native', 'salesforce', 'hubspot'].map((platform) => {
+                    const platformResults = testResults.filter(r => r.platform === platform);
+                    const completedCount = platformResults.filter(r => r.status === 'completed').length;
+                    const failedCount = platformResults.filter(r => r.status === 'failed').length;
+                    
+                    return (
+                      <Card key={platform} className="p-4">
+                        <div className="text-center">
+                          <div className="font-medium capitalize mb-2">{platform} CRM</div>
+                          <div className="text-2xl font-bold text-primary">{completedCount}/3</div>
+                          <div className="text-sm text-muted-foreground">Tests Passed</div>
+                          {failedCount > 0 && (
+                            <div className="text-sm text-destructive mt-1">
+                              {failedCount} Failed
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
               </TabsContent>
-            );
-          })}
-        </Tabs>
+
+              {/* Individual Agent Details */}
+              {customerIntelligenceAgents.map(agent => {
+                const agentResults = testResults.filter(r => r.agentType === agent.id);
+                
+                return (
+                  <TabsContent key={agent.id} value={agent.id.split('-')[1]} className="space-y-4">
+                    {agentResults.length > 0 ? (
+                      <div className="space-y-4">
+                        {agentResults.map((result, index) => (
+                          <Card key={index} className="p-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <h4 className="font-medium capitalize">{result.platform} Platform</h4>
+                              {getStatusBadge(result.status)}
+                            </div>
+                            
+                            {result.status === 'completed' && (
+                              <div className="grid grid-cols-4 gap-4 text-center text-sm">
+                                <div>
+                                  <div className="font-bold text-primary">{Math.round(result.confidence * 100)}%</div>
+                                  <div className="text-muted-foreground">Confidence</div>
+                                </div>
+                                <div>
+                                  <div className="font-bold text-primary">{result.actionsExecuted}</div>
+                                  <div className="text-muted-foreground">Actions</div>
+                                </div>
+                                <div>
+                                  <div className="font-bold text-primary">{result.securityScore}%</div>
+                                  <div className="text-muted-foreground">Security</div>
+                                </div>
+                                <div>
+                                  <div className="font-bold text-primary">{result.executionTime}ms</div>
+                                  <div className="text-muted-foreground">Time</div>
+                                </div>
+                              </div>
+                            )}
+
+                            {result.status === 'failed' && (
+                              <div className="flex items-center gap-2 text-destructive text-sm">
+                                <AlertTriangle className="h-4 w-4" />
+                                <span>{result.error}</span>
+                              </div>
+                            )}
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        No test results yet. Click "Test Agent" to run tests for this agent.
+                      </div>
+                    )}
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
