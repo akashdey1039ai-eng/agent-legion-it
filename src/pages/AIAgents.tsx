@@ -72,7 +72,14 @@ export default function AIAgents() {
   };
 
   const handleAgentClick = (agentId: string) => {
-    navigate(`/ai-agents/${agentId}`);
+    // For now, navigate to the main page with the agent tab and scroll to agents
+    // In a full implementation, this would go to a dedicated agent management page
+    if (agentId === 'lead-intelligence') {
+      navigate('/', { state: { openAgent: 'lead-intelligence' } });
+    } else {
+      // For other agents, show a coming soon message or navigate to main agents tab
+      navigate('/', { state: { activeTab: 'agents' } });
+    }
   };
 
   return (

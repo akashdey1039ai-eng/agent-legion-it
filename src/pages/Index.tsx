@@ -26,6 +26,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     // Clear previous test results on page load
@@ -33,6 +34,16 @@ const Index = () => {
     
     if (!loading && !user) {
       navigate('/auth');
+    }
+
+    // Handle navigation state for agent management
+    const state = window.history.state?.usr;
+    if (state?.activeTab) {
+      setActiveTab(state.activeTab);
+    }
+    if (state?.openAgent) {
+      setActiveTab('agents');
+      setActiveAgent(state.openAgent);
     }
   }, [user, loading, navigate]);
 
@@ -88,7 +99,7 @@ const Index = () => {
       {/* Main Navigation Tabs */}
       <section className="py-12">
         <div className="container mx-auto px-6">
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
