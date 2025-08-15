@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,13 +11,16 @@ interface AgentConfigurationSelectorProps {
   agentType: string;
   onSelectPlatform: (platform: 'salesforce' | 'hubspot') => void;
   onBack: () => void;
+  onQuickRun?: () => void;
 }
 
 export function AgentConfigurationSelector({ 
   agentType, 
   onSelectPlatform, 
-  onBack 
+  onBack,
+  onQuickRun
 }: AgentConfigurationSelectorProps) {
+  const navigate = useNavigate();
   const [realtimeSyncEnabled, setRealtimeSyncEnabled] = useState(false);
   const { toast } = useToast();
   
@@ -69,8 +73,10 @@ export function AgentConfigurationSelector({
         }
         break;
       case 'analysis':
-        // Quick launch analysis
-        window.location.href = '/?tab=agents&agent=pipeline-analysis';
+        // Quick launch analysis using callback instead of navigation
+        if (onQuickRun) {
+          onQuickRun();
+        }
         break;
     }
   };

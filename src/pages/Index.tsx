@@ -306,6 +306,10 @@ const Index = () => {
                     setShowAgentSelector(null);
                   }}
                   onBack={() => setShowAgentSelector(null)}
+                  onQuickRun={() => {
+                    setShowAgentSelector(null);
+                    setActiveAgent(showAgentSelector);
+                  }}
                 />
               ) : activeAgent ? (
                 <div className="space-y-6">
