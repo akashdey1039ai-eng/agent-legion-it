@@ -674,6 +674,7 @@ export type Database = {
           department: string | null
           email: string
           first_name: string
+          hubspot_id: string | null
           id: string
           last_name: string
           last_sync_at: string | null
@@ -700,6 +701,7 @@ export type Database = {
           department?: string | null
           email: string
           first_name: string
+          hubspot_id?: string | null
           id?: string
           last_name: string
           last_sync_at?: string | null
@@ -726,6 +728,7 @@ export type Database = {
           department?: string | null
           email?: string
           first_name?: string
+          hubspot_id?: string | null
           id?: string
           last_name?: string
           last_sync_at?: string | null
