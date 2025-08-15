@@ -13,6 +13,9 @@ import { AgentConfigurationSelector } from "@/components/AgentConfigurationSelec
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
 import { SandboxConnector } from "@/components/SandboxConnector";
+import { TestDataGenerator } from '@/components/TestDataGenerator';
+import { CustomerIntelligenceTestSuite } from '@/components/CustomerIntelligenceTestSuite';
+import { AISecurityMonitor } from '@/components/AISecurityMonitor';
 import heroCommand from "@/assets/hero-command.jpg";
 import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings, Smartphone, Monitor } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -352,7 +355,14 @@ const Index = () => {
                   {activeAgent === 'pipeline-analysis' && <AgentExecutionPanel agentType="pipeline-analysis" platform={(selectedPlatform as 'salesforce' | 'hubspot') || "salesforce"} onBack={() => setActiveAgent(null)} />}
                 </div>
               ) : (
-                <EnhancedAIAgentTester />
+                <div className="space-y-8">
+                  <EnhancedAIAgentTester />
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    <TestDataGenerator />
+                    <CustomerIntelligenceTestSuite />
+                  </div>
+                  <AISecurityMonitor />
+                </div>
               )}
             </TabsContent>
 
