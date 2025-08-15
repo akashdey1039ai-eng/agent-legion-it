@@ -335,9 +335,12 @@ export function AgentExecutionPanel() {
                 {executionResult.analyses && executionResult.analyses.length > 0 ? (
                   executionResult.analyses.map((analysis, index) => (
                     <div 
-                      key={analysis.opportunity_id}
+                      key={analysis.opportunity_id || analysis.Opportunity || `analysis-${index}`}
                       className="p-4 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => setSelectedAnalysis(analysis)}
+                      onClick={() => {
+                        console.log('Opportunity clicked:', analysis);
+                        setSelectedAnalysis(analysis);
+                      }}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
