@@ -110,7 +110,7 @@ const Index = () => {
       <section className="py-12">
         <div className="container mx-auto px-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Overview
@@ -118,6 +118,10 @@ const Index = () => {
               <TabsTrigger value="integration" className="flex items-center gap-2">
                 <Database className="h-4 w-4" />
                 CRM Integration
+              </TabsTrigger>
+              <TabsTrigger value="crm" className="flex items-center gap-2" onClick={() => navigate('/crm')}>
+                <Users className="h-4 w-4" />
+                Native CRM
               </TabsTrigger>
               <TabsTrigger value="agents" className="flex items-center gap-2">
                 <Bot className="h-4 w-4" />
