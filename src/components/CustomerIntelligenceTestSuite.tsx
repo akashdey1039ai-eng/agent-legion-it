@@ -328,12 +328,32 @@ export function CustomerIntelligenceTestSuite() {
           
           // Debug the data structure
           console.log('🔍 salesforceResult keys:', Object.keys(salesforceResult || {}));
-          console.log('🔍 rawSalesforceData:', salesforceResult.rawSalesforceData);
-          console.log('🔍 rawSalesforceData length:', salesforceResult.rawSalesforceData?.length);
+          console.log('🔍 analysis object:', salesforceResult.analysis);
+          console.log('🔍 analysis.analysis:', salesforceResult.analysis?.analysis);
+          
+          // Parse the AI analysis which comes as a JSON string inside analysis.analysis
+          let parsedAnalysis = [];
+          try {
+            if (salesforceResult.analysis?.analysis) {
+              // Extract JSON from the analysis string
+              const analysisText = salesforceResult.analysis.analysis;
+              const jsonMatch = analysisText.match(/```json\n(.*?)\n```/s);
+              if (jsonMatch) {
+                parsedAnalysis = JSON.parse(jsonMatch[1]);
+                console.log('🎯 Parsed analysis records:', parsedAnalysis.length);
+              } else {
+                console.log('⚠️ No JSON found in analysis, trying direct parse...');
+                parsedAnalysis = JSON.parse(analysisText);
+              }
+            }
+          } catch (parseError) {
+            console.error('❌ Failed to parse AI analysis:', parseError);
+            console.log('Raw analysis:', salesforceResult.analysis);
+          }
           
           testResult = {
             confidence: salesforceResult.confidence || 0.95,
-            insights: salesforceResult.insights || salesforceResult.analysis || [],
+            insights: parsedAnalysis || [],
             recommendations: salesforceResult.recommendations || [`Analyzed ${salesforceResult.recordsAnalyzed} real Salesforce records`, 'Real API integration successful'],
             actionsExecuted: salesforceResult.recordsAnalyzed || 0,
             securityScore: 98,
@@ -342,7 +362,8 @@ export function CustomerIntelligenceTestSuite() {
             timestamp: salesforceResult.timestamp,
             rawSalesforceData: salesforceResult.rawSalesforceData,
             salesforceAnalysis: salesforceResult.analysis,
-            salesforceRecordCount: salesforceResult.recordsAnalyzed
+            salesforceRecordCount: salesforceResult.recordsAnalyzed,
+            parsedAnalysis: parsedAnalysis
           };
         } catch (error) {
           console.error(`❌ Real Salesforce test failed for ${agent.id}:`, error);
@@ -387,8 +408,9 @@ export function CustomerIntelligenceTestSuite() {
         executionTime,
         securityScore: testResult.securityScore || 95,
         riskLevel: testResult.riskLevel || 'low',
-        summary: `${agent.name} completed successfully`,
+        summary: `Analyzed ${testResult.salesforceRecordCount || 0} records with ${platform} AI`,
         analysis: testResult.insights || [],
+        logs: [`Started ${agent.name} test on ${platform}`, `Fetched ${testResult.salesforceRecordCount || 0} records`, `AI analysis completed with ${(testResult.confidence * 100).toFixed(1)}% confidence`, `Execution completed in ${executionTime}ms`],
         rawResponse: testResult,
         salesforceData: testResult.rawSalesforceData,
         aiAnalysis: testResult.salesforceAnalysis,

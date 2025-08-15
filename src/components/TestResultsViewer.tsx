@@ -81,7 +81,12 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
   };
 
   const formatAnalysisResults = (analysis: any[]) => {
-    if (!analysis || !Array.isArray(analysis)) return null;
+    if (!analysis || !Array.isArray(analysis)) {
+      console.log('❌ Analysis not array:', typeof analysis, analysis);
+      return <p className="text-muted-foreground">Analysis data is not in expected format</p>;
+    }
+    
+    console.log('✅ Formatting analysis results:', analysis.length, 'items');
     
     return analysis.map((item, index) => (
       <Card key={index} className="mb-2">
