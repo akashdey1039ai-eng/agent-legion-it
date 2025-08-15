@@ -54,12 +54,12 @@ export function AgentConfigurationSelector({
   const handleSalesforceAction = (action: 'sandbox' | 'sync' | 'analysis') => {
     switch (action) {
       case 'sandbox':
-        // Navigate to main page and show Salesforce integration
-        onBack(); // Go back to agents list first
-        setTimeout(() => {
-          // Use navigate to switch to integrations tab and show Salesforce
-          navigate('/?tab=integrations&platform=salesforce');
-        }, 100);
+        // Open Salesforce Developer Sandbox in new tab
+        window.open('https://developer.salesforce.com/trailhead/en/content/learn/projects/quick-start-lightning-platform-app-builder/create-a-developer-org', '_blank');
+        toast({
+          title: "Opening Developer Sandbox",
+          description: "Salesforce Developer Environment opening in new tab",
+        });
         break;
       case 'sync':
         // Toggle real-time sync
