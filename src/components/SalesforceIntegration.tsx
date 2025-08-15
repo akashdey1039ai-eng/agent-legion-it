@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, Clock, RefreshCw, ExternalLink } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, RefreshCw, ExternalLink, Brain, Target, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -292,38 +292,97 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
               </CardTitle>
               <CardDescription>
                 Sync data from your Salesforce Developer Sandbox to enable AI analysis
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {syncOptions.map((option) => (
-                <Card key={option.key} className="p-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">{option.label}</h4>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {syncOptions.map((option) => (
+                  <Card key={option.key} className="p-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium">{option.label}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {option.description}
+                      </p>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSync(option.key)}
+                        disabled={isSyncing}
+                        className="w-full"
+                      >
+                        {isSyncing ? (
+                          <>
+                            <Clock className="h-3 w-3 mr-1" />
+                            Syncing...
+                          </>
+                        ) : (
+                          'Sync Now'
+                        )}
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Salesforce AI Agents */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Salesforce AI Agents
+              </CardTitle>
+              <CardDescription>
+                AI-powered agents that work with your Salesforce data
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card className="p-4 border border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-blue-600" />
+                      <h4 className="font-medium">Pipeline Analysis Agent</h4>
+                    </div>
                     <p className="text-sm text-muted-foreground">
-                      {option.description}
+                      AI-powered pipeline risk assessment and probability forecasting for your Salesforce opportunities
                     </p>
-                    <Button
-                      size="sm"
-                      onClick={() => handleSync(option.key)}
-                      disabled={isSyncing}
-                      className="w-full"
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <Badge variant="secondary" className="text-xs">Risk Assessment</Badge>
+                      <Badge variant="secondary" className="text-xs">Probability Forecasting</Badge>
+                      <Badge variant="secondary" className="text-xs">Deal Intelligence</Badge>
+                    </div>
+                    <Button 
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      onClick={() => window.location.href = '/?tab=agents&agent=pipeline-analysis'}
                     >
-                      {isSyncing ? (
-                        <>
-                          <Clock className="h-3 w-3 mr-1" />
-                          Syncing...
-                        </>
-                      ) : (
-                        'Sync Now'
-                      )}
+                      <Brain className="h-4 w-4 mr-2" />
+                      Launch Pipeline Agent
                     </Button>
                   </div>
                 </Card>
-              ))}
-            </div>
-          </CardContent>
-            </Card>
+
+                <Card className="p-4 border border-gray-200 bg-gray-50 dark:bg-gray-950 dark:border-gray-800 opacity-60">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-gray-600" />
+                      <h4 className="font-medium">Lead Scoring Agent</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Intelligent lead scoring and qualification based on Salesforce lead data
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <Badge variant="outline" className="text-xs">Lead Scoring</Badge>
+                      <Badge variant="outline" className="text-xs">Auto Qualification</Badge>
+                    </div>
+                    <Button variant="outline" className="w-full" disabled>
+                      Coming Soon
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
           </>
         )}
     </div>
