@@ -132,8 +132,9 @@ serve(async (req) => {
     }
 
     console.log(`✅ Analysis completed for ${agentType}`);
+    console.log(`📊 Returning data: ${salesforceData.length} records, analysis type: ${typeof analysisResult}`);
 
-    return new Response(JSON.stringify({
+    const response = {
       success: true,
       agentType,
       dataSource: 'salesforce_sandbox',
@@ -144,7 +145,11 @@ serve(async (req) => {
       insights: Array.isArray(analysisResult) ? analysisResult : [analysisResult],
       recommendations: [`Successfully analyzed ${salesforceData.length} real Salesforce records`, 'Real API integration working'],
       timestamp: new Date().toISOString()
-    }), {
+    };
+
+    console.log('🚀 Final response being sent:', JSON.stringify(response, null, 2));
+
+    return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
@@ -163,12 +168,19 @@ serve(async (req) => {
 async function fetchSalesforceContacts(tokenData: any): Promise<SalesforceContact[]> {
   console.log('📋 Fetching contacts from Salesforce...');
   
-  const response = await fetch(`${tokenData.instance_url}/services/data/v58.0/query/?q=SELECT Id, FirstName, LastName, Email, Phone, Title, Department, LeadSource, Account.Name, Account.Industry, Account.AnnualRevenue, CreatedDate, LastModifiedDate FROM Contact WHERE Email != null LIMIT 20`, {
+  const query = `SELECT Id, FirstName, LastName, Email, Phone, Title, Department, LeadSource, Account.Name, Account.Industry, Account.AnnualRevenue, CreatedDate, LastModifiedDate FROM Contact WHERE Email != null LIMIT 50`;
+  const url = `${tokenData.instance_url}/services/data/v58.0/query/?q=${encodeURIComponent(query)}`;
+  
+  console.log('🔗 Salesforce query URL:', url);
+  
+  const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${tokenData.access_token}`,
       'Content-Type': 'application/json'
     }
   });
+
+  console.log('📡 Salesforce API response status:', response.status);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -177,9 +189,10 @@ async function fetchSalesforceContacts(tokenData: any): Promise<SalesforceContac
   }
 
   const data = await response.json();
-  console.log(`✅ Fetched ${data.records.length} contacts from Salesforce`);
+  console.log(`✅ Fetched ${data.records?.length || 0} contacts from Salesforce`);
+  console.log('📊 Sample contact data:', data.records?.[0]);
   
-  return data.records;
+  return data.records || [];
 }
 
 async function fetchSalesforceOpportunities(tokenData: any): Promise<SalesforceOpportunity[]> {

@@ -38,6 +38,7 @@ interface TestResult {
   rawResponse?: any;
   salesforceData?: any;
   aiAnalysis?: any;
+  recordCount?: number;
 }
 
 interface TestResultsViewerProps {

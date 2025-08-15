@@ -32,6 +32,7 @@ interface AgentTestResult {
   results?: any;
   salesforceData?: any;
   aiAnalysis?: any;
+  recordCount?: number;
 }
 
 export function CustomerIntelligenceTestSuite() {
@@ -324,6 +325,12 @@ export function CustomerIntelligenceTestSuite() {
           }
 
           console.log(`✅ Real Salesforce AI analysis completed:`, salesforceResult);
+          
+          // Debug the data structure
+          console.log('🔍 salesforceResult keys:', Object.keys(salesforceResult || {}));
+          console.log('🔍 rawSalesforceData:', salesforceResult.rawSalesforceData);
+          console.log('🔍 rawSalesforceData length:', salesforceResult.rawSalesforceData?.length);
+          
           testResult = {
             confidence: salesforceResult.confidence || 0.95,
             insights: salesforceResult.insights || salesforceResult.analysis || [],
@@ -334,7 +341,8 @@ export function CustomerIntelligenceTestSuite() {
             dataSource: 'salesforce_sandbox',
             timestamp: salesforceResult.timestamp,
             rawSalesforceData: salesforceResult.rawSalesforceData,
-            salesforceAnalysis: salesforceResult.analysis
+            salesforceAnalysis: salesforceResult.analysis,
+            salesforceRecordCount: salesforceResult.recordsAnalyzed
           };
         } catch (error) {
           console.error(`❌ Real Salesforce test failed for ${agent.id}:`, error);
@@ -366,12 +374,12 @@ export function CustomerIntelligenceTestSuite() {
           completed_at: new Date().toISOString()
         });
 
-      return {
+      const finalResult = {
         agentId: agent.id,
         agentName: agent.name,
         agentType: agent.id,
         platform,
-        status: 'completed',
+        status: 'completed' as const,
         confidence: testResult.confidence,
         insights: testResult.insights,
         recommendations: testResult.recommendations,
@@ -383,8 +391,19 @@ export function CustomerIntelligenceTestSuite() {
         analysis: testResult.insights || [],
         rawResponse: testResult,
         salesforceData: testResult.rawSalesforceData,
-        aiAnalysis: testResult.salesforceAnalysis
+        aiAnalysis: testResult.salesforceAnalysis,
+        recordCount: testResult.salesforceRecordCount
       };
+
+      console.log('🎯 Final test result being returned:', {
+        platform,
+        agentId: agent.id,
+        resultKeys: Object.keys(finalResult),
+        salesforceDataLength: finalResult.salesforceData?.length,
+        rawResponseKeys: Object.keys(finalResult.rawResponse || {})
+      });
+
+      return finalResult;
 
     } catch (error) {
       console.error(`❌ Test failed for ${agent.name} on ${platform}:`, error);
