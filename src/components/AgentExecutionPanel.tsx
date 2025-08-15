@@ -23,17 +23,25 @@ import {
 import { AgentConfiguration } from './AgentConfiguration';
 
 interface AnalysisResult {
-  opportunity_id: string;
-  opportunity_name: string;
-  current_amount: number;
-  current_stage: string;
-  current_probability: number;
-  risk_level: 'low' | 'medium' | 'high' | 'critical';
-  confidence_score: number;
-  recommended_probability: number;
-  insights: string[];
-  next_actions: string[];
-  reasoning: string;
+  opportunity_id?: string;
+  opportunity_name?: string;
+  current_amount?: number;
+  current_stage?: string;
+  current_probability?: number;
+  risk_level?: 'low' | 'medium' | 'high' | 'critical';
+  confidence_score?: number;
+  recommended_probability?: number;
+  insights?: string[];
+  next_actions?: string[];
+  reasoning?: string;
+  // Add support for the actual API response format
+  Opportunity?: string;
+  'Risk Level'?: string;
+  'Confidence Score'?: number;
+  'Recommended Probability'?: number;
+  'Key Insights'?: string[];
+  'Next Actions'?: string[];
+  Reasoning?: string;
 }
 
 interface ExecutionResult {
@@ -324,39 +332,45 @@ export function AgentExecutionPanel() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {executionResult.analyses.map((analysis, index) => (
-                  <div 
-                    key={analysis.opportunity_id}
-                    className="p-4 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => setSelectedAnalysis(analysis)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Badge className={getRiskColor(analysis.risk_level)}>
-                          {getRiskIcon(analysis.risk_level)}
-                          {analysis.risk_level?.toUpperCase() || 'UNKNOWN'}
-                        </Badge>
-                        <div>
-                          <h4 className="font-medium">{analysis.opportunity_name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            ${analysis.current_amount.toLocaleString()} • {analysis.current_stage}
+                {executionResult.analyses && executionResult.analyses.length > 0 ? (
+                  executionResult.analyses.map((analysis, index) => (
+                    <div 
+                      key={analysis.opportunity_id}
+                      className="p-4 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => setSelectedAnalysis(analysis)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Badge className={getRiskColor(analysis.risk_level || analysis['Risk Level'] || 'unknown')}>
+                            {getRiskIcon(analysis.risk_level || analysis['Risk Level'] || 'unknown')}
+                            {(analysis.risk_level || analysis['Risk Level'] || 'UNKNOWN')?.toString().toUpperCase()}
+                          </Badge>
+                          <div>
+                            <h4 className="font-medium">{analysis.opportunity_name || analysis.Opportunity || 'Unknown Opportunity'}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              ${(analysis.current_amount || 0).toLocaleString()} • {analysis.current_stage || 'Unknown Stage'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">
+                              {analysis.current_probability || 0}% → {analysis.recommended_probability || analysis['Recommended Probability'] || 0}%
+                            </span>
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {analysis.confidence_score || analysis['Confidence Score'] || 0}% confidence
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">
-                            {analysis.current_probability}% → {analysis.recommended_probability}%
-                          </span>
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {analysis.confidence_score}% confidence
-                        </p>
-                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No analysis data available
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -368,7 +382,7 @@ export function AgentExecutionPanel() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5" />
-                    {selectedAnalysis.opportunity_name}
+                    {selectedAnalysis.opportunity_name || selectedAnalysis.Opportunity || 'Unknown Opportunity'}
                   </CardTitle>
                   <Button
                     variant="outline"
@@ -384,31 +398,35 @@ export function AgentExecutionPanel() {
                   <div>
                     <h5 className="font-medium mb-3">Key Insights</h5>
                     <ul className="space-y-2">
-                      {selectedAnalysis.insights.map((insight, idx) => (
+                      {(selectedAnalysis.insights || selectedAnalysis['Key Insights'] || []).length > 0 ? (selectedAnalysis.insights || selectedAnalysis['Key Insights'] || []).map((insight, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm">
                           <div className="h-1.5 w-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
                           {insight}
                         </li>
-                      ))}
+                      )) : (
+                        <li className="text-sm text-muted-foreground">No insights available</li>
+                      )}
                     </ul>
                   </div>
                   
                   <div>
                     <h5 className="font-medium mb-3">Recommended Actions</h5>
                     <ul className="space-y-2">
-                      {selectedAnalysis.next_actions.map((action, idx) => (
+                      {(selectedAnalysis.next_actions || selectedAnalysis['Next Actions'] || []).length > 0 ? (selectedAnalysis.next_actions || selectedAnalysis['Next Actions'] || []).map((action, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm">
                           <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                           {action}
                         </li>
-                      ))}
+                      )) : (
+                        <li className="text-sm text-muted-foreground">No actions available</li>
+                      )}
                     </ul>
                   </div>
                 </div>
                 
                 <div className="mt-6 p-4 bg-muted/50 rounded-lg">
                   <h5 className="font-medium mb-2">AI Reasoning</h5>
-                  <p className="text-sm text-muted-foreground">{selectedAnalysis.reasoning}</p>
+                  <p className="text-sm text-muted-foreground">{selectedAnalysis.reasoning || selectedAnalysis.Reasoning || 'No reasoning provided'}</p>
                 </div>
               </CardContent>
             </Card>
