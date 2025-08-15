@@ -305,19 +305,19 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
                       </ScrollArea>
                     </TabsContent>
                     
-                    <TabsContent value="raw" className="mt-4">
-                      <ScrollArea className="h-96 w-full rounded-md border p-4">
-                        <div className="space-y-2">
-                          <h4 className="font-medium flex items-center gap-2">
-                            <Code className="h-4 w-4" />
-                            Raw Response Data
-                          </h4>
-                          <pre className="bg-gray-50 p-3 rounded-md text-xs overflow-auto">
-                            {JSON.stringify(result.rawResponse || result.results || {}, null, 2)}
-                          </pre>
-                        </div>
-                      </ScrollArea>
-                    </TabsContent>
+                     <TabsContent value="raw" className="mt-4">
+                       <ScrollArea className="h-96 w-full rounded-md border p-4">
+                         <div className="space-y-2">
+                           <h4 className="font-medium flex items-center gap-2">
+                             <Code className="h-4 w-4" />
+                             Raw Response Data
+                           </h4>
+                           <pre className="bg-gray-50 p-3 rounded-md text-xs overflow-auto">
+                             {JSON.stringify(result.rawResponse || result, null, 2)}
+                           </pre>
+                         </div>
+                       </ScrollArea>
+                     </TabsContent>
                   </Tabs>
                 </CardContent>
               </CollapsibleContent>
