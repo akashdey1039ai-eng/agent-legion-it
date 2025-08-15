@@ -273,9 +273,25 @@ export function AgentExecutionPanel({ agentType, platform, onBack }: AgentExecut
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">{getAgentTitle()}</h2>
-          <p className="text-muted-foreground">{getAgentDescription()}</p>
+        <div className="flex items-center gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-3xl font-bold tracking-tight">{getAgentTitle()}</h2>
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                platform === 'salesforce' 
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                  : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+              }`}>
+                <div className={`w-3 h-3 rounded-full ${
+                  platform === 'salesforce' ? 'bg-blue-600' : 'bg-orange-500'
+                }`} />
+                {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'}
+              </div>
+            </div>
+            <p className="text-muted-foreground">
+              {getAgentDescription()} for {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} CRM
+            </p>
+          </div>
         </div>
         {onBack && (
           <Button variant="outline" onClick={onBack}>
@@ -285,14 +301,25 @@ export function AgentExecutionPanel({ agentType, platform, onBack }: AgentExecut
       </div>
 
       {/* Execution Controls */}
-      <Card>
+      <Card className={`${
+        platform === 'salesforce' 
+          ? 'border-blue-200 bg-blue-50/30 dark:bg-blue-950/30 dark:border-blue-800' 
+          : 'border-orange-200 bg-orange-50/30 dark:bg-orange-950/30 dark:border-orange-800'
+      }`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
             Agent Execution
+            <Badge variant="outline" className={`ml-auto ${
+              platform === 'salesforce' 
+                ? 'border-blue-400 text-blue-700 dark:text-blue-300' 
+                : 'border-orange-400 text-orange-700 dark:text-orange-300'
+            }`}>
+              {platform === 'salesforce' ? 'Salesforce Data' : 'HubSpot Data'}
+            </Badge>
           </CardTitle>
           <CardDescription>
-            Run the {getAgentTitle()} to analyze your {platform} data
+            Run the {getAgentTitle()} to analyze your {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} pipeline data
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -300,17 +327,21 @@ export function AgentExecutionPanel({ agentType, platform, onBack }: AgentExecut
             <Button 
               onClick={executeAgent} 
               disabled={isRunning}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 ${
+                platform === 'salesforce' 
+                  ? 'bg-blue-600 hover:bg-blue-700' 
+                  : 'bg-orange-500 hover:bg-orange-600'
+              }`}
             >
               {isRunning ? (
                 <>
                   <RefreshCw className="h-4 w-4 animate-spin" />
-                  Running...
+                  Analyzing {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} Data...
                 </>
               ) : (
                 <>
                   <Play className="h-4 w-4" />
-                  Execute Agent
+                  Analyze {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} Pipeline
                 </>
               )}
             </Button>
@@ -396,9 +427,12 @@ export function AgentExecutionPanel({ agentType, platform, onBack }: AgentExecut
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
             Execution History
+            <Badge variant="outline" className="ml-auto">
+              {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} Platform
+            </Badge>
           </CardTitle>
           <CardDescription>
-            Recent executions of {getAgentTitle()}
+            Recent {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} pipeline analysis executions
           </CardDescription>
         </CardHeader>
         <CardContent>
