@@ -69,7 +69,6 @@ export function AgentExecutionPanel() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisResult | null>(null);
-  const [showConfig, setShowConfig] = useState<'salesforce' | 'hubspot' | null>(null);
   const { toast } = useToast();
 
   const executeAgent = async () => {
@@ -122,72 +121,8 @@ export function AgentExecutionPanel() {
     }
   };
 
-  if (showConfig) {
-    return (
-      <AgentConfiguration 
-        platform={showConfig}
-        agentType="pipeline-analysis"
-        onClose={() => setShowConfig(null)}
-      />
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Configuration Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Agent Configuration
-          </CardTitle>
-          <CardDescription>
-            Configure the Pipeline Analysis Agent for your CRM platforms
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Configure Data Source</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                The Pipeline Analysis Agent requires Salesforce opportunity data to perform analysis
-              </p>
-            </div>
-            
-            <Card className="border border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                    SF
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Configure for Salesforce</h4>
-                    <p className="text-sm text-muted-foreground">Connect and sync Salesforce opportunities for AI analysis</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setShowConfig('salesforce')}
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Setup Salesforce Integration
-                  </Button>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">
-                    Connect → Sync Opportunities → Run Analysis
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="text-center text-sm text-muted-foreground">
-              <p>More CRM integrations coming soon (HubSpot, Pipedrive)</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Execution Controls */}
       <Card>
         <CardHeader>

@@ -8,6 +8,7 @@ import HubSpotIntegration from "@/components/HubSpotIntegration";
 import { AgentConfiguration } from "@/components/AgentConfiguration";
 import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
 import { AgentExecutionPanel } from "@/components/AgentExecutionPanel";
+import { AgentConfigurationSelector } from "@/components/AgentConfigurationSelector";
 
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
@@ -31,6 +32,7 @@ const Index = () => {
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [showAgentConfig, setShowAgentConfig] = useState<{platform: 'salesforce' | 'hubspot'; agentType: string} | null>(null);
+  const [showAgentSelector, setShowAgentSelector] = useState<string | null>(null);
 
   useEffect(() => {
     // Clear previous test results on page load
@@ -296,6 +298,15 @@ const Index = () => {
                   agentType={showAgentConfig.agentType}
                   onClose={() => setShowAgentConfig(null)}
                 />
+              ) : showAgentSelector ? (
+                <AgentConfigurationSelector
+                  agentType={showAgentSelector}
+                  onSelectPlatform={(platform) => {
+                    setShowAgentConfig({ platform, agentType: showAgentSelector });
+                    setShowAgentSelector(null);
+                  }}
+                  onBack={() => setShowAgentSelector(null)}
+                />
               ) : activeAgent ? (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -415,7 +426,7 @@ const Index = () => {
                         </div>
                         <Button 
                           className="w-full"
-                          onClick={() => setActiveAgent('lead-intelligence')}
+                          onClick={() => setShowAgentSelector('lead-intelligence')}
                         >
                           <Brain className="h-4 w-4 mr-2" />
                           Manage Agent
@@ -456,7 +467,7 @@ const Index = () => {
                         </div>
                         <Button 
                           className="w-full"
-                          onClick={() => setActiveAgent('pipeline-analysis')}
+                          onClick={() => setShowAgentSelector('pipeline-analysis')}
                         >
                           <TrendingUp className="h-4 w-4 mr-2" />
                           Manage Agent
