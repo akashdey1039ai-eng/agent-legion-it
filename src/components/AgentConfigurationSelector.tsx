@@ -31,8 +31,6 @@ export function AgentConfigurationSelector({
   });
   const getAgentTitle = () => {
     switch (agentType) {
-      case 'pipeline-analysis':
-        return 'Pipeline Analysis Agent';
       case 'lead-intelligence':
         return 'Lead Intelligence Agent';
       default:
@@ -42,8 +40,6 @@ export function AgentConfigurationSelector({
 
   const getAgentDescription = () => {
     switch (agentType) {
-      case 'pipeline-analysis':
-        return 'AI-powered pipeline risk assessment and probability forecasting';
       case 'lead-intelligence':
         return 'Intelligent lead scoring and qualification';
       default:

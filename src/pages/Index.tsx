@@ -7,7 +7,7 @@ import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import HubSpotIntegration from "@/components/HubSpotIntegration";
 import { AgentConfiguration } from "@/components/AgentConfiguration";
 import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
-import { AgentExecutionPanel } from "@/components/AgentExecutionPanel";
+
 import { AgentConfigurationSelector } from "@/components/AgentConfigurationSelector";
 
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
@@ -317,13 +317,11 @@ const Index = () => {
                     <div>
                       <h2 className="text-3xl font-bold tracking-tight">
                         {activeAgent === 'lead-intelligence' && 'Lead Intelligence Agent'}
-                        {activeAgent === 'pipeline-analysis' && 'Pipeline Analysis Agent'}
-                        {activeAgent && !activeAgent.includes('lead-intelligence') && !activeAgent.includes('pipeline-analysis') && 'AI Agent'}
+                        {activeAgent && !activeAgent.includes('lead-intelligence') && 'AI Agent'}
                       </h2>
                       <p className="text-muted-foreground">
                         {activeAgent === 'lead-intelligence' && 'Analyze and score leads using AI'}
-                        {activeAgent === 'pipeline-analysis' && 'Analyze deal risks and probability forecasts'}
-                        {activeAgent && !activeAgent.includes('lead-intelligence') && !activeAgent.includes('pipeline-analysis') && 'Manage your AI agent'}
+                        {activeAgent && !activeAgent.includes('lead-intelligence') && 'Manage your AI agent'}
                       </p>
                     </div>
                     <Button 
@@ -336,9 +334,6 @@ const Index = () => {
                   </div>
                   
                   {activeAgent === 'lead-intelligence' && <LeadIntelligenceAgent />}
-                  {activeAgent === 'pipeline-analysis' && (
-                    <AgentExecutionPanel />
-                  )}
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -438,46 +433,6 @@ const Index = () => {
                       </div>
                     </div>
 
-                    {/* Pipeline Analysis Agent */}
-                    <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <TrendingUp className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Pipeline Analysis Agent</h3>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Active
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Analyzes deal risks and adjusts probability forecasts
-                      </p>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium mb-2">Capabilities</p>
-                          <div className="flex flex-wrap gap-1">
-                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Risk Analysis</span>
-                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Probability Updates</span>
-                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">Review Scheduling</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span><strong>Last Run:</strong> 1 hour ago</span>
-                          <span><strong>Success:</strong> 91%</span>
-                        </div>
-                        <Button 
-                          className="w-full"
-                          onClick={() => setShowAgentSelector('pipeline-analysis')}
-                        >
-                          <TrendingUp className="h-4 w-4 mr-2" />
-                          Manage Agent
-                        </Button>
-                      </div>
-                    </div>
 
                     {/* Smart Follow-up Agent */}
                     <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300 opacity-75">

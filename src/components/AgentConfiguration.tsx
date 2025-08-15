@@ -142,48 +142,6 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
       customPrompt: `Analyze lead data and assign scores based on engagement, company size, and buying signals. Focus on identifying high-value prospects.`
     },
     {
-      name: 'Pipeline Analysis Agent',
-      type: 'pipeline-analysis',
-      status: 'draft',
-      platform,
-      requiresApproval: true,
-      confidenceThreshold: 0.80,
-      maxActionsPerDay: 50,
-      syncFrequency: 'daily',
-      automationRules: {
-        leadScoring: false,
-        autoAssignment: false,
-        followUpTasks: true,
-        duplicateDetection: false,
-        dataEnrichment: true,
-        opportunityStageUpdates: true,
-        emailNotifications: true,
-        activityLogging: true
-      },
-      salesforceConfig: platform === 'salesforce' ? {
-        objects: ['Opportunity', 'Account', 'Contact'],
-        fields: ['Amount', 'StageName', 'Probability', 'CloseDate'],
-        customFilters: { 'Amount__gte': 10000 },
-        triggerConditions: ['Stage Changed', 'Amount Updated', 'Close Date Modified'],
-        bulkOperations: false,
-        sandboxMode: true,
-        apiVersion: '58.0'
-      } : undefined,
-      notifications: {
-        email: true,
-        inApp: true,
-        webhook: '',
-        slackWebhook: ''
-      },
-      fieldMappings: {},
-      schedule: {
-        timezone: 'America/New_York',
-        workingHours: { start: '08:00', end: '18:00' },
-        weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-      },
-      customPrompt: `Analyze deal progression, identify risks, and update probability forecasts. Alert on deals requiring immediate attention.`
-    },
-    {
       name: 'Data Sync Agent',
       type: 'data-sync',
       status: 'draft',

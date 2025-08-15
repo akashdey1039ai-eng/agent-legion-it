@@ -16,16 +16,6 @@ const agents = [
     successRate: "94%"
   },
   {
-    id: "pipeline-analysis",
-    title: "Pipeline Analysis Agent", 
-    description: "Analyzes deal risks and adjusts probability forecasts",
-    status: "active",
-    icon: TrendingUp,
-    capabilities: ["Risk Analysis", "Probability Updates", "Review Scheduling"],
-    lastRun: "1 hour ago", 
-    successRate: "91%"
-  },
-  {
     id: "follow-up",
     title: "Smart Follow-up Agent",
     description: "Generates personalized email sequences based on lead behavior",
@@ -68,9 +58,6 @@ export default function AIAgents() {
     if (agentId === 'lead-intelligence') {
       console.log('Navigating to lead intelligence agent');
       navigate('/', { state: { openAgent: 'lead-intelligence' } });
-    } else if (agentId === 'pipeline-analysis') {
-      console.log('Navigating to pipeline analysis agent');
-      navigate('/', { state: { activeTab: 'agents', openAgent: 'pipeline-analysis' } });
     } else {
       console.log('Navigating to main agents tab');
       // For other agents, show a coming soon message or navigate to main agents tab
