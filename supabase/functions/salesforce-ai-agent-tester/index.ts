@@ -56,7 +56,7 @@ serve(async (req) => {
 
   try {
     const { agentType, userId } = await req.json();
-    console.log(`🚀 Starting real Salesforce AI test for ${agentType}`);
+    console.log(`🔍 Looking for Salesforce tokens for user: ${userId}`);
 
     // Get user's most recent Salesforce token
     const { data: tokenData, error: tokenError } = await supabase
@@ -66,8 +66,22 @@ serve(async (req) => {
       .order('created_at', { ascending: false })
       .limit(1);
 
-    if (tokenError || !tokenData || tokenData.length === 0) {
-      console.error('❌ No Salesforce token found:', tokenError);
+    console.log(`🔍 Token query result:`, { tokenData, tokenError, count: tokenData?.length });
+
+    if (tokenError) {
+      console.error('❌ Token query error:', tokenError);
+      return new Response(JSON.stringify({
+        error: 'Database error retrieving Salesforce token',
+        details: tokenError.message,
+        requiresAuth: true
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (!tokenData || tokenData.length === 0) {
+      console.error('❌ No Salesforce tokens found for user:', userId);
       return new Response(JSON.stringify({
         error: 'No Salesforce connection found. Please connect to Salesforce first.',
         requiresAuth: true

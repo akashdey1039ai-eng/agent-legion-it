@@ -299,14 +299,17 @@ export function CustomerIntelligenceTestSuite() {
       // For Salesforce platform, use real API instead of dummy data
       let testResult;
       if (platform === 'salesforce') {
-        console.log(`🔄 Running real Salesforce AI test for ${agent.id}`);
+        console.log(`🔄 Running real Salesforce AI test for ${agent.id} with user ID:`, user.id);
         try {
+          console.log('📞 Invoking Salesforce AI agent tester...');
           const { data: salesforceResult, error: sfError } = await supabase.functions.invoke('salesforce-ai-agent-tester', {
             body: { 
               agentType: agent.id,
               userId: user.id
             }
           });
+
+          console.log('📥 Salesforce function response:', { salesforceResult, sfError });
 
           if (sfError) {
             console.error(`❌ Salesforce AI test error:`, sfError);

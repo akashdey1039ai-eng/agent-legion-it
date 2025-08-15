@@ -312,8 +312,13 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
                          <div className="space-y-4">
                            <h4 className="font-medium flex items-center gap-2">
                              <Code className="h-4 w-4" />
-                             Raw Response Data
+                             Raw Response Data {result.platform && `(${result.platform})`}
                            </h4>
+                           
+                           {/* Debug Info */}
+                           <div className="text-xs text-gray-500 bg-yellow-50 p-2 rounded">
+                             Debug: Platform={result.platform}, Has salesforceData={!!result.salesforceData}, Has rawResponse={!!result.rawResponse}
+                           </div>
                            
                            {/* Salesforce Data Section */}
                            {result.platform === 'salesforce' && result.salesforceData && (
