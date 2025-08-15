@@ -285,10 +285,13 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
     console.log(`Upserting ${transformedRecords.length} records to ${mapping.table}`)
     console.log('Sample record:', JSON.stringify(transformedRecords[0], null, 2))
     
+    // For contacts, we need to handle both salesforce_id and email conflicts
+    const conflictColumns = objectType === 'contacts' ? 'salesforce_id,email' : 'salesforce_id'
+    
     const { error } = await supabase
       .from(mapping.table)
       .upsert(transformedRecords, { 
-        onConflict: 'salesforce_id',
+        onConflict: conflictColumns,
         ignoreDuplicates: false 
       })
 
