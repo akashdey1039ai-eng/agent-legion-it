@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Brain, Target, Database, Loader2, CheckCircle, AlertTriangle, Zap, Settings, Activity } from 'lucide-react';
+import { Brain, Target, Database, Loader2, CheckCircle, AlertTriangle, Zap, Settings, Activity, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -269,6 +269,374 @@ export function EnhancedAIAgentTester() {
             <Database className="h-6 w-6" />
             <span>Clear Results</span>
           </Button>
+        </div>
+
+        {/* Additional AI Agents Showcase */}
+        <div className="space-y-6">
+          <h4 className="font-semibold text-foreground text-lg">🚀 Complete AI Agent Intelligence Suite</h4>
+          
+          {/* Currently Available Agents */}
+          <div>
+            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              Currently Available Agents
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Brain className="h-6 w-6 text-primary" />
+                    <div>
+                      <CardTitle className="text-base">Enhanced Lead Intelligence</CardTitle>
+                      <CardDescription className="text-sm">Active & Ready</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• AI-powered lead scoring and qualification</p>
+                    <p>• Autonomous lead prioritization</p>
+                    <p>• Intelligent next action recommendations</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Target className="h-6 w-6 text-accent" />
+                    <div>
+                      <CardTitle className="text-base">Enhanced Pipeline Analysis</CardTitle>
+                      <CardDescription className="text-sm">Active & Ready</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• Advanced pipeline forecasting</p>
+                    <p>• Deal risk assessment</p>
+                    <p>• Revenue prediction algorithms</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Coming Soon - Customer Intelligence */}
+          <div>
+            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
+              <Zap className="h-4 w-4 text-yellow-500" />
+              Customer Intelligence Agents (Coming Soon)
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-success/5 to-success/10 border-success/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-6 w-6 text-success" />
+                    <div>
+                      <CardTitle className="text-base">Customer Sentiment AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Email sentiment analysis</p>
+                    <p>• Customer satisfaction scoring</p>
+                    <p>• Communication tone detection</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-warning/5 to-warning/10 border-warning/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-6 w-6 text-warning" />
+                    <div>
+                      <CardTitle className="text-base">Churn Prediction AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Churn risk identification</p>
+                    <p>• Retention strategy recommendations</p>
+                    <p>• Customer health monitoring</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-6 w-6 text-blue-500" />
+                    <div>
+                      <CardTitle className="text-base">Customer Segmentation AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Behavioral segmentation</p>
+                    <p>• Predictive customer groups</p>
+                    <p>• Personalization insights</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Coming Soon - Sales Performance */}
+          <div>
+            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
+              <Settings className="h-4 w-4 text-purple-500" />
+              Sales Performance Agents (Coming Soon)
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Settings className="h-6 w-6 text-purple-500" />
+                    <div>
+                      <CardTitle className="text-base">Sales Coaching AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Performance analysis</p>
+                    <p>• Coaching recommendations</p>
+                    <p>• Skill gap identification</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-orange-500/5 to-orange-500/10 border-orange-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-6 w-6 text-orange-500" />
+                    <div>
+                      <CardTitle className="text-base">Meeting Intelligence AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Call transcription & summary</p>
+                    <p>• Action item extraction</p>
+                    <p>• Follow-up recommendations</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-teal-500/5 to-teal-500/10 border-teal-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Zap className="h-6 w-6 text-teal-500" />
+                    <div>
+                      <CardTitle className="text-base">Opportunity Scoring AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Close probability scoring</p>
+                    <p>• Optimal timing predictions</p>
+                    <p>• Deal progression insights</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Coming Soon - Revenue Intelligence */}
+          <div>
+            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
+              <Database className="h-4 w-4 text-emerald-500" />
+              Revenue Intelligence Agents (Coming Soon)
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Database className="h-6 w-6 text-emerald-500" />
+                    <div>
+                      <CardTitle className="text-base">Product Recommendation AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Cross-sell opportunities</p>
+                    <p>• Upsell recommendations</p>
+                    <p>• Bundle optimization</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-indigo-500/5 to-indigo-500/10 border-indigo-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Target className="h-6 w-6 text-indigo-500" />
+                    <div>
+                      <CardTitle className="text-base">Price Optimization AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Dynamic pricing strategies</p>
+                    <p>• Market-based adjustments</p>
+                    <p>• Margin optimization</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-6 w-6 text-red-500" />
+                    <div>
+                      <CardTitle className="text-base">Competitive Intelligence AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Competitor tracking</p>
+                    <p>• Win/loss analysis</p>
+                    <p>• Battle card generation</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Coming Soon - Communication Intelligence */}
+          <div>
+            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
+              <Brain className="h-4 w-4 text-pink-500" />
+              Communication Intelligence Agents (Coming Soon)
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-pink-500/5 to-pink-500/10 border-pink-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Brain className="h-6 w-6 text-pink-500" />
+                    <div>
+                      <CardTitle className="text-base">Email Intelligence AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Auto email generation</p>
+                    <p>• Response optimization</p>
+                    <p>• Engagement tracking</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-cyan-500/5 to-cyan-500/10 border-cyan-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-6 w-6 text-cyan-500" />
+                    <div>
+                      <CardTitle className="text-base">Customer Journey AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Journey mapping</p>
+                    <p>• Touchpoint optimization</p>
+                    <p>• Conversion insights</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-violet-500/5 to-violet-500/10 border-violet-500/20 opacity-75">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Database className="h-6 w-6 text-violet-500" />
+                    <div>
+                      <CardTitle className="text-base">Content Intelligence AI</CardTitle>
+                      <CardDescription className="text-sm">In Development</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>• Document analysis</p>
+                    <p>• Content recommendations</p>
+                    <p>• Knowledge extraction</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Custom Agent Development */}
+          <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Custom AI Agent Development</CardTitle>
+                  <CardDescription>
+                    Need specialized AI agents for your unique CRM workflows? We build custom agents tailored to your business.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-2 flex items-center justify-center">
+                    <Settings className="h-8 w-8 text-primary" />
+                  </div>
+                  <h6 className="font-medium mb-1">Workflow Automation</h6>
+                  <p className="text-sm text-muted-foreground">Custom agents for your specific business processes</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-2 flex items-center justify-center">
+                    <Database className="h-8 w-8 text-accent" />
+                  </div>
+                  <h6 className="font-medium mb-1">Data Integration</h6>
+                  <p className="text-sm text-muted-foreground">Connect any data source or third-party system</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-success/10 rounded-full mx-auto mb-2 flex items-center justify-center">
+                    <Zap className="h-8 w-8 text-success" />
+                  </div>
+                  <h6 className="font-medium mb-1">AI Models</h6>
+                  <p className="text-sm text-muted-foreground">Fine-tuned models for your industry and use case</p>
+                </div>
+              </div>
+              <div className="flex gap-3 justify-center">
+                <Button>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Request Custom Agent
+                </Button>
+                <Button variant="outline">
+                  <Brain className="mr-2 h-4 w-4" />
+                  View Agent Documentation
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Test Results */}
