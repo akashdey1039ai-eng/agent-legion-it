@@ -71,6 +71,62 @@ export function CustomerIntelligenceTestSuite() {
     }
   ];
 
+  const runSingleAgentTest = async (agentId: string, platform: string) => {
+    if (!user) {
+      toast({
+        title: "❌ Authentication Required",
+        description: "Please log in to run AI agent tests.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const agent = customerIntelligenceAgents.find(a => a.id === agentId);
+    if (!agent) {
+      toast({
+        title: "❌ Agent Not Found", 
+        description: `Agent ${agentId} not found.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsRunningTests(true);
+    setTestResults([]);
+    setCurrentTest(`${agent.name} - ${platform.toUpperCase()}`);
+    setProgress(50);
+
+    try {
+      console.log(`🚀 Starting single test: ${agent.name} on ${platform}`);
+      const result = await runAgentTest(agent, platform);
+      setTestResults([result]);
+      setProgress(100);
+      setCurrentTest('');
+
+      if (result.status === 'completed') {
+        toast({
+          title: "✅ Test Completed Successfully",
+          description: `${agent.name} test completed for ${platform.toUpperCase()} with ${Math.round(result.confidence * 100)}% confidence.`,
+        });
+      } else {
+        toast({
+          title: "❌ Test Failed",
+          description: `${agent.name} test failed for ${platform.toUpperCase()}: ${result.error}`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Single agent test failed:', error);
+      toast({
+        title: "❌ Test Failed",
+        description: `Error: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setIsRunningTests(false);
+    }
+  };
+
   const runFullTestSuite = async () => {
     if (!user) {
       toast({
@@ -483,25 +539,48 @@ export function CustomerIntelligenceTestSuite() {
             </div>
           )}
 
-          {/* Run Tests Button */}
-          <Button 
-            onClick={runFullTestSuite}
-            disabled={isRunningTests}
-            className="w-full"
-            size="lg"
-          >
-            {isRunningTests ? (
-              <>
-                <Activity className="h-4 w-4 mr-2 animate-spin" />
-                Running Tests...
-              </>
-            ) : (
-              <>
-                <Brain className="h-4 w-4 mr-2" />
-                Run Customer Intelligence Test Suite
-              </>
-            )}
-          </Button>
+          {/* Test Buttons */}
+          <div className="space-y-3">
+            {/* Single Agent Test - Customer Sentiment AI for Salesforce */}
+            <Button 
+              onClick={() => runSingleAgentTest('customer-sentiment', 'salesforce')}
+              disabled={isRunningTests}
+              variant="outline"
+              className="w-full"
+            >
+              {isRunningTests ? (
+                <>
+                  <Activity className="h-4 w-4 mr-2 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-2" />
+                  Test Customer Sentiment AI - Salesforce Only
+                </>
+              )}
+            </Button>
+
+            {/* Full Test Suite Button */}
+            <Button 
+              onClick={runFullTestSuite}
+              disabled={isRunningTests}
+              className="w-full"
+              size="lg"
+            >
+              {isRunningTests ? (
+                <>
+                  <Activity className="h-4 w-4 mr-2 animate-spin" />
+                  Running Tests...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-2" />
+                  Run Full Customer Intelligence Test Suite (All Agents × All Platforms)
+                </>
+              )}
+            </Button>
+          </div>
 
           {/* Security Notice */}
           <Alert>
