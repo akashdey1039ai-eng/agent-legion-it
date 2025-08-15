@@ -270,17 +270,32 @@ export default function LeadIntelligenceAgent() {
       const { data, error } = await supabase
         .from('contacts')
         .select('*')
-        .is('salesforce_id', null)
-        .order('created_at', { ascending: false })
+        .not('salesforce_id', 'is', null)
+        .order('last_sync_at', { ascending: false })
         .limit(5);
 
       if (error) {
         throw new Error(error.message);
       }
 
-      setRecentLeads(data || []);
+      // Filter for HubSpot contacts (those synced from HubSpot will have numeric IDs)
+      const hubspotContacts = data?.filter(contact => 
+        contact.salesforce_id && !contact.salesforce_id.startsWith('003')
+      ) || [];
+
+      setRecentLeads(hubspotContacts);
+      
+      toast({
+        title: "Recent Leads Loaded",
+        description: `Loaded ${hubspotContacts.length} recent HubSpot contacts.`,
+      });
     } catch (error) {
       console.error('Error loading HubSpot leads:', error);
+      toast({
+        title: "Load Failed",
+        description: "Failed to load recent HubSpot leads.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -290,16 +305,31 @@ export default function LeadIntelligenceAgent() {
         .from('contacts')
         .select('*')
         .not('salesforce_id', 'is', null)
-        .order('created_at', { ascending: false })
+        .order('last_sync_at', { ascending: false })
         .limit(5);
 
       if (error) {
         throw new Error(error.message);
       }
 
-      setRecentLeads(data || []);
+      // Filter for Salesforce contacts (those synced from Salesforce will have IDs starting with '003')
+      const salesforceContacts = data?.filter(contact => 
+        contact.salesforce_id && contact.salesforce_id.startsWith('003')
+      ) || [];
+
+      setRecentLeads(salesforceContacts);
+      
+      toast({
+        title: "Recent Records Loaded",
+        description: `Loaded ${salesforceContacts.length} recent Salesforce contacts.`,
+      });
     } catch (error) {
       console.error('Error loading Salesforce leads:', error);
+      toast({
+        title: "Load Failed",
+        description: "Failed to load recent Salesforce leads.",
+        variant: "destructive",
+      });
     }
   };
 
