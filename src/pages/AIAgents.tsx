@@ -45,16 +45,6 @@ const agents = [
     lastRun: "Never",
     successRate: "N/A"
   },
-  {
-    id: "sync",
-    title: "Cross-Platform Sync Agent",
-    description: "Syncs data between Salesforce and HubSpot intelligently",
-    status: "draft",
-    icon: Target,
-    capabilities: ["Data Synchronization", "Conflict Resolution", "Duplicate Detection"],
-    lastRun: "Never",
-    successRate: "N/A"
-  }
 ];
 
 export default function AIAgents() {
