@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import SalesforceCallback from "./pages/SalesforceCallback";
 import HubSpotCallback from "./pages/HubSpotCallback";
 import AIAgents from "./pages/AIAgents";
+import CRM from "./pages/CRM";
 
 // QueryClient for React Query state management
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/crm" element={<CRM />} />
             <Route path="/ai-agents" element={<AIAgents />} />
             <Route path="/salesforce-callback" element={<SalesforceCallback />} />
             <Route path="/hubspot-callback" element={<HubSpotCallback />} />

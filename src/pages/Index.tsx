@@ -271,7 +271,7 @@ const Index = () => {
                     <p className="text-muted-foreground mb-4">
                       Our built-in CRM system designed specifically for AI automation and intelligence.
                     </p>
-                    <Button className="bg-gradient-primary hover:opacity-90">
+                    <Button className="bg-gradient-primary hover:opacity-90" onClick={() => navigate('/crm')}>
                       Explore Native CRM
                     </Button>
                   </div>

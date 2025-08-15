@@ -16,14 +16,21 @@ export type Database = {
     Tables: {
       activities: {
         Row: {
+          activity_type: string
+          attendees: Json | null
           completed_at: string | null
           contact_id: string | null
           created_at: string
+          deal_id: string | null
           description: string | null
+          duration_minutes: number | null
           id: string
           last_sync_at: string | null
+          location: string | null
           opportunity_id: string | null
+          outcome: string | null
           owner_id: string | null
+          priority: string | null
           salesforce_id: string | null
           scheduled_at: string | null
           status: string | null
@@ -32,14 +39,21 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          activity_type?: string
+          attendees?: Json | null
           completed_at?: string | null
           contact_id?: string | null
           created_at?: string
+          deal_id?: string | null
           description?: string | null
+          duration_minutes?: number | null
           id?: string
           last_sync_at?: string | null
+          location?: string | null
           opportunity_id?: string | null
+          outcome?: string | null
           owner_id?: string | null
+          priority?: string | null
           salesforce_id?: string | null
           scheduled_at?: string | null
           status?: string | null
@@ -48,14 +62,21 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          activity_type?: string
+          attendees?: Json | null
           completed_at?: string | null
           contact_id?: string | null
           created_at?: string
+          deal_id?: string | null
           description?: string | null
+          duration_minutes?: number | null
           id?: string
           last_sync_at?: string | null
+          location?: string | null
           opportunity_id?: string | null
+          outcome?: string | null
           owner_id?: string | null
+          priority?: string | null
           salesforce_id?: string | null
           scheduled_at?: string | null
           status?: string | null
@@ -69,6 +90,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
             referencedColumns: ["id"]
           },
           {
@@ -508,64 +536,105 @@ export type Database = {
       companies: {
         Row: {
           address: string | null
+          annual_revenue: number | null
+          assigned_user_id: string | null
           city: string | null
+          company_type: string | null
           country: string | null
           created_at: string
+          custom_fields: Json | null
           description: string | null
+          employee_count: number | null
           id: string
           industry: string | null
           last_sync_at: string | null
           name: string
+          parent_company_id: string | null
           phone: string | null
+          primary_contact_id: string | null
+          rating: string | null
           revenue: number | null
           salesforce_id: string | null
           size: string | null
+          social_media: Json | null
           state: string | null
+          tags: string[] | null
           updated_at: string
           website: string | null
         }
         Insert: {
           address?: string | null
+          annual_revenue?: number | null
+          assigned_user_id?: string | null
           city?: string | null
+          company_type?: string | null
           country?: string | null
           created_at?: string
+          custom_fields?: Json | null
           description?: string | null
+          employee_count?: number | null
           id?: string
           industry?: string | null
           last_sync_at?: string | null
           name: string
+          parent_company_id?: string | null
           phone?: string | null
+          primary_contact_id?: string | null
+          rating?: string | null
           revenue?: number | null
           salesforce_id?: string | null
           size?: string | null
+          social_media?: Json | null
           state?: string | null
+          tags?: string[] | null
           updated_at?: string
           website?: string | null
         }
         Update: {
           address?: string | null
+          annual_revenue?: number | null
+          assigned_user_id?: string | null
           city?: string | null
+          company_type?: string | null
           country?: string | null
           created_at?: string
+          custom_fields?: Json | null
           description?: string | null
+          employee_count?: number | null
           id?: string
           industry?: string | null
           last_sync_at?: string | null
           name?: string
+          parent_company_id?: string | null
           phone?: string | null
+          primary_contact_id?: string | null
+          rating?: string | null
           revenue?: number | null
           salesforce_id?: string | null
           size?: string | null
+          social_media?: Json | null
           state?: string | null
+          tags?: string[] | null
           updated_at?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_parent_company_id_fkey"
+            columns: ["parent_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {
+          address: Json | null
+          birthday: string | null
           company_id: string | null
           created_at: string
+          custom_fields: Json | null
           department: string | null
           email: string
           first_name: string
@@ -574,17 +643,24 @@ export type Database = {
           last_sync_at: string | null
           lead_score: number | null
           lead_source: string | null
+          mobile_phone: string | null
           owner_id: string | null
           phone: string | null
+          preferred_contact_method: string | null
           salesforce_id: string | null
           salesforce_type: string | null
+          social_media: Json | null
           status: string | null
+          tags: string[] | null
           title: string | null
           updated_at: string
         }
         Insert: {
+          address?: Json | null
+          birthday?: string | null
           company_id?: string | null
           created_at?: string
+          custom_fields?: Json | null
           department?: string | null
           email: string
           first_name: string
@@ -593,17 +669,24 @@ export type Database = {
           last_sync_at?: string | null
           lead_score?: number | null
           lead_source?: string | null
+          mobile_phone?: string | null
           owner_id?: string | null
           phone?: string | null
+          preferred_contact_method?: string | null
           salesforce_id?: string | null
           salesforce_type?: string | null
+          social_media?: Json | null
           status?: string | null
+          tags?: string[] | null
           title?: string | null
           updated_at?: string
         }
         Update: {
+          address?: Json | null
+          birthday?: string | null
           company_id?: string | null
           created_at?: string
+          custom_fields?: Json | null
           department?: string | null
           email?: string
           first_name?: string
@@ -612,11 +695,15 @@ export type Database = {
           last_sync_at?: string | null
           lead_score?: number | null
           lead_source?: string | null
+          mobile_phone?: string | null
           owner_id?: string | null
           phone?: string | null
+          preferred_contact_method?: string | null
           salesforce_id?: string | null
           salesforce_type?: string | null
+          social_media?: Json | null
           status?: string | null
+          tags?: string[] | null
           title?: string | null
           updated_at?: string
         }
@@ -667,6 +754,284 @@ export type Database = {
           id?: string
           retention_days?: number | null
           table_name?: string
+        }
+        Relationships: []
+      }
+      deal_products: {
+        Row: {
+          created_at: string
+          deal_id: string
+          discount_percent: number | null
+          id: string
+          product_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          discount_percent?: number | null
+          id?: string
+          product_id: string
+          quantity?: number
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          discount_percent?: number | null
+          id?: string
+          product_id?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_products_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          actual_close_date: string | null
+          amount: number | null
+          assigned_user_id: string | null
+          company_id: string | null
+          competitors: string[] | null
+          contact_id: string | null
+          created_at: string
+          currency: string | null
+          custom_fields: Json | null
+          deal_type: string | null
+          description: string | null
+          expected_close_date: string | null
+          hubspot_id: string | null
+          id: string
+          last_sync_at: string | null
+          lead_source: string | null
+          name: string
+          next_step: string | null
+          probability: number | null
+          salesforce_id: string | null
+          stage: string
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          actual_close_date?: string | null
+          amount?: number | null
+          assigned_user_id?: string | null
+          company_id?: string | null
+          competitors?: string[] | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          custom_fields?: Json | null
+          deal_type?: string | null
+          description?: string | null
+          expected_close_date?: string | null
+          hubspot_id?: string | null
+          id?: string
+          last_sync_at?: string | null
+          lead_source?: string | null
+          name: string
+          next_step?: string | null
+          probability?: number | null
+          salesforce_id?: string | null
+          stage?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          actual_close_date?: string | null
+          amount?: number | null
+          assigned_user_id?: string | null
+          company_id?: string | null
+          competitors?: string[] | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          custom_fields?: Json | null
+          deal_type?: string | null
+          description?: string | null
+          expected_close_date?: string | null
+          hubspot_id?: string | null
+          id?: string
+          last_sync_at?: string | null
+          lead_source?: string | null
+          name?: string
+          next_step?: string | null
+          probability?: number | null
+          salesforce_id?: string | null
+          stage?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          file_path: string
+          file_size: number | null
+          id: string
+          is_public: boolean | null
+          name: string
+          related_to_id: string | null
+          related_to_type: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          related_to_id?: string | null
+          related_to_type?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          related_to_id?: string | null
+          related_to_type?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      email_campaigns: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          template_id: string | null
+          total_clicked: number | null
+          total_opened: number | null
+          total_recipients: number | null
+          total_sent: number | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          template_id?: string | null
+          total_clicked?: number | null
+          total_opened?: number | null
+          total_recipients?: number | null
+          total_sent?: number | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          template_id?: string | null
+          total_clicked?: number | null
+          total_opened?: number | null
+          total_recipients?: number | null
+          total_sent?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject: string
+          template_type?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string
+          template_type?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -823,6 +1188,145 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          assigned_user_id: string | null
+          company: string | null
+          converted_at: string | null
+          converted_company_id: string | null
+          converted_contact_id: string | null
+          converted_deal_id: string | null
+          created_at: string
+          custom_fields: Json | null
+          description: string | null
+          email: string
+          first_name: string
+          hubspot_id: string | null
+          id: string
+          industry: string | null
+          last_name: string
+          last_sync_at: string | null
+          lead_source: string | null
+          phone: string | null
+          rating: string | null
+          salesforce_id: string | null
+          score: number | null
+          status: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          company?: string | null
+          converted_at?: string | null
+          converted_company_id?: string | null
+          converted_contact_id?: string | null
+          converted_deal_id?: string | null
+          created_at?: string
+          custom_fields?: Json | null
+          description?: string | null
+          email: string
+          first_name: string
+          hubspot_id?: string | null
+          id?: string
+          industry?: string | null
+          last_name: string
+          last_sync_at?: string | null
+          lead_source?: string | null
+          phone?: string | null
+          rating?: string | null
+          salesforce_id?: string | null
+          score?: number | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          company?: string | null
+          converted_at?: string | null
+          converted_company_id?: string | null
+          converted_contact_id?: string | null
+          converted_deal_id?: string | null
+          created_at?: string
+          custom_fields?: Json | null
+          description?: string | null
+          email?: string
+          first_name?: string
+          hubspot_id?: string | null
+          id?: string
+          industry?: string | null
+          last_name?: string
+          last_sync_at?: string | null
+          lead_source?: string | null
+          phone?: string | null
+          rating?: string | null
+          salesforce_id?: string | null
+          score?: number | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_converted_company_id_fkey"
+            columns: ["converted_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_converted_contact_id_fkey"
+            columns: ["converted_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_converted_deal_id_fkey"
+            columns: ["converted_deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_private: boolean | null
+          related_to_id: string
+          related_to_type: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_private?: boolean | null
+          related_to_id: string
+          related_to_type: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_private?: boolean | null
+          related_to_id?: string
+          related_to_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       oauth_states: {
         Row: {
           code_verifier: string
@@ -917,6 +1421,48 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          category: string | null
+          code: string | null
+          cost: number | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          code?: string | null
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          code?: string | null
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -953,6 +1499,75 @@ export type Database = {
           role?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          configuration: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          report_type: string
+          updated_at: string
+        }
+        Insert: {
+          configuration?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          report_type: string
+          updated_at?: string
+        }
+        Update: {
+          configuration?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          report_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sales_stages: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_closed_lost: boolean | null
+          is_closed_won: boolean | null
+          name: string
+          probability: number | null
+          stage_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_closed_lost?: boolean | null
+          is_closed_won?: boolean | null
+          name: string
+          probability?: number | null
+          stage_order: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_closed_lost?: boolean | null
+          is_closed_won?: boolean | null
+          name?: string
+          probability?: number | null
+          stage_order?: number
         }
         Relationships: []
       }
@@ -1034,6 +1649,134 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          assigned_user_id: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string | null
+          related_to_id: string | null
+          related_to_type: string | null
+          status: string | null
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string | null
+          related_to_id?: string | null
+          related_to_type?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string | null
+          related_to_id?: string | null
+          related_to_type?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          manager_id: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          manager_id?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          manager_id?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1051,7 +1794,13 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role:
+        | "admin"
+        | "sales_manager"
+        | "sales_rep"
+        | "marketing_manager"
+        | "customer_support"
+        | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1178,6 +1927,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: [
+        "admin",
+        "sales_manager",
+        "sales_rep",
+        "marketing_manager",
+        "customer_support",
+        "viewer",
+      ],
+    },
   },
 } as const
