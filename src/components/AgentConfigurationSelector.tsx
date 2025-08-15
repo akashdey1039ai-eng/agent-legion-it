@@ -54,8 +54,8 @@ export function AgentConfigurationSelector({
   const handleSalesforceAction = (action: 'sandbox' | 'sync' | 'analysis') => {
     switch (action) {
       case 'sandbox':
-        // Navigate directly to Salesforce integration page
-        navigate('/', { state: { showSalesforce: true } });
+        // Call the parent's callback to show Salesforce configuration
+        onSelectPlatform('salesforce');
         break;
       case 'sync':
         // Toggle real-time sync
