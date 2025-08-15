@@ -86,16 +86,37 @@ export function AgentConfigurationSelector({
     }
   };
 
-  const handleHubSpotAction = (action: 'pipeline' | 'scoring' | 'automation') => {
+  const handleHubSpotAction = (action: 'sandbox' | 'sync' | 'analysis') => {
     switch (action) {
-      case 'pipeline':
-        onSelectPlatform('hubspot');
+      case 'sandbox':
+        // Open HubSpot Developer Account in new tab
+        window.open('https://developers.hubspot.com/get-started', '_blank');
+        toast({
+          title: "Opening HubSpot Developer Hub",
+          description: "HubSpot Developer resources opening in new tab",
+        });
         break;
-      case 'scoring':
-        alert('Contact scoring will be available after HubSpot integration');
+      case 'sync':
+        // Toggle real-time sync for HubSpot
+        if (!realtimeSyncEnabled) {
+          setRealtimeSyncEnabled(true);
+          toast({
+            title: "Real-time Sync Enabled",
+            description: "Now monitoring HubSpot data for live updates",
+          });
+        } else {
+          setRealtimeSyncEnabled(false);
+          toast({
+            title: "Real-time Sync Disabled",
+            description: "Live monitoring has been turned off",
+          });
+        }
         break;
-      case 'automation':
-        alert('Marketing automation features coming soon');
+      case 'analysis':
+        // Quick launch analysis using callback instead of navigation
+        if (onQuickRun) {
+          onQuickRun();
+        }
         break;
     }
   };
@@ -201,35 +222,35 @@ export function AgentConfigurationSelector({
                   
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
-                      Connect to your HubSpot account and analyze deals, contacts, and pipeline data
+                      Connect to your HubSpot developer account and analyze deals, contacts, and pipeline data
                     </p>
                     <div className="grid grid-cols-3 gap-2">
                       <Button
                         variant="secondary"
                         size="sm"
                         className="flex items-center gap-1 text-xs"
-                        onClick={() => handleHubSpotAction('pipeline')}
+                        onClick={() => handleHubSpotAction('sandbox')}
                       >
-                        <Target className="h-3 w-3" />
-                        Deal Pipeline
+                        <Database className="h-3 w-3" />
+                        Developer Hub
+                      </Button>
+                      <Button
+                        variant={realtimeSyncEnabled ? "default" : "secondary"}
+                        size="sm"
+                        className="flex items-center gap-1 text-xs"
+                        onClick={() => handleHubSpotAction('sync')}
+                      >
+                        <Zap className="h-3 w-3" />
+                        {realtimeSyncEnabled ? 'Sync Active' : 'Real-time Sync'}
                       </Button>
                       <Button
                         variant="secondary"
                         size="sm"
                         className="flex items-center gap-1 text-xs"
-                        onClick={() => handleHubSpotAction('scoring')}
+                        onClick={() => handleHubSpotAction('analysis')}
                       >
-                        <Users className="h-3 w-3" />
-                        Contact Scoring
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="flex items-center gap-1 text-xs"
-                        onClick={() => handleHubSpotAction('automation')}
-                      >
-                        <Activity className="h-3 w-3" />
-                        Marketing Automation
+                        <Brain className="h-3 w-3" />
+                        AI Analysis
                       </Button>
                     </div>
                   </div>
