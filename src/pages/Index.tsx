@@ -318,12 +318,12 @@ const Index = () => {
                       <h2 className="text-3xl font-bold tracking-tight">
                         {activeAgent === 'lead-intelligence' && 'Lead Intelligence Agent'}
                         {activeAgent === 'pipeline-analysis' && 'Pipeline Analysis Agent'}
-                        {!activeAgent.includes('lead-intelligence') && !activeAgent.includes('pipeline-analysis') && 'AI Agent'}
+                        {activeAgent && !activeAgent.includes('lead-intelligence') && !activeAgent.includes('pipeline-analysis') && 'AI Agent'}
                       </h2>
                       <p className="text-muted-foreground">
                         {activeAgent === 'lead-intelligence' && 'Analyze and score leads using AI'}
                         {activeAgent === 'pipeline-analysis' && 'Analyze deal risks and probability forecasts'}
-                        {!activeAgent.includes('lead-intelligence') && !activeAgent.includes('pipeline-analysis') && 'Manage your AI agent'}
+                        {activeAgent && !activeAgent.includes('lead-intelligence') && !activeAgent.includes('pipeline-analysis') && 'Manage your AI agent'}
                       </p>
                     </div>
                     <Button 
