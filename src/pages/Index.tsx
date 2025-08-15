@@ -29,7 +29,7 @@ const Index = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
-  const [showAgentConfig, setShowAgentConfig] = useState<'salesforce' | 'hubspot' | null>(null);
+  const [showAgentConfig, setShowAgentConfig] = useState<{platform: 'salesforce' | 'hubspot'; agentType: string} | null>(null);
 
   useEffect(() => {
     // Clear previous test results on page load
@@ -245,37 +245,12 @@ const Index = () => {
                 </div>
                 
                 {/* Show integration details based on selected platform */}
-                {selectedPlatform === 'salesforce' && !showAgentConfig && (
-                  <div className="space-y-4">
-                    <SalesforceIntegration />
-                    <div className="text-center">
-                      <Button
-                        onClick={() => setShowAgentConfig('salesforce')}
-                        className="bg-gradient-primary hover:opacity-90"
-                      >
-                        <Settings className="h-4 w-4 mr-2" />
-                        Configure AI Agents
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {selectedPlatform === 'hubspot' && !showAgentConfig && (
-                  <div className="space-y-4">
-                    <HubSpotIntegration />
-                    <div className="text-center">
-                      <Button
-                        onClick={() => setShowAgentConfig('hubspot')}
-                        className="bg-gradient-primary hover:opacity-90"
-                      >
-                        <Settings className="h-4 w-4 mr-2" />
-                        Configure AI Agents
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                {selectedPlatform === 'salesforce' && !showAgentConfig && <SalesforceIntegration />}
+                {selectedPlatform === 'hubspot' && !showAgentConfig && <HubSpotIntegration />}
                 {showAgentConfig && (
                   <AgentConfiguration 
-                    platform={showAgentConfig} 
+                    platform={showAgentConfig.platform}
+                    agentType={showAgentConfig.agentType}
                     onClose={() => setShowAgentConfig(null)}
                   />
                 )}
@@ -347,17 +322,32 @@ const Index = () => {
                   
                   {activeAgent === 'lead-intelligence' && <LeadIntelligenceAgent />}
                   {activeAgent === 'pipeline-analysis' && (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
-                        <TrendingUp className="h-8 w-8 text-primary" />
+                    <div className="space-y-6">
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
+                          <TrendingUp className="h-8 w-8 text-primary" />
+                        </div>
+                        <h3 className="text-xl font-semibold mb-2">Pipeline Analysis Agent</h3>
+                        <p className="text-muted-foreground mb-6">
+                          This agent analyzes deal risks and adjusts probability forecasts automatically.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+                          <Button 
+                            className="bg-gradient-primary hover:opacity-90"
+                            onClick={() => setShowAgentConfig({platform: 'salesforce', agentType: 'pipeline-analysis'})}
+                          >
+                            <Settings className="h-4 w-4 mr-2" />
+                            Configure for Salesforce
+                          </Button>
+                          <Button 
+                            className="bg-gradient-primary hover:opacity-90"
+                            onClick={() => setShowAgentConfig({platform: 'hubspot', agentType: 'pipeline-analysis'})}
+                          >
+                            <Settings className="h-4 w-4 mr-2" />
+                            Configure for HubSpot
+                          </Button>
+                        </div>
                       </div>
-                      <h3 className="text-xl font-semibold mb-2">Pipeline Analysis Agent</h3>
-                      <p className="text-muted-foreground mb-4">
-                        This agent analyzes deal risks and adjusts probability forecasts automatically.
-                      </p>
-                      <Button className="bg-gradient-primary hover:opacity-90">
-                        Configure Agent Settings
-                      </Button>
                     </div>
                   )}
                 </div>

@@ -58,10 +58,11 @@ interface AgentConfig {
 
 interface AgentConfigurationProps {
   platform: 'salesforce' | 'hubspot';
+  agentType?: string;
   onClose?: () => void;
 }
 
-export function AgentConfiguration({ platform, onClose }: AgentConfigurationProps) {
+export function AgentConfiguration({ platform, agentType, onClose }: AgentConfigurationProps) {
   const [configs, setConfigs] = useState<AgentConfig[]>([]);
   const [selectedConfig, setSelectedConfig] = useState<AgentConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -147,17 +148,24 @@ export function AgentConfiguration({ platform, onClose }: AgentConfigurationProp
 
   useEffect(() => {
     loadConfigurations();
-  }, [user, platform]);
+  }, [user, platform, agentType]);
 
   const loadConfigurations = async () => {
     if (!user) return;
 
     try {
-      const { data: agents, error } = await supabase
+      let query = supabase
         .from('ai_agents')
         .select('*')
         .eq('created_by', user.id)
         .contains('config', { platform });
+
+      // If specific agent type is requested, filter by that
+      if (agentType) {
+        query = query.eq('type', agentType);
+      }
+
+      const { data: agents, error } = await query;
 
       if (error) throw error;
 
@@ -180,9 +188,9 @@ export function AgentConfiguration({ platform, onClose }: AgentConfigurationProp
             fieldMappings: config?.fieldMappings || {}
           };
         });
-        setConfigs(agentConfigs);
+        setConfigs(agentConfigs.filter(config => !agentType || config.type === agentType));
       } else {
-        setConfigs(defaultConfigs);
+        setConfigs(defaultConfigs.filter(config => !agentType || config.type === agentType));
       }
     } catch (error) {
       console.error('Error loading agent configurations:', error);
@@ -302,10 +310,13 @@ export function AgentConfiguration({ platform, onClose }: AgentConfigurationProp
           </div>
           <div>
             <h2 className="text-2xl font-bold">
-              {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} Agent Configuration
+              {agentType ? 
+                `${agentType.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} Configuration` :
+                `${platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} Agent Configuration`
+              }
             </h2>
             <p className="text-muted-foreground">
-              Configure AI agents for {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} integration
+              Configure AI agent{agentType ? '' : 's'} for {platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} integration
             </p>
           </div>
         </div>
@@ -319,7 +330,9 @@ export function AgentConfiguration({ platform, onClose }: AgentConfigurationProp
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Agent List */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Available Agents</h3>
+          <h3 className="text-lg font-semibold">
+            {agentType ? 'Agent Configuration' : 'Available Agents'}
+          </h3>
           {configs.map((config, index) => (
             <Card 
               key={config.id || index}
