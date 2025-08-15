@@ -33,6 +33,8 @@ export function AgentConfigurationSelector({
     switch (agentType) {
       case 'lead-intelligence':
         return 'Lead Intelligence Agent';
+      case 'pipeline-analysis':
+        return 'Pipeline Analysis Agent';
       default:
         return 'AI Agent';
     }
@@ -42,6 +44,8 @@ export function AgentConfigurationSelector({
     switch (agentType) {
       case 'lead-intelligence':
         return 'Intelligent lead scoring and qualification';
+      case 'pipeline-analysis':
+        return 'Pipeline analysis and revenue forecasting';
       default:
         return 'AI-powered CRM automation';
     }

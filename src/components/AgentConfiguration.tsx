@@ -142,6 +142,48 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
       customPrompt: `Analyze lead data and assign scores based on engagement, company size, and buying signals. Focus on identifying high-value prospects.`
     },
     {
+      name: 'Pipeline Analysis Agent',
+      type: 'pipeline-analysis',
+      status: 'draft',
+      platform,
+      requiresApproval: true,
+      confidenceThreshold: 0.85,
+      maxActionsPerDay: 50,
+      syncFrequency: 'daily',
+      automationRules: {
+        leadScoring: false,
+        autoAssignment: false,
+        followUpTasks: false,
+        duplicateDetection: false,
+        dataEnrichment: false,
+        opportunityStageUpdates: true,
+        emailNotifications: true,
+        activityLogging: true
+      },
+      salesforceConfig: platform === 'salesforce' ? {
+        objects: ['Opportunity', 'Account', 'Contact'],
+        fields: ['Amount', 'StageName', 'Probability', 'CloseDate', 'ForecastCategory'],
+        customFilters: {},
+        triggerConditions: ['Opportunity Stage Changed', 'Amount Updated', 'Close Date Changed'],
+        bulkOperations: true,
+        sandboxMode: true,
+        apiVersion: '58.0'
+      } : undefined,
+      notifications: {
+        email: true,
+        inApp: true,
+        webhook: '',
+        slackWebhook: ''
+      },
+      fieldMappings: {},
+      schedule: {
+        timezone: 'America/New_York',
+        workingHours: { start: '08:00', end: '18:00' },
+        weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+      },
+      customPrompt: `Analyze sales pipeline data to identify risk factors, forecast revenue, and recommend actions to improve close rates and pipeline health.`
+    },
+    {
       name: 'Data Sync Agent',
       type: 'data-sync',
       status: 'draft',

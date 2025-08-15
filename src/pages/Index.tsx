@@ -7,7 +7,7 @@ import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import HubSpotIntegration from "@/components/HubSpotIntegration";
 import { AgentConfiguration } from "@/components/AgentConfiguration";
 import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
-
+import { AgentExecutionPanel } from "@/components/AgentExecutionPanel";
 import { AgentConfigurationSelector } from "@/components/AgentConfigurationSelector";
 
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
@@ -317,11 +317,13 @@ const Index = () => {
                     <div>
                       <h2 className="text-3xl font-bold tracking-tight">
                         {activeAgent === 'lead-intelligence' && 'Lead Intelligence Agent'}
-                        {activeAgent && !activeAgent.includes('lead-intelligence') && 'AI Agent'}
+                        {activeAgent === 'pipeline-analysis' && 'Pipeline Analysis Agent'}
+                        {activeAgent && !['lead-intelligence', 'pipeline-analysis'].includes(activeAgent) && 'AI Agent'}
                       </h2>
                       <p className="text-muted-foreground">
                         {activeAgent === 'lead-intelligence' && 'Analyze and score leads using AI'}
-                        {activeAgent && !activeAgent.includes('lead-intelligence') && 'Manage your AI agent'}
+                        {activeAgent === 'pipeline-analysis' && 'Analyze sales pipeline performance and forecast revenue'}
+                        {activeAgent && !['lead-intelligence', 'pipeline-analysis'].includes(activeAgent) && 'Manage your AI agent'}
                       </p>
                     </div>
                     <Button 
@@ -334,6 +336,7 @@ const Index = () => {
                   </div>
                   
                   {activeAgent === 'lead-intelligence' && <LeadIntelligenceAgent />}
+                  {activeAgent === 'pipeline-analysis' && <AgentExecutionPanel agentType="pipeline-analysis" platform="salesforce" onBack={() => setActiveAgent(null)} />}
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -428,6 +431,47 @@ const Index = () => {
                           onClick={() => setShowAgentSelector('lead-intelligence')}
                         >
                           <Brain className="h-4 w-4 mr-2" />
+                          Manage Agent
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Pipeline Analysis Agent */}
+                    <div className="bg-card border border-border/50 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-accent/10 rounded-lg">
+                            <TrendingUp className="h-5 w-5 text-accent" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold">Pipeline Analysis Agent</h3>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Active
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Analyzes sales pipeline performance and provides revenue forecasting
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Capabilities</p>
+                          <div className="flex flex-wrap gap-1">
+                            <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">Pipeline Analytics</span>
+                            <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">Revenue Forecasting</span>
+                            <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">Risk Assessment</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span><strong>Last Run:</strong> 1 hour ago</span>
+                          <span><strong>Success:</strong> 96%</span>
+                        </div>
+                        <Button 
+                          className="w-full"
+                          onClick={() => setShowAgentSelector('pipeline-analysis')}
+                        >
+                          <TrendingUp className="h-4 w-4 mr-2" />
                           Manage Agent
                         </Button>
                       </div>

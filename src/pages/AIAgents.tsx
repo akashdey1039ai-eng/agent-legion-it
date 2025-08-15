@@ -16,6 +16,16 @@ const agents = [
     successRate: "94%"
   },
   {
+    id: "pipeline-analysis",
+    title: "Pipeline Analysis Agent",
+    description: "Analyzes sales pipeline performance and provides revenue forecasting",
+    status: "active",
+    icon: TrendingUp,
+    capabilities: ["Pipeline Analytics", "Revenue Forecasting", "Risk Assessment"],
+    lastRun: "1 hour ago",
+    successRate: "96%"
+  },
+  {
     id: "follow-up",
     title: "Smart Follow-up Agent",
     description: "Generates personalized email sequences based on lead behavior",
@@ -55,9 +65,9 @@ export default function AIAgents() {
     console.log('Agent clicked:', agentId);
     // For now, navigate to the main page with the agent tab and scroll to agents
     // In a full implementation, this would go to a dedicated agent management page
-    if (agentId === 'lead-intelligence') {
-      console.log('Navigating to lead intelligence agent');
-      navigate('/', { state: { openAgent: 'lead-intelligence' } });
+    if (agentId === 'lead-intelligence' || agentId === 'pipeline-analysis') {
+      console.log(`Navigating to ${agentId} agent`);
+      navigate('/', { state: { openAgent: agentId } });
     } else {
       console.log('Navigating to main agents tab');
       // For other agents, show a coming soon message or navigate to main agents tab
