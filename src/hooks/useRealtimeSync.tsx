@@ -13,7 +13,10 @@ export function useRealtimeSync({ enabled, tables }: RealtimeSyncOptions) {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!enabled || tables.length === 0) return;
+    if (!enabled || tables.length === 0) {
+      setIsConnected(false);
+      return;
+    }
 
     console.log('Setting up real-time sync for tables:', tables);
     
@@ -58,25 +61,24 @@ export function useRealtimeSync({ enabled, tables }: RealtimeSyncOptions) {
       return { table, channel };
     });
 
-    // Show initial connection toast
-    setTimeout(() => {
-      if (enabled) {
-        toast({
-          title: "Real-time Sync Enabled",
-          description: `Monitoring ${tables.join(', ')} for live updates`,
-        });
-      }
+    // Show initial connection toast only once
+    const toastTimeout = setTimeout(() => {
+      toast({
+        title: "Real-time Sync Enabled",
+        description: `Monitoring ${tables.join(', ')} for live updates`,
+      });
     }, 1000);
 
     // Cleanup function
     return () => {
       console.log('Cleaning up real-time subscriptions');
+      clearTimeout(toastTimeout);
       channels.forEach(({ channel }) => {
         supabase.removeChannel(channel);
       });
       setIsConnected(false);
     };
-  }, [enabled, tables, toast]);
+  }, [enabled, tables.join(',')]); // Use tables.join(',') to prevent array reference issues
 
   return {
     isConnected,
