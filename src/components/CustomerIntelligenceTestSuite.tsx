@@ -127,9 +127,11 @@ export function CustomerIntelligenceTestSuite() {
 
   const runAgentTest = async (agent: any, platform: string): Promise<AgentTestResult> => {
     const startTime = Date.now();
+    console.log(`Starting test for ${agent.name} on ${platform} platform`);
 
     try {
       // Create test agent
+      console.log(`Creating agent: ${agent.name} - ${platform.toUpperCase()}`);
       const { data: agentData, error: agentError } = await supabase
         .from('ai_agents')
         .insert({
@@ -145,11 +147,17 @@ export function CustomerIntelligenceTestSuite() {
         .select()
         .single();
 
-      if (agentError) throw agentError;
+      if (agentError) {
+        console.error(`Agent creation error:`, agentError);
+        throw agentError;
+      }
+      console.log(`Agent created successfully:`, agentData);
 
       // Get test data based on platform
+      console.log(`Fetching test data for platform: ${platform}`);
       let testContacts;
       if (platform === 'native') {
+        console.log('Fetching native contacts...');
         const { data, error: contactsError } = await supabase
           .from('contacts')
           .select(`
@@ -158,10 +166,15 @@ export function CustomerIntelligenceTestSuite() {
           `)
           .limit(10);
         
-        if (contactsError) throw contactsError;
+        if (contactsError) {
+          console.error(`Native contacts fetch error:`, contactsError);
+          throw contactsError;
+        }
         testContacts = data;
+        console.log(`Native contacts fetched:`, testContacts?.length);
       } else {
         // For Salesforce/HubSpot, check if we have synced data
+        console.log(`Fetching ${platform} synced contacts...`);
         const { data, error: contactsError } = await supabase
           .from('contacts')
           .select(`
@@ -172,10 +185,16 @@ export function CustomerIntelligenceTestSuite() {
           .not(`${platform}_id`, 'is', null)
           .limit(5);
         
-        if (contactsError) throw contactsError;
+        if (contactsError) {
+          console.error(`${platform} contacts fetch error:`, contactsError);
+          throw contactsError;
+        }
+        
+        console.log(`${platform} synced contacts found:`, data?.length || 0);
         
         // If no synced data, use native data for testing
         if (!data || data.length === 0) {
+          console.log(`No ${platform} synced data found, using native data for simulation...`);
           const { data: nativeData, error: nativeError } = await supabase
             .from('contacts')
             .select(`
@@ -184,21 +203,30 @@ export function CustomerIntelligenceTestSuite() {
             `)
             .limit(5);
           
-          if (nativeError) throw nativeError;
+          if (nativeError) {
+            console.error(`Native data fallback error:`, nativeError);
+            throw nativeError;
+          }
           testContacts = nativeData?.map(contact => ({
             ...contact,
             [`${platform}_simulated`]: true
           })) || [];
+          console.log(`Using ${testContacts.length} native contacts for ${platform} simulation`);
         } else {
           testContacts = data;
+          console.log(`Using ${testContacts.length} actual ${platform} synced contacts`);
         }
       }
 
       if (!testContacts || testContacts.length === 0) {
+        console.error(`No test contacts available for ${platform}`);
         throw new Error(`No test contacts available for ${platform}. Please generate test data first.`);
       }
 
+      console.log(`Proceeding with ${testContacts.length} test contacts for ${agent.name} on ${platform}`);
+
       // Execute agent-specific test logic with platform context
+      console.log(`Executing ${agent.id} test logic...`);
       let testResult;
       switch (agent.id) {
         case 'customer-sentiment':
@@ -213,8 +241,10 @@ export function CustomerIntelligenceTestSuite() {
         default:
           throw new Error(`Unknown agent type: ${agent.id}`);
       }
+      console.log(`Test logic completed for ${agent.id}:`, testResult);
 
       const executionTime = Date.now() - startTime;
+      console.log(`Execution completed in ${executionTime}ms`);
 
       // Log test execution
       await supabase
@@ -244,7 +274,8 @@ export function CustomerIntelligenceTestSuite() {
       };
 
     } catch (error) {
-      console.error(`Test failed for ${agent.name} on ${platform}:`, error);
+      console.error(`❌ Test failed for ${agent.name} on ${platform}:`, error);
+      console.error('Error details:', error.message, error.code, error.details);
       return {
         agentType: agent.id,
         platform,
