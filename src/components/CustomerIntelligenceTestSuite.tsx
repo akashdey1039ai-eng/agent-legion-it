@@ -9,8 +9,11 @@ import { Brain, Users, TrendingDown, Target, Activity, CheckCircle, AlertTriangl
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { TestResultsViewer } from './TestResultsViewer';
 
 interface AgentTestResult {
+  agentId: string;
+  agentName: string;
   agentType: string;
   platform: string;
   status: 'running' | 'completed' | 'failed';
@@ -22,6 +25,11 @@ interface AgentTestResult {
   securityScore: number;
   riskLevel: 'low' | 'medium' | 'high';
   error?: string;
+  summary?: string;
+  analysis?: any[];
+  logs?: string[];
+  rawResponse?: any;
+  results?: any;
 }
 
 export function CustomerIntelligenceTestSuite() {
@@ -92,7 +100,7 @@ export function CustomerIntelligenceTestSuite() {
     }
 
     setIsRunningTests(true);
-    setTestResults(prev => prev.filter(r => r.agentType !== agentId)); // Clear previous results for this agent
+    setTestResults(prev => prev.filter(r => r.agentId !== agentId)); // Clear previous results for this agent
     setProgress(0);
 
     try {
@@ -322,6 +330,8 @@ export function CustomerIntelligenceTestSuite() {
         });
 
       return {
+        agentId: agent.id,
+        agentName: agent.name,
         agentType: agent.id,
         platform,
         status: 'completed',
@@ -331,13 +341,18 @@ export function CustomerIntelligenceTestSuite() {
         actionsExecuted: testResult.actionsExecuted || 0,
         executionTime,
         securityScore: testResult.securityScore || 95,
-        riskLevel: testResult.riskLevel || 'low'
+        riskLevel: testResult.riskLevel || 'low',
+        summary: `${agent.name} completed successfully`,
+        analysis: testResult.insights || [],
+        rawResponse: testResult
       };
 
     } catch (error) {
       console.error(`❌ Test failed for ${agent.name} on ${platform}:`, error);
       console.error('Error details:', error.message, error.code, error.details);
       return {
+        agentId: agent.id,
+        agentName: agent.name,
         agentType: agent.id,
         platform,
         status: 'failed',
@@ -348,7 +363,10 @@ export function CustomerIntelligenceTestSuite() {
         executionTime: Date.now() - startTime,
         securityScore: 0,
         riskLevel: 'high',
-        error: error.message
+        error: error.message,
+        summary: `${agent.name} test failed`,
+        analysis: [],
+        rawResponse: { error: error.message }
       };
     }
   };
@@ -553,7 +571,7 @@ export function CustomerIntelligenceTestSuite() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {customerIntelligenceAgents.map((agent) => {
           const IconComponent = agent.icon;
-          const agentResults = testResults.filter(r => r.agentType === agent.id);
+          const agentResults = testResults.filter(r => r.agentId === agent.id);
           const completedTests = agentResults.filter(r => r.status === 'completed').length;
           const failedTests = agentResults.filter(r => r.status === 'failed').length;
           const avgConfidence = agentResults.length > 0 
@@ -720,7 +738,7 @@ export function CustomerIntelligenceTestSuite() {
 
               {/* Individual Agent Details */}
               {customerIntelligenceAgents.map(agent => {
-                const agentResults = testResults.filter(r => r.agentType === agent.id);
+                const agentResults = testResults.filter(r => r.agentId === agent.id);
                 
                 return (
                   <TabsContent key={agent.id} value={agent.id.split('-')[1]} className="space-y-4">
@@ -775,6 +793,13 @@ export function CustomerIntelligenceTestSuite() {
           </CardContent>
         </Card>
       )}
+
+      {/* Enhanced Test Results Viewer */}
+      <TestResultsViewer 
+        results={testResults}
+        isRunning={isRunningTests}
+        currentTest={currentTest}
+      />
     </div>
   );
 }
