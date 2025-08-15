@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -104,7 +105,8 @@ interface Task {
 }
 
 const CRM = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
@@ -130,11 +132,16 @@ const CRM = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+      return;
+    }
+    
     if (user) {
       fetchDashboardStats();
       fetchAllData();
     }
-  }, [user]);
+  }, [user, authLoading, navigate]);
 
   const fetchDashboardStats = async () => {
     try {
@@ -290,15 +297,21 @@ const CRM = () => {
     task.subject.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading CRM...</p>
+          <p className="text-muted-foreground">
+            {authLoading ? 'Authenticating...' : 'Loading CRM...'}
+          </p>
         </div>
       </div>
     );
+  }
+
+  if (!user) {
+    return null; // Will redirect in useEffect
   }
 
   return (
