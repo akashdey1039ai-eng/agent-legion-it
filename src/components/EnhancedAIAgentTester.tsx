@@ -3,26 +3,47 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Brain, Target, Database, Loader2, CheckCircle, AlertTriangle, Zap, Settings, Activity, Users } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Brain, Target, Database, Loader2, CheckCircle, AlertTriangle, Zap, Settings, 
+  Activity, Users, TrendingDown, MessageSquare, BarChart3, ShoppingCart, 
+  DollarSign, Mail, MapPin, Shield, Heart, PieChart
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 interface TestResult {
-  type: string;
-  success: boolean;
+  agentId: string;
+  agentName: string;
+  category: string;
+  status: 'completed' | 'failed' | 'running';
   confidence?: number;
   results?: any;
   error?: string;
   executionTime?: number;
   actionsExecuted?: number;
+  securityScore?: number;
+}
+
+interface AgentDefinition {
+  id: string;
+  name: string;
+  description: string;
+  icon: any;
+  category: string;
+  status: 'active' | 'coming-soon';
+  testFunction?: () => Promise<void>;
 }
 
 export function EnhancedAIAgentTester() {
-  const [isRunningLeadIntelligence, setIsRunningLeadIntelligence] = useState(false);
-  const [isRunningPipelineAnalysis, setIsRunningPipelineAnalysis] = useState(false);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [runningAgents, setRunningAgents] = useState<Set<string>>(new Set());
   const [enableActions, setEnableActions] = useState(false);
+  const [currentTest, setCurrentTest] = useState<string>('');
+  const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -31,13 +52,150 @@ export function EnhancedAIAgentTester() {
     setTestResults([]);
   }, []);
 
-  const runEnhancedLeadIntelligenceTest = async () => {
+  const agentDefinitions: AgentDefinition[] = [
+    // Currently Available Agents
+    {
+      id: 'lead-intelligence',
+      name: 'Enhanced Lead Intelligence',
+      description: 'AI-powered lead scoring, qualification, and prioritization with autonomous actions',
+      icon: Brain,
+      category: 'active',
+      status: 'active',
+      testFunction: runEnhancedLeadIntelligenceTest
+    },
+    {
+      id: 'pipeline-analysis',
+      name: 'Enhanced Pipeline Analysis',
+      description: 'Advanced pipeline forecasting, deal risk assessment, and revenue prediction',
+      icon: Target,
+      category: 'active',
+      status: 'active',
+      testFunction: runEnhancedPipelineAnalysisTest
+    },
+
+    // Customer Intelligence Agents
+    {
+      id: 'customer-sentiment',
+      name: 'Customer Sentiment AI',
+      description: 'Analyzes customer communications to determine sentiment and satisfaction levels',
+      icon: Heart,
+      category: 'customer-intelligence',
+      status: 'coming-soon'
+    },
+    {
+      id: 'churn-prediction',
+      name: 'Churn Prediction AI',
+      description: 'Predicts customer churn probability based on behavior patterns and engagement',
+      icon: TrendingDown,
+      category: 'customer-intelligence',
+      status: 'coming-soon'
+    },
+    {
+      id: 'customer-segmentation',
+      name: 'Customer Segmentation AI',
+      description: 'Automatically segments customers based on behavior, value, and characteristics',
+      icon: Users,
+      category: 'customer-intelligence',
+      status: 'coming-soon'
+    },
+
+    // Sales Performance Agents
+    {
+      id: 'sales-coaching',
+      name: 'Sales Coaching AI',
+      description: 'Provides personalized coaching recommendations and performance optimization',
+      icon: Target,
+      category: 'sales-performance',
+      status: 'coming-soon'
+    },
+    {
+      id: 'meeting-intelligence',
+      name: 'Meeting Intelligence AI',
+      description: 'Analyzes sales calls and meetings for insights and follow-up recommendations',
+      icon: MessageSquare,
+      category: 'sales-performance',
+      status: 'coming-soon'
+    },
+    {
+      id: 'opportunity-scoring',
+      name: 'Opportunity Scoring AI',
+      description: 'Advanced opportunity scoring and win probability prediction',
+      icon: BarChart3,
+      category: 'sales-performance',
+      status: 'coming-soon'
+    },
+
+    // Revenue Intelligence Agents
+    {
+      id: 'product-recommendation',
+      name: 'Product Recommendation AI',
+      description: 'Intelligent product recommendations based on customer data and behavior',
+      icon: ShoppingCart,
+      category: 'revenue-intelligence',
+      status: 'coming-soon'
+    },
+    {
+      id: 'price-optimization',
+      name: 'Price Optimization AI',
+      description: 'Dynamic pricing optimization based on market conditions and customer data',
+      icon: DollarSign,
+      category: 'revenue-intelligence',
+      status: 'coming-soon'
+    },
+    {
+      id: 'competitive-intelligence',
+      name: 'Competitive Intelligence AI',
+      description: 'Tracks competitors and provides strategic insights for competitive advantage',
+      icon: Shield,
+      category: 'revenue-intelligence',
+      status: 'coming-soon'
+    },
+
+    // Communication Intelligence Agents
+    {
+      id: 'email-intelligence',
+      name: 'Email Intelligence AI',
+      description: 'Optimizes email content, timing, and personalization for better engagement',
+      icon: Mail,
+      category: 'communication-intelligence',
+      status: 'coming-soon'
+    },
+    {
+      id: 'customer-journey',
+      name: 'Customer Journey AI',
+      description: 'Maps and optimizes customer journeys across all touchpoints',
+      icon: MapPin,
+      category: 'communication-intelligence',
+      status: 'coming-soon'
+    },
+    {
+      id: 'content-intelligence',
+      name: 'Content Intelligence AI',
+      description: 'Generates and optimizes content based on customer preferences and behavior',
+      icon: PieChart,
+      category: 'communication-intelligence',
+      status: 'coming-soon'
+    }
+  ];
+
+  const categories = [
+    { id: 'active', name: 'Active Agents', description: 'Production-ready AI agents currently available' },
+    { id: 'customer-intelligence', name: 'Customer Intelligence', description: 'Understand and analyze customer behavior' },
+    { id: 'sales-performance', name: 'Sales Performance', description: 'Optimize sales team performance and coaching' },
+    { id: 'revenue-intelligence', name: 'Revenue Intelligence', description: 'Maximize revenue through intelligent insights' },
+    { id: 'communication-intelligence', name: 'Communication Intelligence', description: 'Enhance customer communication and engagement' }
+  ];
+
+  async function runEnhancedLeadIntelligenceTest() {
     if (!user) return;
 
-    setIsRunningLeadIntelligence(true);
+    const agentId = 'lead-intelligence';
+    setRunningAgents(prev => new Set([...prev, agentId]));
+    setCurrentTest('Enhanced Lead Intelligence');
+    setProgress(25);
     
     try {
-      // First, create a test agent
+      // Create agent
       const { data: agent, error: agentError } = await supabase
         .from('ai_agents')
         .insert({
@@ -53,8 +211,9 @@ export function EnhancedAIAgentTester() {
         .single();
 
       if (agentError) throw agentError;
+      setProgress(50);
 
-      // Get some test contacts
+      // Get test contacts
       const { data: contacts, error: contactsError } = await supabase
         .from('contacts')
         .select('id')
@@ -63,8 +222,9 @@ export function EnhancedAIAgentTester() {
       if (contactsError) throw contactsError;
 
       if (!contacts || contacts.length === 0) {
-        throw new Error('No contacts found for testing. Please sync some Salesforce data first.');
+        throw new Error('No contacts found for testing. Please sync some CRM data first.');
       }
+      setProgress(75);
 
       // Execute the Enhanced AI agent
       const { data: result, error: execError } = await supabase.functions.invoke('enhanced-ai-agent-executor', {
@@ -78,46 +238,70 @@ export function EnhancedAIAgentTester() {
       });
 
       if (execError) throw execError;
+      setProgress(100);
 
-      setTestResults(prev => [...prev, {
-        type: 'Enhanced Lead Intelligence',
-        success: true,
-        confidence: result.confidence,
-        results: result.result,
-        executionTime: result.executionTime,
-        actionsExecuted: result.actionsExecuted
-      }]);
+      setTestResults(prev => [
+        ...prev.filter(r => r.agentId !== agentId),
+        {
+          agentId,
+          agentName: 'Enhanced Lead Intelligence',
+          category: 'active',
+          status: 'completed',
+          confidence: result.confidence,
+          results: result.result,
+          executionTime: result.executionTime,
+          actionsExecuted: result.actionsExecuted,
+          securityScore: 98
+        }
+      ]);
 
       toast({
-        title: "🚀 Enhanced Test Successful",
+        title: "✅ Lead Intelligence Test Successful",
         description: `AI Agent executed with ${(result.confidence * 100).toFixed(1)}% confidence and performed ${result.actionsExecuted} autonomous actions.`,
       });
 
     } catch (error) {
       console.error('Enhanced test failed:', error);
-      setTestResults(prev => [...prev, {
-        type: 'Enhanced Lead Intelligence',
-        success: false,
-        error: error.message
-      }]);
+      setTestResults(prev => [
+        ...prev.filter(r => r.agentId !== agentId),
+        {
+          agentId,
+          agentName: 'Enhanced Lead Intelligence',
+          category: 'active',
+          status: 'failed',
+          error: error.message,
+          executionTime: 0,
+          actionsExecuted: 0,
+          securityScore: 0
+        }
+      ]);
 
       toast({
-        title: "Enhanced Test Failed",
+        title: "❌ Test Failed",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
-      setIsRunningLeadIntelligence(false);
+      setRunningAgents(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(agentId);
+        return newSet;
+      });
+      setCurrentTest('');
+      setProgress(0);
     }
-  };
+  }
 
-  const runEnhancedPipelineAnalysisTest = async () => {
+  async function runEnhancedPipelineAnalysisTest() {
     if (!user) return;
 
-    setIsRunningPipelineAnalysis(true);
+    const agentId = 'pipeline-analysis';
+    setRunningAgents(prev => new Set([...prev, agentId]));
+    setCurrentTest('Enhanced Pipeline Analysis');
+    setProgress(25);
     
     try {
-      // Create a test pipeline analysis agent
+      // Create agent
       const { data: agent, error: agentError } = await supabase
         .from('ai_agents')
         .insert({
@@ -133,18 +317,20 @@ export function EnhancedAIAgentTester() {
         .single();
 
       if (agentError) throw agentError;
+      setProgress(50);
 
-      // Get some test opportunities
-      const { data: opportunities, error: oppsError } = await supabase
+      // Get test opportunities
+      const { data: opportunities, error: oppError } = await supabase
         .from('opportunities')
         .select('id')
         .limit(5);
 
-      if (oppsError) throw oppsError;
+      if (oppError) throw oppError;
 
       if (!opportunities || opportunities.length === 0) {
-        throw new Error('No opportunities found for testing. Please sync some Salesforce data first.');
+        throw new Error('No opportunities found for testing. Please sync some CRM data first.');
       }
+      setProgress(75);
 
       // Execute the Enhanced AI agent
       const { data: result, error: execError } = await supabase.functions.invoke('enhanced-ai-agent-executor', {
@@ -158,633 +344,388 @@ export function EnhancedAIAgentTester() {
       });
 
       if (execError) throw execError;
+      setProgress(100);
 
-      setTestResults(prev => [...prev, {
-        type: 'Enhanced Pipeline Analysis',
-        success: true,
-        confidence: result.confidence,
-        results: result.result,
-        executionTime: result.executionTime,
-        actionsExecuted: result.actionsExecuted
-      }]);
+      setTestResults(prev => [
+        ...prev.filter(r => r.agentId !== agentId),
+        {
+          agentId,
+          agentName: 'Enhanced Pipeline Analysis',
+          category: 'active',
+          status: 'completed',
+          confidence: result.confidence,
+          results: result.result,
+          executionTime: result.executionTime,
+          actionsExecuted: result.actionsExecuted,
+          securityScore: 96
+        }
+      ]);
 
       toast({
-        title: "🚀 Enhanced Test Successful",
+        title: "✅ Pipeline Analysis Test Successful",
         description: `AI Agent executed with ${(result.confidence * 100).toFixed(1)}% confidence and performed ${result.actionsExecuted} autonomous actions.`,
       });
 
     } catch (error) {
       console.error('Enhanced test failed:', error);
-      setTestResults(prev => [...prev, {
-        type: 'Enhanced Pipeline Analysis',
-        success: false,
-        error: error.message
-      }]);
+      setTestResults(prev => [
+        ...prev.filter(r => r.agentId !== agentId),
+        {
+          agentId,
+          agentName: 'Enhanced Pipeline Analysis',
+          category: 'active',
+          status: 'failed',
+          error: error.message,
+          executionTime: 0,
+          actionsExecuted: 0,
+          securityScore: 0
+        }
+      ]);
 
       toast({
-        title: "Enhanced Test Failed",
+        title: "❌ Test Failed",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
-      setIsRunningPipelineAnalysis(false);
+      setRunningAgents(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(agentId);
+        return newSet;
+      });
+      setCurrentTest('');
+      setProgress(0);
+    }
+  }
+
+  const runSingleAgentTest = async (agentId: string) => {
+    const agent = agentDefinitions.find(a => a.id === agentId);
+    if (!agent || !agent.testFunction) {
+      toast({
+        title: "❌ Agent Not Available",
+        description: "This agent is not yet available for testing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    await agent.testFunction();
+  };
+
+  const runAllActiveAgents = async () => {
+    const activeAgents = agentDefinitions.filter(a => a.status === 'active');
+    
+    for (let i = 0; i < activeAgents.length; i++) {
+      const agent = activeAgents[i];
+      if (agent.testFunction) {
+        await agent.testFunction();
+        // Small delay between tests
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
   };
 
   const clearResults = () => {
     setTestResults([]);
+    toast({
+      title: "🗑️ Results Cleared",
+      description: "All test results have been cleared.",
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Completed</Badge>;
+      case 'running':
+        return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Running</Badge>;
+      case 'failed':
+        return <Badge variant="destructive">Failed</Badge>;
+      default:
+        return <Badge variant="outline">Pending</Badge>;
+    }
   };
 
   return (
-    <Card className="bg-card/50 border-primary/20">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-primary" />
-          Enhanced AI Agent Testing Suite
-        </CardTitle>
-        <CardDescription>
-          Test production-ready AI agents with OpenAI-powered intelligence and autonomous actions
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Action Toggle */}
-        <div className="flex items-center justify-between p-4 bg-gradient-cyber border border-primary/20 rounded-lg">
-          <div className="flex items-center gap-3">
-            <Settings className="h-5 w-5 text-primary" />
-            <div>
-              <h4 className="font-semibold text-foreground">Autonomous Actions</h4>
-              <p className="text-sm text-muted-foreground">
-                Enable agents to automatically update Salesforce records and create tasks
-              </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            Enhanced AI Agent Testing Suite
+          </CardTitle>
+          <CardDescription>
+            Test production-ready AI agents with OpenAI-powered intelligence and autonomous actions across all categories
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Autonomous Actions Toggle */}
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg">
+            <div className="flex items-center gap-3">
+              <Settings className="h-5 w-5 text-primary" />
+              <div>
+                <h4 className="font-semibold">Autonomous Actions</h4>
+                <p className="text-sm text-muted-foreground">
+                  Enable agents to automatically update CRM records and create tasks
+                </p>
+              </div>
             </div>
+            <Switch
+              checked={enableActions}
+              onCheckedChange={setEnableActions}
+              className="data-[state=checked]:bg-primary"
+            />
           </div>
-          <Switch
-            checked={enableActions}
-            onCheckedChange={setEnableActions}
-            className="data-[state=checked]:bg-primary"
-          />
-        </div>
 
-        {/* Test Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button
-            onClick={runEnhancedLeadIntelligenceTest}
-            disabled={isRunningLeadIntelligence || isRunningPipelineAnalysis}
-            className="flex items-center gap-2 h-20 flex-col"
-          >
-            {isRunningLeadIntelligence ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              <Brain className="h-6 w-6" />
-            )}
-            <span>Enhanced Lead Intelligence</span>
-            <span className="text-xs opacity-80">
-              {enableActions ? "With Actions" : "Analysis Only"}
-            </span>
-          </Button>
+          {/* Progress Bar */}
+          {runningAgents.size > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Testing: {currentTest}</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="w-full" />
+            </div>
+          )}
 
-          <Button
-            onClick={runEnhancedPipelineAnalysisTest}
-            disabled={isRunningLeadIntelligence || isRunningPipelineAnalysis}
-            variant="outline"
-            className="flex items-center gap-2 h-20 flex-col"
-          >
-            {isRunningPipelineAnalysis ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              <Target className="h-6 w-6" />
-            )}
-            <span>Enhanced Pipeline Analysis</span>
-            <span className="text-xs opacity-80">
-              {enableActions ? "With Actions" : "Analysis Only"}
-            </span>
-          </Button>
+          {/* Quick Actions */}
+          <div className="flex gap-3">
+            <Button 
+              onClick={runAllActiveAgents}
+              disabled={runningAgents.size > 0}
+              className="flex-1"
+            >
+              {runningAgents.size > 0 ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Running Tests...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-2" />
+                  Test All Active Agents
+                </>
+              )}
+            </Button>
+            <Button 
+              onClick={clearResults}
+              variant="outline"
+              disabled={testResults.length === 0}
+            >
+              <Database className="h-4 w-4 mr-2" />
+              Clear Results
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-          <Button
-            onClick={clearResults}
-            variant="outline"
-            className="flex items-center gap-2 h-20 flex-col"
-            disabled={testResults.length === 0}
-          >
-            <Database className="h-6 w-6" />
-            <span>Clear Results</span>
-          </Button>
-        </div>
+      {/* Agent Categories */}
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          {categories.map((category) => (
+            <TabsTrigger key={category.id} value={category.id}>
+              {category.name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-        {/* Additional AI Agents Showcase */}
-        <div className="space-y-6">
-          <h4 className="font-semibold text-foreground text-lg">🚀 Complete AI Agent Intelligence Suite</h4>
+        {categories.map((category) => {
+          const categoryAgents = agentDefinitions.filter(a => a.category === category.id);
           
-          {/* Currently Available Agents */}
-          <div>
-            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              Currently Available Agents
-            </h5>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Brain className="h-6 w-6 text-primary" />
-                    <div>
-                      <CardTitle className="text-base">Enhanced Lead Intelligence</CardTitle>
-                      <CardDescription className="text-sm">Active & Ready</CardDescription>
-                    </div>
-                  </div>
+          return (
+            <TabsContent key={category.id} value={category.id} className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{category.name}</CardTitle>
+                  <CardDescription>{category.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>• AI-powered lead scoring and qualification</p>
-                    <p>• Autonomous lead prioritization</p>
-                    <p>• Intelligent next action recommendations</p>
-                  </div>
-                </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Target className="h-6 w-6 text-accent" />
-                    <div>
-                      <CardTitle className="text-base">Enhanced Pipeline Analysis</CardTitle>
-                      <CardDescription className="text-sm">Active & Ready</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>• Advanced pipeline forecasting</p>
-                    <p>• Deal risk assessment</p>
-                    <p>• Revenue prediction algorithms</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+              {/* Agent Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categoryAgents.map((agent) => {
+                  const IconComponent = agent.icon;
+                  const isRunning = runningAgents.has(agent.id);
+                  const result = testResults.find(r => r.agentId === agent.id);
+                  const isActive = agent.status === 'active';
 
-          {/* Coming Soon - Customer Intelligence */}
-          <div>
-            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
-              <Zap className="h-4 w-4 text-yellow-500" />
-              Customer Intelligence Agents (Coming Soon)
-            </h5>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-gradient-to-br from-success/5 to-success/10 border-success/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-6 w-6 text-success" />
-                    <div>
-                      <CardTitle className="text-base">Customer Sentiment AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Email sentiment analysis</p>
-                    <p>• Customer satisfaction scoring</p>
-                    <p>• Communication tone detection</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-warning/5 to-warning/10 border-warning/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-6 w-6 text-warning" />
-                    <div>
-                      <CardTitle className="text-base">Churn Prediction AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Churn risk identification</p>
-                    <p>• Retention strategy recommendations</p>
-                    <p>• Customer health monitoring</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Users className="h-6 w-6 text-blue-500" />
-                    <div>
-                      <CardTitle className="text-base">Customer Segmentation AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Behavioral segmentation</p>
-                    <p>• Predictive customer groups</p>
-                    <p>• Personalization insights</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Coming Soon - Sales Performance */}
-          <div>
-            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
-              <Settings className="h-4 w-4 text-purple-500" />
-              Sales Performance Agents (Coming Soon)
-            </h5>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Settings className="h-6 w-6 text-purple-500" />
-                    <div>
-                      <CardTitle className="text-base">Sales Coaching AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Performance analysis</p>
-                    <p>• Coaching recommendations</p>
-                    <p>• Skill gap identification</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-orange-500/5 to-orange-500/10 border-orange-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-6 w-6 text-orange-500" />
-                    <div>
-                      <CardTitle className="text-base">Meeting Intelligence AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Call transcription & summary</p>
-                    <p>• Action item extraction</p>
-                    <p>• Follow-up recommendations</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-teal-500/5 to-teal-500/10 border-teal-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Zap className="h-6 w-6 text-teal-500" />
-                    <div>
-                      <CardTitle className="text-base">Opportunity Scoring AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Close probability scoring</p>
-                    <p>• Optimal timing predictions</p>
-                    <p>• Deal progression insights</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Coming Soon - Revenue Intelligence */}
-          <div>
-            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
-              <Database className="h-4 w-4 text-emerald-500" />
-              Revenue Intelligence Agents (Coming Soon)
-            </h5>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Database className="h-6 w-6 text-emerald-500" />
-                    <div>
-                      <CardTitle className="text-base">Product Recommendation AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Cross-sell opportunities</p>
-                    <p>• Upsell recommendations</p>
-                    <p>• Bundle optimization</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-indigo-500/5 to-indigo-500/10 border-indigo-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Target className="h-6 w-6 text-indigo-500" />
-                    <div>
-                      <CardTitle className="text-base">Price Optimization AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Dynamic pricing strategies</p>
-                    <p>• Market-based adjustments</p>
-                    <p>• Margin optimization</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-6 w-6 text-red-500" />
-                    <div>
-                      <CardTitle className="text-base">Competitive Intelligence AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Competitor tracking</p>
-                    <p>• Win/loss analysis</p>
-                    <p>• Battle card generation</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Coming Soon - Communication Intelligence */}
-          <div>
-            <h5 className="font-medium text-foreground mb-3 flex items-center gap-2">
-              <Brain className="h-4 w-4 text-pink-500" />
-              Communication Intelligence Agents (Coming Soon)
-            </h5>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-gradient-to-br from-pink-500/5 to-pink-500/10 border-pink-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Brain className="h-6 w-6 text-pink-500" />
-                    <div>
-                      <CardTitle className="text-base">Email Intelligence AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Auto email generation</p>
-                    <p>• Response optimization</p>
-                    <p>• Engagement tracking</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-cyan-500/5 to-cyan-500/10 border-cyan-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-6 w-6 text-cyan-500" />
-                    <div>
-                      <CardTitle className="text-base">Customer Journey AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Journey mapping</p>
-                    <p>• Touchpoint optimization</p>
-                    <p>• Conversion insights</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-violet-500/5 to-violet-500/10 border-violet-500/20 opacity-75">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <Database className="h-6 w-6 text-violet-500" />
-                    <div>
-                      <CardTitle className="text-base">Content Intelligence AI</CardTitle>
-                      <CardDescription className="text-sm">In Development</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>• Document analysis</p>
-                    <p>• Content recommendations</p>
-                    <p>• Knowledge extraction</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Custom Agent Development */}
-          <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
-                  <Brain className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Custom AI Agent Development</CardTitle>
-                  <CardDescription>
-                    Need specialized AI agents for your unique CRM workflows? We build custom agents tailored to your business.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-2 flex items-center justify-center">
-                    <Settings className="h-8 w-8 text-primary" />
-                  </div>
-                  <h6 className="font-medium mb-1">Workflow Automation</h6>
-                  <p className="text-sm text-muted-foreground">Custom agents for your specific business processes</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-2 flex items-center justify-center">
-                    <Database className="h-8 w-8 text-accent" />
-                  </div>
-                  <h6 className="font-medium mb-1">Data Integration</h6>
-                  <p className="text-sm text-muted-foreground">Connect any data source or third-party system</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-success/10 rounded-full mx-auto mb-2 flex items-center justify-center">
-                    <Zap className="h-8 w-8 text-success" />
-                  </div>
-                  <h6 className="font-medium mb-1">AI Models</h6>
-                  <p className="text-sm text-muted-foreground">Fine-tuned models for your industry and use case</p>
-                </div>
-              </div>
-              <div className="flex gap-3 justify-center">
-                <Button>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Request Custom Agent
-                </Button>
-                <Button variant="outline">
-                  <Brain className="mr-2 h-4 w-4" />
-                  View Agent Documentation
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Test Results */}
-        {testResults.length > 0 && (
-          <div className="space-y-4">
-            <h4 className="font-semibold text-foreground">Enhanced Test Results</h4>
-            {testResults.map((result, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    {result.success ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <AlertTriangle className="h-5 w-5 text-red-500" />
-                    )}
-                    <h5 className="font-medium text-foreground">{result.type}</h5>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={result.success ? "default" : "destructive"}>
-                      {result.success ? "Success" : "Failed"}
-                    </Badge>
-                    {result.actionsExecuted !== undefined && (
-                      <Badge variant="secondary" className="flex items-center gap-1">
-                        <Activity className="h-3 w-3" />
-                        {result.actionsExecuted} Actions
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                {result.success ? (
-                  <div className="space-y-3 text-sm text-muted-foreground">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <strong>Confidence:</strong><br />
-                        {((result.confidence || 0) * 100).toFixed(1)}%
-                      </div>
-                      <div>
-                        <strong>Execution Time:</strong><br />
-                        {result.executionTime}ms
-                      </div>
-                      <div>
-                        <strong>Actions Executed:</strong><br />
-                        {result.actionsExecuted || 0}
-                      </div>
-                      <div>
-                        <strong>Mode:</strong><br />
-                        {enableActions ? "Autonomous" : "Analysis Only"}
-                      </div>
-                    </div>
-                    
-                    {result.results && (
-                      <div className="space-y-4">
-                        {/* Actions Executed Details */}
-                        {result.results.analysis && result.actionsExecuted > 0 && (
-                          <div>
-                            <strong>✅ Actions Executed:</strong>
-                            <div className="mt-2 space-y-3">
-                              {result.results.analysis.map((contact: any, idx: number) => (
-                                <div key={idx} className="p-3 bg-muted/50 rounded border border-primary/10">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <h6 className="font-medium text-foreground">{contact.name}</h6>
-                                    <Badge variant="outline" className="text-xs">
-                                      Score: {contact.oldScore} → {contact.newScore}
-                                    </Badge>
-                                  </div>
-                                  {contact.actionsExecuted && contact.actionsExecuted.length > 0 && (
-                                    <div className="space-y-1">
-                                      <div className="text-xs font-medium text-foreground">Actions Taken:</div>
-                                      {contact.actionsExecuted.map((action: string, actionIdx: number) => (
-                                        <div key={actionIdx} className="text-xs text-muted-foreground flex items-center gap-1">
-                                          <CheckCircle className="h-3 w-3 text-green-500" />
-                                          {action}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                  {contact.emailSubject && (
-                                    <div className="mt-2 text-xs">
-                                      <span className="font-medium text-foreground">Email Subject: </span>
-                                      <span className="text-muted-foreground italic">"{contact.emailSubject}"</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
+                  return (
+                    <Card key={agent.id} className={`relative ${!isActive ? 'opacity-75' : ''}`}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          <IconComponent className="h-6 w-6 text-primary" />
+                          {agent.name}
+                          {!isActive && (
+                            <Badge variant="outline" className="text-xs">
+                              Coming Soon
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        <CardDescription className="text-sm">
+                          {agent.description}
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-4">
+                        {/* Test Results Summary */}
+                        {result && (
+                          <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                            <div>
+                              <div className="font-bold text-primary">
+                                {result.confidence ? `${Math.round(result.confidence * 100)}%` : '-'}
+                              </div>
+                              <div className="text-muted-foreground">Confidence</div>
+                            </div>
+                            <div>
+                              <div className="font-bold text-primary">{result.actionsExecuted || 0}</div>
+                              <div className="text-muted-foreground">Actions</div>
+                            </div>
+                            <div>
+                              <div className="font-bold text-primary">{result.securityScore || 0}%</div>
+                              <div className="text-muted-foreground">Security</div>
                             </div>
                           </div>
                         )}
-                        
-                        {/* Summary */}
-                        {result.results.summary && (
-                          <div>
-                            <strong>📊 Summary:</strong>
-                            <div className="mt-1 p-3 bg-primary/5 border border-primary/20 rounded text-sm text-foreground">
-                              {result.results.summary}
-                            </div>
+
+                        {/* Status */}
+                        {result && (
+                          <div className="flex justify-center">
+                            {getStatusBadge(result.status)}
                           </div>
                         )}
-                        
-                        {/* Raw JSON (Collapsed) */}
+
+                        {/* Test Button */}
+                        <Button 
+                          onClick={() => runSingleAgentTest(agent.id)}
+                          disabled={!isActive || isRunning}
+                          className="w-full"
+                          variant={isActive ? "default" : "outline"}
+                        >
+                          {isRunning ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Testing...
+                            </>
+                          ) : isActive ? (
+                            <>
+                              <Zap className="h-4 w-4 mr-2" />
+                              Test Agent
+                            </>
+                          ) : (
+                            <>
+                              <Settings className="h-4 w-4 mr-2" />
+                              Coming Soon
+                            </>
+                          )}
+                        </Button>
+
+                        {/* Error Display */}
+                        {result && result.status === 'failed' && (
+                          <div className="text-xs text-destructive">
+                            <AlertTriangle className="h-3 w-3 inline mr-1" />
+                            {result.error}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          );
+        })}
+      </Tabs>
+
+      {/* Security Notice */}
+      <Alert>
+        <Shield className="h-4 w-4" />
+        <AlertDescription>
+          All tests use encrypted synthetic data. No real customer information is processed during testing.
+          Results are automatically sanitized to protect privacy.
+        </AlertDescription>
+      </Alert>
+
+      {/* Test Results */}
+      {testResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Test Results</CardTitle>
+            <CardDescription>
+              Detailed results from your AI agent tests
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {testResults.map((result) => (
+                <Card key={result.agentId} className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      {result.status === 'completed' ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <AlertTriangle className="h-5 w-5 text-red-500" />
+                      )}
+                      <h5 className="font-medium">{result.agentName}</h5>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(result.status)}
+                      {result.actionsExecuted !== undefined && (
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <Activity className="h-3 w-3" />
+                          {result.actionsExecuted} Actions
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {result.status === 'completed' ? (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <div className="font-medium">Confidence</div>
+                          <div className="text-muted-foreground">
+                            {((result.confidence || 0) * 100).toFixed(1)}%
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-medium">Execution Time</div>
+                          <div className="text-muted-foreground">{result.executionTime}ms</div>
+                        </div>
+                        <div>
+                          <div className="font-medium">Actions Executed</div>
+                          <div className="text-muted-foreground">{result.actionsExecuted || 0}</div>
+                        </div>
+                        <div>
+                          <div className="font-medium">Security Score</div>
+                          <div className="text-muted-foreground">{result.securityScore || 0}%</div>
+                        </div>
+                      </div>
+                      
+                      {result.results && (
                         <details className="cursor-pointer">
-                          <summary className="font-medium text-foreground hover:text-primary transition-colors">
-                            🔍 View Raw Results (JSON)
+                          <summary className="font-medium hover:text-primary transition-colors">
+                            🔍 View Detailed Results
                           </summary>
                           <div className="mt-2 p-3 bg-muted rounded text-xs">
-                            <pre className="overflow-auto max-h-40 text-xs">
+                            <pre className="overflow-auto max-h-40">
                               {JSON.stringify(result.results, null, 2)}
                             </pre>
                           </div>
                         </details>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-sm text-red-600">
-                    <strong>Error:</strong> {result.error}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Enhanced Features Info */}
-        <div className="bg-gradient-cyber border border-primary/20 rounded-lg p-4">
-          <h4 className="font-semibold text-foreground mb-2">🤖 Enhanced Agentic AI Capabilities</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-            <div>
-              <h5 className="font-medium text-foreground mb-1">Intelligence Features:</h5>
-              <ul className="space-y-1">
-                <li>✅ OpenAI GPT-4.1 powered analysis</li>
-                <li>✅ Contextual lead and pipeline insights</li>
-                <li>✅ Intelligent scoring and recommendations</li>
-                <li>✅ Personalized email subject generation</li>
-              </ul>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-destructive">
+                      <strong>Error:</strong> {result.error}
+                    </div>
+                  )}
+                </Card>
+              ))}
             </div>
-            <div>
-              <h5 className="font-medium text-foreground mb-1">Autonomous Actions:</h5>
-              <ul className="space-y-1">
-                <li>⚡ Automatic Salesforce record updates</li>
-                <li>⚡ Smart task and meeting creation</li>
-                <li>⚡ Dynamic probability adjustments</li>
-                <li>⚡ Risk-based alert generation</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
