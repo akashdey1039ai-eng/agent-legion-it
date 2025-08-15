@@ -55,7 +55,7 @@ export function AgentConfigurationSelector({
     switch (action) {
       case 'sandbox':
         // Open Salesforce Developer Sandbox in new tab
-        window.open('https://developer.salesforce.com/trailhead/en/content/learn/projects/quick-start-lightning-platform-app-builder/create-a-developer-org', '_blank');
+        window.open('https://developer.salesforce.com/signup', '_blank');
         toast({
           title: "Opening Developer Sandbox",
           description: "Salesforce Developer Environment opening in new tab",
