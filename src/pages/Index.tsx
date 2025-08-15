@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { CrmDashboard } from "@/components/CrmDashboard";
@@ -24,6 +24,7 @@ const clearTestResults = () => {
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -37,15 +38,19 @@ const Index = () => {
     }
 
     // Handle navigation state for agent management
-    const state = window.history.state?.usr;
+    const state = location.state as { activeTab?: string; openAgent?: string } | null;
+    console.log('Navigation state:', state);
+    
     if (state?.activeTab) {
+      console.log('Setting active tab:', state.activeTab);
       setActiveTab(state.activeTab);
     }
     if (state?.openAgent) {
+      console.log('Opening agent:', state.openAgent);
       setActiveTab('agents');
       setActiveAgent(state.openAgent);
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location.state]);
 
   if (loading) {
     return (
@@ -287,10 +292,14 @@ const Index = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-3xl font-bold tracking-tight">
-                        {activeAgent === 'lead-intelligence' ? 'Lead Intelligence Agent' : 'AI Agent'}
+                        {activeAgent === 'lead-intelligence' && 'Lead Intelligence Agent'}
+                        {activeAgent === 'pipeline-analysis' && 'Pipeline Analysis Agent'}
+                        {!activeAgent.includes('lead-intelligence') && !activeAgent.includes('pipeline-analysis') && 'AI Agent'}
                       </h2>
                       <p className="text-muted-foreground">
-                        {activeAgent === 'lead-intelligence' ? 'Analyze and score leads using AI' : 'Manage your AI agent'}
+                        {activeAgent === 'lead-intelligence' && 'Analyze and score leads using AI'}
+                        {activeAgent === 'pipeline-analysis' && 'Analyze deal risks and probability forecasts'}
+                        {!activeAgent.includes('lead-intelligence') && !activeAgent.includes('pipeline-analysis') && 'Manage your AI agent'}
                       </p>
                     </div>
                     <Button 
@@ -303,6 +312,20 @@ const Index = () => {
                   </div>
                   
                   {activeAgent === 'lead-intelligence' && <LeadIntelligenceAgent />}
+                  {activeAgent === 'pipeline-analysis' && (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <TrendingUp className="h-8 w-8 text-primary" />
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">Pipeline Analysis Agent</h3>
+                      <p className="text-muted-foreground mb-4">
+                        This agent analyzes deal risks and adjusts probability forecasts automatically.
+                      </p>
+                      <Button className="bg-gradient-primary hover:opacity-90">
+                        Configure Agent Settings
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -433,7 +456,10 @@ const Index = () => {
                           <span><strong>Last Run:</strong> 1 hour ago</span>
                           <span><strong>Success:</strong> 91%</span>
                         </div>
-                        <Button className="w-full">
+                        <Button 
+                          className="w-full"
+                          onClick={() => setActiveAgent('pipeline-analysis')}
+                        >
                           <TrendingUp className="h-4 w-4 mr-2" />
                           Manage Agent
                         </Button>

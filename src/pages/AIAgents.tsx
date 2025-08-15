@@ -72,11 +72,17 @@ export default function AIAgents() {
   };
 
   const handleAgentClick = (agentId: string) => {
+    console.log('Agent clicked:', agentId);
     // For now, navigate to the main page with the agent tab and scroll to agents
     // In a full implementation, this would go to a dedicated agent management page
     if (agentId === 'lead-intelligence') {
+      console.log('Navigating to lead intelligence agent');
       navigate('/', { state: { openAgent: 'lead-intelligence' } });
+    } else if (agentId === 'pipeline-analysis') {
+      console.log('Navigating to pipeline analysis agent');
+      navigate('/', { state: { activeTab: 'agents', openAgent: 'pipeline-analysis' } });
     } else {
+      console.log('Navigating to main agents tab');
       // For other agents, show a coming soon message or navigate to main agents tab
       navigate('/', { state: { activeTab: 'agents' } });
     }
