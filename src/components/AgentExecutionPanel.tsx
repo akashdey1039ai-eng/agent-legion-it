@@ -334,7 +334,7 @@ export function AgentExecutionPanel() {
                       <div className="flex items-center gap-3">
                         <Badge className={getRiskColor(analysis.risk_level)}>
                           {getRiskIcon(analysis.risk_level)}
-                          {analysis.risk_level.toUpperCase()}
+                          {analysis.risk_level?.toUpperCase() || 'UNKNOWN'}
                         </Badge>
                         <div>
                           <h4 className="font-medium">{analysis.opportunity_name}</h4>
