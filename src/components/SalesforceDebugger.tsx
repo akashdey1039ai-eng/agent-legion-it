@@ -56,37 +56,37 @@ export function SalesforceDebugger() {
         </Button>
 
         {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded">
-            <h3 className="font-bold text-red-800">Error:</h3>
-            <p className="text-red-700">{error}</p>
+          <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded">
+            <h3 className="font-bold text-destructive">Error:</h3>
+            <p className="text-destructive/80">{error}</p>
           </div>
         )}
 
         {result && (
           <div className="mt-4 space-y-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded">
-              <h3 className="font-bold text-green-800">Success!</h3>
-              <p className="text-green-700">Records analyzed: {result.recordsAnalyzed}</p>
-              <p className="text-green-700">Data source: {result.dataSource}</p>
+            <div className="p-4 bg-success/10 border border-success/20 rounded">
+              <h3 className="font-bold text-success">Success!</h3>
+              <p className="text-success/80">Records analyzed: {result.recordsAnalyzed}</p>
+              <p className="text-success/80">Data source: {result.dataSource}</p>
             </div>
 
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded">
-              <h3 className="font-bold text-blue-800">Raw Salesforce Data ({result.rawSalesforceData?.length || 0} records):</h3>
-              <pre className="text-xs mt-2 overflow-auto max-h-60">
+            <div className="p-4 bg-blue-950/30 border border-blue-500/20 rounded">
+              <h3 className="font-bold text-blue-400">Raw Salesforce Data ({result.rawSalesforceData?.length || 0} records):</h3>
+              <pre className="text-xs mt-2 overflow-auto max-h-60 text-blue-100">
                 {JSON.stringify(result.rawSalesforceData, null, 2)}
               </pre>
             </div>
 
-            <div className="p-4 bg-purple-50 border border-purple-200 rounded">
-              <h3 className="font-bold text-purple-800">AI Analysis:</h3>
-              <pre className="text-xs mt-2 overflow-auto max-h-60">
+            <div className="p-4 bg-green-950/30 border border-green-500/20 rounded">
+              <h3 className="font-bold text-green-400">AI Analysis:</h3>
+              <pre className="text-xs mt-2 overflow-auto max-h-60 text-green-100">
                 {JSON.stringify(result.analysis, null, 2)}
               </pre>
             </div>
 
-            <div className="p-4 bg-gray-50 border border-gray-200 rounded">
-              <h3 className="font-bold text-gray-800">Complete Response:</h3>
-              <pre className="text-xs mt-2 overflow-auto max-h-60">
+            <div className="p-4 bg-muted/30 border border-border rounded">
+              <h3 className="font-bold text-foreground">Complete Response:</h3>
+              <pre className="text-xs mt-2 overflow-auto max-h-60 text-muted-foreground">
                 {JSON.stringify(result, null, 2)}
               </pre>
             </div>

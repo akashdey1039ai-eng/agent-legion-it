@@ -317,15 +317,15 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
                            </h4>
                            
                            {/* Debug Info */}
-                           <div className="text-xs text-gray-500 bg-yellow-50 p-2 rounded">
+                           <div className="text-xs text-muted-foreground bg-secondary/50 border border-border p-2 rounded">
                              Debug: Platform={result.platform}, Has salesforceData={!!result.salesforceData}, Has rawResponse={!!result.rawResponse}
                            </div>
                            
                            {/* Salesforce Data Section */}
                            {result.platform === 'salesforce' && result.salesforceData && (
                              <div className="space-y-2">
-                               <h5 className="text-sm font-medium text-blue-600">📊 Real Salesforce Data ({result.salesforceData.length} records)</h5>
-                               <pre className="bg-blue-50 p-3 rounded-md text-xs overflow-auto border-l-4 border-blue-400">
+                               <h5 className="text-sm font-medium text-blue-400">📊 Real Salesforce Data ({result.salesforceData.length} records)</h5>
+                               <pre className="bg-blue-950/30 border border-blue-500/20 p-3 rounded-md text-xs overflow-auto text-blue-100">
                                  {JSON.stringify(result.salesforceData, null, 2)}
                                </pre>
                              </div>
@@ -334,8 +334,8 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
                            {/* AI Analysis Section */}
                            {result.platform === 'salesforce' && result.aiAnalysis && (
                              <div className="space-y-2">
-                               <h5 className="text-sm font-medium text-green-600">🧠 AI Analysis Results</h5>
-                               <pre className="bg-green-50 p-3 rounded-md text-xs overflow-auto border-l-4 border-green-400">
+                               <h5 className="text-sm font-medium text-green-400">🧠 AI Analysis Results</h5>
+                               <pre className="bg-green-950/30 border border-green-500/20 p-3 rounded-md text-xs overflow-auto text-green-100">
                                  {typeof result.aiAnalysis === 'string' ? result.aiAnalysis : JSON.stringify(result.aiAnalysis, null, 2)}
                                </pre>
                              </div>
@@ -343,8 +343,8 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
                            
                            {/* Complete Raw Response */}
                            <div className="space-y-2">
-                             <h5 className="text-sm font-medium text-gray-600">📋 Complete Test Result</h5>
-                             <pre className="bg-gray-50 p-3 rounded-md text-xs overflow-auto">
+                             <h5 className="text-sm font-medium text-muted-foreground">📋 Complete Test Result</h5>
+                             <pre className="bg-muted/50 border border-border p-3 rounded-md text-xs overflow-auto text-foreground">
                                {JSON.stringify(result.rawResponse || result, null, 2)}
                              </pre>
                            </div>
