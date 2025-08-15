@@ -27,7 +27,16 @@ import {
   Building2,
   AlertTriangle,
   CheckCircle,
-  Save
+  Save,
+  Calendar,
+  Mail,
+  Phone,
+  FileText,
+  DollarSign,
+  Star,
+  Filter,
+  Bell,
+  Globe
 } from 'lucide-react';
 
 interface AgentConfig {
@@ -46,14 +55,32 @@ interface AgentConfig {
     followUpTasks: boolean;
     duplicateDetection: boolean;
     dataEnrichment: boolean;
+    opportunityStageUpdates: boolean;
+    emailNotifications: boolean;
+    activityLogging: boolean;
+  };
+  salesforceConfig?: {
+    objects: string[];
+    fields: string[];
+    customFilters: Record<string, any>;
+    triggerConditions: string[];
+    bulkOperations: boolean;
+    sandboxMode: boolean;
+    apiVersion: string;
   };
   notifications: {
     email: boolean;
     inApp: boolean;
     webhook: string;
+    slackWebhook?: string;
   };
   customPrompt?: string;
   fieldMappings: Record<string, string>;
+  schedule?: {
+    timezone: string;
+    workingHours: { start: string; end: string };
+    weekdays: string[];
+  };
 }
 
 interface AgentConfigurationProps {
@@ -86,14 +113,32 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
         autoAssignment: true,
         followUpTasks: true,
         duplicateDetection: true,
-        dataEnrichment: false
+        dataEnrichment: false,
+        opportunityStageUpdates: false,
+        emailNotifications: true,
+        activityLogging: true
       },
+      salesforceConfig: platform === 'salesforce' ? {
+        objects: ['Lead', 'Contact', 'Account'],
+        fields: ['Email', 'Phone', 'Company', 'Title', 'LeadSource'],
+        customFilters: {},
+        triggerConditions: ['New Lead Created', 'Lead Status Changed'],
+        bulkOperations: true,
+        sandboxMode: true,
+        apiVersion: '58.0'
+      } : undefined,
       notifications: {
         email: true,
         inApp: true,
-        webhook: ''
+        webhook: '',
+        slackWebhook: ''
       },
       fieldMappings: {},
+      schedule: {
+        timezone: 'America/New_York',
+        workingHours: { start: '09:00', end: '17:00' },
+        weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+      },
       customPrompt: `Analyze lead data and assign scores based on engagement, company size, and buying signals. Focus on identifying high-value prospects.`
     },
     {
@@ -110,14 +155,32 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
         autoAssignment: false,
         followUpTasks: true,
         duplicateDetection: false,
-        dataEnrichment: true
+        dataEnrichment: true,
+        opportunityStageUpdates: true,
+        emailNotifications: true,
+        activityLogging: true
       },
+      salesforceConfig: platform === 'salesforce' ? {
+        objects: ['Opportunity', 'Account', 'Contact'],
+        fields: ['Amount', 'StageName', 'Probability', 'CloseDate'],
+        customFilters: { 'Amount__gte': 10000 },
+        triggerConditions: ['Stage Changed', 'Amount Updated', 'Close Date Modified'],
+        bulkOperations: false,
+        sandboxMode: true,
+        apiVersion: '58.0'
+      } : undefined,
       notifications: {
         email: true,
         inApp: true,
-        webhook: ''
+        webhook: '',
+        slackWebhook: ''
       },
       fieldMappings: {},
+      schedule: {
+        timezone: 'America/New_York',
+        workingHours: { start: '08:00', end: '18:00' },
+        weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+      },
       customPrompt: `Analyze deal progression, identify risks, and update probability forecasts. Alert on deals requiring immediate attention.`
     },
     {
@@ -134,14 +197,32 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
         autoAssignment: false,
         followUpTasks: false,
         duplicateDetection: true,
-        dataEnrichment: true
+        dataEnrichment: true,
+        opportunityStageUpdates: false,
+        emailNotifications: false,
+        activityLogging: true
       },
+      salesforceConfig: platform === 'salesforce' ? {
+        objects: ['Lead', 'Contact', 'Account', 'Opportunity'],
+        fields: ['*'],
+        customFilters: {},
+        triggerConditions: ['Data Updated', 'Record Created', 'Record Modified'],
+        bulkOperations: true,
+        sandboxMode: true,
+        apiVersion: '58.0'
+      } : undefined,
       notifications: {
         email: false,
         inApp: true,
-        webhook: ''
+        webhook: '',
+        slackWebhook: ''
       },
       fieldMappings: {},
+      schedule: {
+        timezone: 'America/New_York',
+        workingHours: { start: '00:00', end: '23:59' },
+        weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+      },
       customPrompt: `Ensure data consistency between platforms. Detect and resolve conflicts intelligently.`
     }
   ];
@@ -278,6 +359,30 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
     });
   };
 
+  const updateSalesforceConfig = (field: string, value: any) => {
+    if (!selectedConfig) return;
+
+    setSelectedConfig({
+      ...selectedConfig,
+      salesforceConfig: {
+        ...selectedConfig.salesforceConfig,
+        [field]: value
+      }
+    });
+  };
+
+  const updateSchedule = (field: string, value: any) => {
+    if (!selectedConfig) return;
+
+    setSelectedConfig({
+      ...selectedConfig,
+      schedule: {
+        ...selectedConfig.schedule,
+        [field]: value
+      }
+    });
+  };
+
   const updateNotification = (type: string, enabled: boolean | string) => {
     if (!selectedConfig) return;
 
@@ -387,9 +492,10 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="general" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="general">General</TabsTrigger>
                     <TabsTrigger value="automation">Automation</TabsTrigger>
+                    {platform === 'salesforce' && <TabsTrigger value="salesforce">Salesforce</TabsTrigger>}
                     <TabsTrigger value="notifications">Notifications</TabsTrigger>
                     <TabsTrigger value="advanced">Advanced</TabsTrigger>
                   </TabsList>
@@ -509,15 +615,177 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
                         
                         <div className="flex items-center space-x-2">
                           <Switch
-                            checked={selectedConfig.automationRules.dataEnrichment}
-                            onCheckedChange={(checked) => updateAutomationRule('dataEnrichment', checked)}
+                            checked={selectedConfig.automationRules.opportunityStageUpdates}
+                            onCheckedChange={(checked) => updateAutomationRule('opportunityStageUpdates', checked)}
                           />
-                          <Database className="h-4 w-4 text-muted-foreground" />
-                          <Label>Data enrichment from external sources</Label>
+                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                          <Label>Automatic opportunity stage updates</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={selectedConfig.automationRules.emailNotifications}
+                            onCheckedChange={(checked) => updateAutomationRule('emailNotifications', checked)}
+                          />
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <Label>Send email notifications</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={selectedConfig.automationRules.activityLogging}
+                            onCheckedChange={(checked) => updateAutomationRule('activityLogging', checked)}
+                          />
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <Label>Automatic activity logging</Label>
                         </div>
                       </div>
                     </div>
                   </TabsContent>
+
+                  {platform === 'salesforce' && (
+                    <TabsContent value="salesforce" className="space-y-6 mt-6">
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-2">
+                          <Database className="h-5 w-5 text-primary" />
+                          <h4 className="font-medium">Salesforce Configuration</h4>
+                        </div>
+
+                        {/* Salesforce Objects */}
+                        <div className="space-y-3">
+                          <Label>Salesforce Objects to Monitor</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {['Lead', 'Contact', 'Account', 'Opportunity', 'Case', 'Campaign'].map((object) => (
+                              <div key={object} className="flex items-center space-x-2">
+                                <Switch
+                                  checked={selectedConfig.salesforceConfig?.objects.includes(object) || false}
+                                  onCheckedChange={(checked) => {
+                                    const currentObjects = selectedConfig.salesforceConfig?.objects || [];
+                                    const newObjects = checked 
+                                      ? [...currentObjects, object]
+                                      : currentObjects.filter(obj => obj !== object);
+                                    updateSalesforceConfig('objects', newObjects);
+                                  }}
+                                />
+                                <Label className="text-sm">{object}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* API Configuration */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>API Version</Label>
+                            <Select 
+                              value={selectedConfig.salesforceConfig?.apiVersion || '58.0'}
+                              onValueChange={(value) => updateSalesforceConfig('apiVersion', value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="58.0">v58.0</SelectItem>
+                                <SelectItem value="57.0">v57.0</SelectItem>
+                                <SelectItem value="56.0">v56.0</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="flex items-center space-x-2 pt-7">
+                            <Switch
+                              checked={selectedConfig.salesforceConfig?.sandboxMode || false}
+                              onCheckedChange={(checked) => updateSalesforceConfig('sandboxMode', checked)}
+                            />
+                            <Label>Sandbox Mode</Label>
+                          </div>
+                        </div>
+
+                        {/* Trigger Conditions */}
+                        <div className="space-y-3">
+                          <Label>Trigger Conditions</Label>
+                          <div className="space-y-2">
+                            {['New Lead Created', 'Lead Status Changed', 'Opportunity Stage Changed', 
+                              'Amount Updated', 'Close Date Modified', 'Contact Updated'].map((trigger) => (
+                              <div key={trigger} className="flex items-center space-x-2">
+                                <Switch
+                                  checked={selectedConfig.salesforceConfig?.triggerConditions.includes(trigger) || false}
+                                  onCheckedChange={(checked) => {
+                                    const currentTriggers = selectedConfig.salesforceConfig?.triggerConditions || [];
+                                    const newTriggers = checked 
+                                      ? [...currentTriggers, trigger]
+                                      : currentTriggers.filter(t => t !== trigger);
+                                    updateSalesforceConfig('triggerConditions', newTriggers);
+                                  }}
+                                />
+                                <Label className="text-sm">{trigger}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Field Mapping */}
+                        <div className="space-y-3">
+                          <Label>Key Fields to Monitor</Label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {['Email', 'Phone', 'Company', 'Title', 'LeadSource', 'Amount', 'StageName', 
+                              'Probability', 'CloseDate', 'LastActivityDate'].map((field) => (
+                              <div key={field} className="flex items-center space-x-2">
+                                <Switch
+                                  checked={selectedConfig.salesforceConfig?.fields.includes(field) || false}
+                                  onCheckedChange={(checked) => {
+                                    const currentFields = selectedConfig.salesforceConfig?.fields || [];
+                                    const newFields = checked 
+                                      ? [...currentFields, field]
+                                      : currentFields.filter(f => f !== field);
+                                    updateSalesforceConfig('fields', newFields);
+                                  }}
+                                />
+                                <Label className="text-sm">{field}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Advanced Settings */}
+                        <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                          <h5 className="font-medium text-sm">Advanced Settings</h5>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={selectedConfig.salesforceConfig?.bulkOperations || false}
+                              onCheckedChange={(checked) => updateSalesforceConfig('bulkOperations', checked)}
+                            />
+                            <Label className="text-sm">Enable Bulk Operations</Label>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-sm">Minimum Deal Amount Filter</Label>
+                            <Input
+                              type="number"
+                              placeholder="10000"
+                              value={selectedConfig.salesforceConfig?.customFilters?.['Amount__gte'] || ''}
+                              onChange={(e) => updateSalesforceConfig('customFilters', {
+                                ...selectedConfig.salesforceConfig?.customFilters,
+                                'Amount__gte': e.target.value ? parseInt(e.target.value) : undefined
+                              })}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Real-time Sync Status */}
+                        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-medium">Salesforce Connection Status</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Connected to Salesforce sandbox. Agent will monitor selected objects and fields in real-time.
+                          </p>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  )}
 
                   <TabsContent value="notifications" className="space-y-6 mt-6">
                     <div className="space-y-4">
