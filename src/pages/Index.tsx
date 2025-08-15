@@ -247,13 +247,6 @@ const Index = () => {
                 {/* Show integration details based on selected platform */}
                 {selectedPlatform === 'salesforce' && !showAgentConfig && <SalesforceIntegration />}
                 {selectedPlatform === 'hubspot' && !showAgentConfig && <HubSpotIntegration />}
-                {showAgentConfig && (
-                  <AgentConfiguration 
-                    platform={showAgentConfig.platform}
-                    agentType={showAgentConfig.agentType}
-                    onClose={() => setShowAgentConfig(null)}
-                  />
-                )}
                 {selectedPlatform === 'pipedrive' && (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -296,7 +289,13 @@ const Index = () => {
 
             {/* AI Agents Tab */}
             <TabsContent value="agents" className="mt-8">
-              {activeAgent ? (
+              {showAgentConfig ? (
+                <AgentConfiguration 
+                  platform={showAgentConfig.platform}
+                  agentType={showAgentConfig.agentType}
+                  onClose={() => setShowAgentConfig(null)}
+                />
+              ) : activeAgent ? (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -334,14 +333,20 @@ const Index = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
                           <Button 
                             className="bg-gradient-primary hover:opacity-90"
-                            onClick={() => setShowAgentConfig({platform: 'salesforce', agentType: 'pipeline-analysis'})}
+                            onClick={() => {
+                              console.log('Configure for Salesforce clicked');
+                              setShowAgentConfig({platform: 'salesforce', agentType: 'pipeline-analysis'});
+                            }}
                           >
                             <Settings className="h-4 w-4 mr-2" />
                             Configure for Salesforce
                           </Button>
                           <Button 
                             className="bg-gradient-primary hover:opacity-90"
-                            onClick={() => setShowAgentConfig({platform: 'hubspot', agentType: 'pipeline-analysis'})}
+                            onClick={() => {
+                              console.log('Configure for HubSpot clicked');
+                              setShowAgentConfig({platform: 'hubspot', agentType: 'pipeline-analysis'});
+                            }}
                           >
                             <Settings className="h-4 w-4 mr-2" />
                             Configure for HubSpot
@@ -643,7 +648,7 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
-            )}
+              )}
             </TabsContent>
 
 
