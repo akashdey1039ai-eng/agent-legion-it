@@ -81,14 +81,23 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
   };
 
   const formatAnalysisResults = (analysis: any[]) => {
+    console.log('🔍 formatAnalysisResults called with:', typeof analysis, Array.isArray(analysis), analysis?.length);
+    
     if (!analysis || !Array.isArray(analysis)) {
       console.log('❌ Analysis not array:', typeof analysis, analysis);
-      return <p className="text-muted-foreground">Analysis data is not in expected format</p>;
+      return <p className="text-muted-foreground text-center py-4">Analysis data is not in expected format (got {typeof analysis})</p>;
     }
     
-    console.log('✅ Formatting analysis results:', analysis.length, 'items');
+    if (analysis.length === 0) {
+      return <p className="text-muted-foreground text-center py-4">No analysis results available</p>;
+    }
     
-    return analysis.map((item, index) => (
+    console.log('✅ Formatting', analysis.length, 'analysis results');
+    console.log('🔍 First item structure:', Object.keys(analysis[0] || {}));
+    
+    return analysis.map((item, index) => {
+      console.log(`🔍 Item ${index}:`, Object.keys(item), item.name || item.Name || item.contactId || item.Id);
+      return (
       <Card key={index} className="mb-2">
         <CardContent className="p-3">
           <div className="space-y-2">
@@ -136,7 +145,8 @@ export function TestResultsViewer({ results, isRunning, currentTest }: TestResul
           </div>
         </CardContent>
       </Card>
-    ));
+      );
+    });
   };
 
   if (results.length === 0 && !isRunning) {

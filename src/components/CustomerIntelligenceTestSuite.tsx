@@ -326,35 +326,25 @@ export function CustomerIntelligenceTestSuite() {
 
           console.log(`✅ Real Salesforce AI analysis completed:`, salesforceResult);
           
-          // Debug the data structure
+          // Debug the data structure thoroughly
           console.log('🔍 salesforceResult keys:', Object.keys(salesforceResult || {}));
           console.log('🔍 analysis object:', salesforceResult.analysis);
-          console.log('🔍 analysis.analysis:', salesforceResult.analysis?.analysis);
+          console.log('🔍 insights:', salesforceResult.insights);
+          console.log('🔍 insights length:', salesforceResult.insights?.length);
+          console.log('🔍 rawSalesforceData length:', salesforceResult.rawSalesforceData?.length);
           
-          // Parse the AI analysis which comes as a JSON string inside analysis.analysis
-          let parsedAnalysis = [];
-          try {
-            if (salesforceResult.analysis?.analysis) {
-              // Extract JSON from the analysis string
-              const analysisText = salesforceResult.analysis.analysis;
-              const jsonMatch = analysisText.match(/```json\n(.*?)\n```/s);
-              if (jsonMatch) {
-                parsedAnalysis = JSON.parse(jsonMatch[1]);
-                console.log('🎯 Parsed analysis records:', parsedAnalysis.length);
-              } else {
-                console.log('⚠️ No JSON found in analysis, trying direct parse...');
-                parsedAnalysis = JSON.parse(analysisText);
-              }
-            }
-          } catch (parseError) {
-            console.error('❌ Failed to parse AI analysis:', parseError);
-            console.log('Raw analysis:', salesforceResult.analysis);
-          }
+          // Use the parsed insights directly from the edge function
+          const analysisRecords = salesforceResult.insights || salesforceResult.analysis?.parsedRecords || [];
+          console.log('🎯 Final analysis records to use:', analysisRecords.length);
           
           testResult = {
             confidence: salesforceResult.confidence || 0.95,
-            insights: parsedAnalysis || [],
-            recommendations: salesforceResult.recommendations || [`Analyzed ${salesforceResult.recordsAnalyzed} real Salesforce records`, 'Real API integration successful'],
+            insights: analysisRecords,
+            recommendations: salesforceResult.recommendations || [
+              `Analyzed ${salesforceResult.recordsAnalyzed} real Salesforce records`, 
+              'Real API integration successful',
+              `Found ${analysisRecords.length} customer insights`
+            ],
             actionsExecuted: salesforceResult.recordsAnalyzed || 0,
             securityScore: 98,
             riskLevel: 'low',
@@ -363,7 +353,7 @@ export function CustomerIntelligenceTestSuite() {
             rawSalesforceData: salesforceResult.rawSalesforceData,
             salesforceAnalysis: salesforceResult.analysis,
             salesforceRecordCount: salesforceResult.recordsAnalyzed,
-            parsedAnalysis: parsedAnalysis
+            parsedAnalysis: analysisRecords
           };
         } catch (error) {
           console.error(`❌ Real Salesforce test failed for ${agent.id}:`, error);
