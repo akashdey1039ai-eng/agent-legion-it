@@ -365,6 +365,13 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
     setSelectedConfig({
       ...selectedConfig,
       salesforceConfig: {
+        objects: [],
+        fields: [],
+        customFilters: {},
+        triggerConditions: [],
+        bulkOperations: false,
+        sandboxMode: true,
+        apiVersion: '58.0',
         ...selectedConfig.salesforceConfig,
         [field]: value
       }
@@ -658,7 +665,7 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
                             {['Lead', 'Contact', 'Account', 'Opportunity', 'Case', 'Campaign'].map((object) => (
                               <div key={object} className="flex items-center space-x-2">
                                 <Switch
-                                  checked={selectedConfig.salesforceConfig?.objects.includes(object) || false}
+                                  checked={(selectedConfig.salesforceConfig?.objects || []).includes(object)}
                                   onCheckedChange={(checked) => {
                                     const currentObjects = selectedConfig.salesforceConfig?.objects || [];
                                     const newObjects = checked 
@@ -709,7 +716,7 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
                               'Amount Updated', 'Close Date Modified', 'Contact Updated'].map((trigger) => (
                               <div key={trigger} className="flex items-center space-x-2">
                                 <Switch
-                                  checked={selectedConfig.salesforceConfig?.triggerConditions.includes(trigger) || false}
+                                  checked={(selectedConfig.salesforceConfig?.triggerConditions || []).includes(trigger)}
                                   onCheckedChange={(checked) => {
                                     const currentTriggers = selectedConfig.salesforceConfig?.triggerConditions || [];
                                     const newTriggers = checked 
@@ -732,7 +739,7 @@ export function AgentConfiguration({ platform, agentType, onClose }: AgentConfig
                               'Probability', 'CloseDate', 'LastActivityDate'].map((field) => (
                               <div key={field} className="flex items-center space-x-2">
                                 <Switch
-                                  checked={selectedConfig.salesforceConfig?.fields.includes(field) || false}
+                                  checked={(selectedConfig.salesforceConfig?.fields || []).includes(field)}
                                   onCheckedChange={(checked) => {
                                     const currentFields = selectedConfig.salesforceConfig?.fields || [];
                                     const newFields = checked 
