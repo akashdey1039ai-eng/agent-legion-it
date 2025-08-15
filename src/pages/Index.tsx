@@ -7,6 +7,7 @@ import { SalesforceIntegration } from "@/components/SalesforceIntegration";
 import HubSpotIntegration from "@/components/HubSpotIntegration";
 import { AgentConfiguration } from "@/components/AgentConfiguration";
 import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
+import { AgentExecutionPanel } from "@/components/AgentExecutionPanel";
 
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { Header } from "@/components/Header";
@@ -321,39 +322,7 @@ const Index = () => {
                   
                   {activeAgent === 'lead-intelligence' && <LeadIntelligenceAgent />}
                   {activeAgent === 'pipeline-analysis' && (
-                    <div className="space-y-6">
-                      <div className="text-center py-8">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
-                          <TrendingUp className="h-8 w-8 text-primary" />
-                        </div>
-                        <h3 className="text-xl font-semibold mb-2">Pipeline Analysis Agent</h3>
-                        <p className="text-muted-foreground mb-6">
-                          This agent analyzes deal risks and adjusts probability forecasts automatically.
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
-                          <Button 
-                            className="bg-gradient-primary hover:opacity-90"
-                            onClick={() => {
-                              console.log('Configure for Salesforce clicked');
-                              setShowAgentConfig({platform: 'salesforce', agentType: 'pipeline-analysis'});
-                            }}
-                          >
-                            <Settings className="h-4 w-4 mr-2" />
-                            Configure for Salesforce
-                          </Button>
-                          <Button 
-                            className="bg-gradient-primary hover:opacity-90"
-                            onClick={() => {
-                              console.log('Configure for HubSpot clicked');
-                              setShowAgentConfig({platform: 'hubspot', agentType: 'pipeline-analysis'});
-                            }}
-                          >
-                            <Settings className="h-4 w-4 mr-2" />
-                            Configure for HubSpot
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                    <AgentExecutionPanel />
                   )}
                 </div>
               ) : (
