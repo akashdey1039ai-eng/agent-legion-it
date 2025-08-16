@@ -1984,6 +1984,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      validate_function_security: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "manager" | "sales_rep" | "viewer"
