@@ -1876,24 +1876,24 @@ export type Database = {
         Insert: {
           company_id?: string | null
           created_at?: string | null
-          email?: never
+          email?: string | null
           first_name?: string | null
           id?: string | null
           last_name?: string | null
           owner_id?: string | null
-          phone?: never
+          phone?: string | null
           title?: string | null
           updated_at?: string | null
         }
         Update: {
           company_id?: string | null
           created_at?: string | null
-          email?: never
+          email?: string | null
           first_name?: string | null
           id?: string | null
           last_name?: string | null
           owner_id?: string | null
-          phone?: never
+          phone?: string | null
           title?: string | null
           updated_at?: string | null
         }
@@ -1942,6 +1942,20 @@ export type Database = {
           last_name: string
           owner_id: string
           phone: string
+          title: string
+        }[]
+      }
+      get_masked_contact_data: {
+        Args: { contact_id: string }
+        Returns: {
+          company_id: string
+          created_at: string
+          email_masked: string
+          first_name: string
+          id: string
+          last_name: string
+          owner_id: string
+          phone_masked: string
           title: string
         }[]
       }
