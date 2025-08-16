@@ -1828,6 +1828,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      encrypt_sensitive_data: {
+        Args: { data: string }
+        Returns: string
+      }
+      get_filtered_contacts: {
+        Args: { user_role?: Database["public"]["Enums"]["app_role"] }
+        Returns: {
+          company_id: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          owner_id: string
+          phone: string
+          title: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -1838,6 +1856,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      mask_sensitive_data: {
+        Args: { data: string; mask_type?: string }
+        Returns: string
       }
       update_agent_performance: {
         Args: {
