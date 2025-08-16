@@ -13,6 +13,9 @@ import { AgentConfigurationSelector } from "@/components/AgentConfigurationSelec
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
 import { GlobalAIAgentRunner } from "@/components/GlobalAIAgentRunner";
 import { ProductionReadyDashboard } from "@/components/ProductionReadyDashboard";
+import { EnterpriseWelcomeDashboard } from "@/components/EnterpriseWelcomeDashboard";
+import { UserPlaybook } from "@/components/UserPlaybook";
+import { EnterpriseSafetyDashboard } from "@/components/EnterpriseSafetyDashboard";
 import { UniversalCRMTester } from "@/components/UniversalCRMTester";
 import { Header } from "@/components/Header";
 import { SandboxConnector } from "@/components/SandboxConnector";
@@ -21,7 +24,7 @@ import { CustomerIntelligenceTestSuite } from '@/components/CustomerIntelligence
 import { SalesforceDebugger } from '@/components/SalesforceDebugger';
 import { AISecurityMonitor } from '@/components/AISecurityMonitor';
 import heroCommand from "@/assets/hero-command.jpg";
-import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings, Smartphone, Monitor } from "lucide-react";
+import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings, Smartphone, Monitor, BookOpen } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Clear previous test results on page load
@@ -38,7 +41,7 @@ const Index = () => {
   const location = useLocation();
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("global-ai");
+  const [activeTab, setActiveTab] = useState("enterprise");
   const [showAgentConfig, setShowAgentConfig] = useState<{platform: 'salesforce' | 'hubspot'; agentType: string} | null>(null);
   const [showAgentSelector, setShowAgentSelector] = useState<string | null>(null);
 
@@ -127,11 +130,26 @@ const Index = () => {
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 gap-1">
+            <TabsList className="grid w-full grid-cols-4 sm:grid-cols-8 gap-1">
+              <TabsTrigger value="enterprise" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Enterprise</span>
+                <span className="sm:hidden">Home</span>
+              </TabsTrigger>
               <TabsTrigger value="global-ai" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Global AI</span>
+                <span className="hidden sm:inline">AI Agents</span>
                 <span className="sm:hidden">AI</span>
+              </TabsTrigger>
+              <TabsTrigger value="playbook" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Playbook</span>
+                <span className="sm:hidden">Guide</span>
+              </TabsTrigger>
+              <TabsTrigger value="safety" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Security</span>
+                <span className="sm:hidden">Safe</span>
               </TabsTrigger>
               <TabsTrigger value="production" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -165,9 +183,24 @@ const Index = () => {
               </TabsTrigger>
             </TabsList>
 
+            {/* Enterprise Welcome Tab */}
+            <TabsContent value="enterprise" className="mt-6 sm:mt-8">
+              <EnterpriseWelcomeDashboard />
+            </TabsContent>
+
             {/* Global AI Tab */}
             <TabsContent value="global-ai" className="mt-6 sm:mt-8">
               <GlobalAIAgentRunner />
+            </TabsContent>
+
+            {/* Playbook Tab */}
+            <TabsContent value="playbook" className="mt-6 sm:mt-8">
+              <UserPlaybook />
+            </TabsContent>
+
+            {/* Safety Tab */}
+            <TabsContent value="safety" className="mt-6 sm:mt-8">
+              <EnterpriseSafetyDashboard />
             </TabsContent>
 
             {/* Production Tab */}
