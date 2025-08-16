@@ -34,7 +34,18 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [currentTest, setCurrentTest] = useState<string | null>(null);
   const [overallProgress, setOverallProgress] = useState(0);
+  const [autoRunCompleted, setAutoRunCompleted] = useState(false);
   const { toast } = useToast();
+
+  // Auto-run tests on mount to verify fixes
+  useEffect(() => {
+    if (!autoRunCompleted) {
+      setTimeout(() => {
+        runAllTests();
+        setAutoRunCompleted(true);
+      }, 1000);
+    }
+  }, [autoRunCompleted]);
 
   const runAllTests = async () => {
     setIsRunning(true);
@@ -186,7 +197,7 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            Real-Time AI Agent Testing
+            Real-Time AI Agent Testing - Verifying Fixes
             <div className="flex gap-2">
               <Button 
                 onClick={runAllTests} 
@@ -194,7 +205,7 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                 className="flex items-center gap-2"
               >
                 {isRunning ? <PauseCircle className="w-4 h-4" /> : <PlayCircle className="w-4 h-4" />}
-                {isRunning ? 'Testing...' : 'Run All Tests'}
+                {isRunning ? 'Testing...' : 'Re-run All Tests'}
               </Button>
               <Button 
                 onClick={clearResults} 
