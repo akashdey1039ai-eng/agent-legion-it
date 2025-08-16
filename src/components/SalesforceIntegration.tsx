@@ -51,9 +51,16 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
 
       // Listen for messages from the popup
       const handleMessage = (event: MessageEvent) => {
+        console.log('Received message from popup:', event.data);
         if (event.data.type === 'SALESFORCE_AUTH_SUCCESS') {
           setIsConnecting(false);
-          checkConnection(); // Refresh connection status
+          
+          // Wait a moment for the token to be stored, then check connection
+          setTimeout(() => {
+            console.log('Checking connection after successful auth...');
+            checkConnection();
+          }, 2000);
+          
           toast({
             title: "Connected Successfully",
             description: "Your Salesforce account has been connected.",
