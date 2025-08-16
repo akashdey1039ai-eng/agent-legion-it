@@ -20,7 +20,11 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
   const { user } = useAuth();
 
   const handleConnect = async () => {
+    console.log('🚀 Connect button clicked');
+    console.log('👤 Current user:', user);
+    
     if (!user) {
+      console.log('❌ No user found');
       toast({
         title: "Authentication Required",
         description: "Please log in to connect to Salesforce.",
@@ -29,6 +33,7 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
       return;
     }
 
+    console.log('✅ User authenticated, proceeding with connection');
     setIsConnecting(true);
     try {
       // Get Salesforce OAuth URL from our backend
@@ -99,8 +104,16 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
   };
 
   const checkConnection = async () => {
+    console.log('🔍 Check Status button clicked');
+    console.log('👤 Current user:', user);
+    
     if (!user) {
       console.log('🚫 No user found, cannot check connection');
+      toast({
+        title: "Authentication Required", 
+        description: "Please log in first to check Salesforce connection status.",
+        variant: "destructive",
+      });
       return;
     }
 
