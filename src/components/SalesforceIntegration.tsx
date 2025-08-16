@@ -113,7 +113,8 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(1);
+        .limit(1)
+        .maybeSingle(); // Use maybeSingle to avoid errors when no data found
 
       console.log('🎯 User-specific Salesforce token query result:', { data, error });
 
@@ -123,24 +124,23 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
         return;
       }
 
-      if (data && data.length > 0) {
-        const token = data[0];
+      if (data) {
         // Check if token is still valid (not expired)
         const now = new Date();
-        const expiresAt = new Date(token.expires_at);
+        const expiresAt = new Date(data.expires_at);
         
         console.log('⏰ Token expiration check:', { 
           now: now.toISOString(), 
           expiresAt: expiresAt.toISOString(), 
           isValid: expiresAt > now,
-          accessToken: token.access_token ? '✅ Present' : '❌ Missing',
-          refreshToken: token.refresh_token ? '✅ Present' : '❌ Missing'
+          accessToken: data.access_token ? '✅ Present' : '❌ Missing',
+          refreshToken: data.refresh_token ? '✅ Present' : '❌ Missing'
         });
         
-        if (expiresAt > now && token.access_token) {
+        if (expiresAt > now && data.access_token) {
           console.log('✅ Setting connected to true - valid token found');
           setIsConnected(true);
-          setLastSyncTime(token.updated_at);
+          setLastSyncTime(data.updated_at);
         } else {
           // Token is expired or invalid
           console.log('⏰ Salesforce token has expired or is invalid');
