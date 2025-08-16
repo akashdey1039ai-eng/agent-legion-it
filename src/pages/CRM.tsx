@@ -27,7 +27,8 @@ import {
   Phone,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  Settings
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
@@ -37,6 +38,7 @@ import DealForm from '@/components/DealForm';
 import TaskForm from '@/components/TaskForm';
 import CompanyForm from '@/components/CompanyForm';
 import Analytics from '@/components/Analytics';
+import { SalesforceIntegration } from '@/components/SalesforceIntegration';
 
 interface DashboardStats {
   totalLeads: number;
@@ -345,7 +347,7 @@ const CRM = () => {
       {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-8">
+          <TabsList className="grid w-full grid-cols-8 mb-8">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Dashboard
@@ -373,6 +375,10 @@ const CRM = () => {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="integrations" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Integrations
             </TabsTrigger>
           </TabsList>
 
@@ -901,6 +907,17 @@ const CRM = () => {
               </div>
             </div>
             <Analytics />
+          </TabsContent>
+
+          {/* Integrations Tab */}
+          <TabsContent value="integrations" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">Integrations</h2>
+                <p className="text-muted-foreground">Connect external platforms and services</p>
+              </div>
+            </div>
+            <SalesforceIntegration onSyncComplete={handleFormSave} />
           </TabsContent>
         </Tabs>
       </div>
