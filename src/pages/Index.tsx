@@ -16,6 +16,7 @@ import { ProductionReadyDashboard } from "@/components/ProductionReadyDashboard"
 import { EnterpriseWelcomeDashboard } from "@/components/EnterpriseWelcomeDashboard";
 import { UserPlaybook } from "@/components/UserPlaybook";
 import { EnterpriseSafetyDashboard } from "@/components/EnterpriseSafetyDashboard";
+import { VideoDemoStudio } from "@/components/VideoDemoStudio";
 import { UniversalCRMTester } from "@/components/UniversalCRMTester";
 import { Header } from "@/components/Header";
 import { SandboxConnector } from "@/components/SandboxConnector";
@@ -130,7 +131,7 @@ const Index = () => {
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 sm:grid-cols-8 gap-1">
+            <TabsList className="grid w-full grid-cols-5 sm:grid-cols-9 gap-1">
               <TabsTrigger value="enterprise" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Enterprise</span>
@@ -140,6 +141,11 @@ const Index = () => {
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">AI Agents</span>
                 <span className="sm:hidden">AI</span>
+              </TabsTrigger>
+              <TabsTrigger value="video-demo" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Video Demo</span>
+                <span className="sm:hidden">Video</span>
               </TabsTrigger>
               <TabsTrigger value="playbook" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -191,6 +197,11 @@ const Index = () => {
             {/* Global AI Tab */}
             <TabsContent value="global-ai" className="mt-6 sm:mt-8">
               <GlobalAIAgentRunner />
+            </TabsContent>
+
+            {/* Video Demo Tab */}
+            <TabsContent value="video-demo" className="mt-6 sm:mt-8">
+              <VideoDemoStudio />
             </TabsContent>
 
             {/* Playbook Tab */}
