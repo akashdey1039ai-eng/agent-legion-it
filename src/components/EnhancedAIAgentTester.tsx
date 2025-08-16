@@ -14,6 +14,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { TestResultsViewer } from '@/components/TestResultsViewer';
 
 interface TestResult {
   agentId: string;
@@ -433,6 +434,74 @@ export function EnhancedAIAgentTester() {
     });
   };
 
+  const exportResults = (format: 'json' | 'csv') => {
+    if (testResults.length === 0) {
+      toast({
+        title: "No Results to Export",
+        description: "Run some tests first to generate results.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `ai-agent-test-results-${timestamp}`;
+
+    if (format === 'json') {
+      const jsonData = JSON.stringify(testResults, null, 2);
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else if (format === 'csv') {
+      const csvHeaders = [
+        'Agent Name',
+        'Status',
+        'Confidence (%)',
+        'Execution Time (ms)',
+        'Actions Executed',
+        'Security Score (%)',
+        'Records Processed',
+        'Error Message'
+      ];
+      
+      const csvRows = testResults.map(result => [
+        result.agentName,
+        result.status,
+        result.confidence ? (result.confidence * 100).toFixed(1) : 'N/A',
+        result.executionTime || 'N/A',
+        result.actionsExecuted || 0,
+        result.securityScore || 'N/A',
+        result.results?.insights?.length || result.results?.analysis?.length || 'N/A',
+        result.error || 'None'
+      ]);
+
+      const csvContent = [csvHeaders, ...csvRows]
+        .map(row => row.map(cell => `"${cell}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    toast({
+      title: "Export Complete",
+      description: `Results exported as ${format.toUpperCase()} file.`,
+    });
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
@@ -646,85 +715,134 @@ export function EnhancedAIAgentTester() {
         </AlertDescription>
       </Alert>
 
-      {/* Test Results */}
+      {/* Test Results Summary */}
       {testResults.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Test Results</CardTitle>
-            <CardDescription>
-              Detailed results from your AI agent tests
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {testResults.map((result) => (
-                <Card key={result.agentId} className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      {result.status === 'completed' ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <AlertTriangle className="h-5 w-5 text-red-500" />
-                      )}
-                      <h5 className="font-medium">{result.agentName}</h5>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(result.status)}
-                      {result.actionsExecuted !== undefined && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <Activity className="h-3 w-3" />
-                          {result.actionsExecuted} Actions
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {result.status === 'completed' ? (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <div className="font-medium">Confidence</div>
-                          <div className="text-muted-foreground">
-                            {((result.confidence || 0) * 100).toFixed(1)}%
-                          </div>
-                        </div>
-                        <div>
-                          <div className="font-medium">Execution Time</div>
-                          <div className="text-muted-foreground">{result.executionTime}ms</div>
-                        </div>
-                        <div>
-                          <div className="font-medium">Actions Executed</div>
-                          <div className="text-muted-foreground">{result.actionsExecuted || 0}</div>
-                        </div>
-                        <div>
-                          <div className="font-medium">Security Score</div>
-                          <div className="text-muted-foreground">{result.securityScore || 0}%</div>
-                        </div>
+        <div className="space-y-6">
+          {/* Quick Results Overview */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Test Results Overview</CardTitle>
+                <CardDescription>
+                  Summary of {testResults.length} test execution(s)
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => exportResults('json')}
+                >
+                  Export JSON
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => exportResults('csv')}
+                >
+                  Export CSV
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setTestResults([])}
+                >
+                  Clear Results
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Results Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {testResults.map((result) => (
+                  <Card key={result.agentId} className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        {result.status === 'completed' ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                        )}
+                        <span className="font-medium text-sm">{result.agentName}</span>
                       </div>
-                      
-                      {result.results && (
-                        <details className="cursor-pointer">
-                          <summary className="font-medium hover:text-primary transition-colors">
-                            🔍 View Detailed Results
-                          </summary>
-                          <div className="mt-2 p-3 bg-muted rounded text-xs">
-                            <pre className="overflow-auto max-h-40">
-                              {JSON.stringify(result.results, null, 2)}
-                            </pre>
+                      {getStatusBadge(result.status)}
+                    </div>
+                    
+                    {result.status === 'completed' ? (
+                      <div className="space-y-2 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Confidence:</span>
+                          <span className="font-medium">{((result.confidence || 0) * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Time:</span>
+                          <span className="font-medium">{result.executionTime}ms</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Actions:</span>
+                          <span className="font-medium">{result.actionsExecuted || 0}</span>
+                        </div>
+                        {result.results?.insights?.length && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Records:</span>
+                            <span className="font-medium">{result.results.insights.length}</span>
                           </div>
-                        </details>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-destructive">
-                      <strong>Error:</strong> {result.error}
-                    </div>
-                  )}
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-destructive">
+                        {result.error}
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+
+              {/* Performance Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {testResults.filter(r => r.status === 'completed').length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Successful</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600">
+                    {testResults.filter(r => r.status === 'failed').length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Failed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {testResults.reduce((sum, r) => sum + (r.executionTime || 0), 0)}ms
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Time</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {(testResults.reduce((sum, r) => sum + (r.confidence || 0), 0) / testResults.length * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-muted-foreground">Avg Confidence</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Detailed Results Viewer */}
+          <TestResultsViewer 
+            results={testResults.map(r => ({
+              ...r,
+              platform: 'salesforce', // Default platform for EnhancedAIAgentTester
+              analysis: r.results?.insights || r.results?.analysis || [],
+              logs: r.results?.logs || [],
+              rawResponse: r.results,
+              salesforceData: r.results?.salesforceData,
+              aiAnalysis: r.results?.aiAnalysis
+            }))}
+            isRunning={runningAgents.size > 0}
+            currentTest={currentTest}
+          />
+        </div>
       )}
     </div>
   );
