@@ -11,6 +11,8 @@ import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
 import { AgentExecutionPanel } from "@/components/AgentExecutionPanel";
 import { AgentConfigurationSelector } from "@/components/AgentConfigurationSelector";
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
+import { ProductionReadyDashboard } from "@/components/ProductionReadyDashboard";
+import { UniversalCRMTester } from "@/components/UniversalCRMTester";
 import { Header } from "@/components/Header";
 import { SandboxConnector } from "@/components/SandboxConnector";
 import { TestDataGenerator } from '@/components/TestDataGenerator';
@@ -35,7 +37,7 @@ const Index = () => {
   const location = useLocation();
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("production");
   const [showAgentConfig, setShowAgentConfig] = useState<{platform: 'salesforce' | 'hubspot'; agentType: string} | null>(null);
   const [showAgentSelector, setShowAgentSelector] = useState<string | null>(null);
 
@@ -125,10 +127,15 @@ const Index = () => {
         <div className="container mx-auto px-4 sm:px-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1">
-              <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Overview</span>
-                <span className="sm:hidden">Info</span>
+              <TabsTrigger value="production" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Production</span>
+                <span className="sm:hidden">Prod</span>
+              </TabsTrigger>
+              <TabsTrigger value="universal-testing" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Universal Testing</span>
+                <span className="sm:hidden">Test</span>
               </TabsTrigger>
               <TabsTrigger value="integration" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <Database className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -151,6 +158,16 @@ const Index = () => {
                 <span className="sm:hidden">Stats</span>
               </TabsTrigger>
             </TabsList>
+
+            {/* Production Tab */}
+            <TabsContent value="production" className="mt-6 sm:mt-8">
+              <ProductionReadyDashboard />
+            </TabsContent>
+
+            {/* Universal Testing Tab */}
+            <TabsContent value="universal-testing" className="mt-6 sm:mt-8">
+              <UniversalCRMTester />
+            </TabsContent>
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="mt-6 sm:mt-8">
