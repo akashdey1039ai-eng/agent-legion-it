@@ -88,10 +88,10 @@ Deno.serve(async (req) => {
     const body = await req.json()
     console.log('📋 Request received:', body)
     
-    const { agentId, inputData, userId, requestSource, enableActions = false } = body
+    const { agentType, userId, enableActions = false, platform = 'native' } = body
 
     // Security validation
-    if (!agentId || !inputData || !userId) {
+    if (!agentType || !userId) {
       throw new Error('Invalid request parameters')
     }
 

@@ -157,19 +157,26 @@ serve(async (req) => {
     // Parse the AI response to extract structured data
     let parsedAnalysis = [];
     try {
-      // Try to extract JSON from markdown code blocks
-      const jsonMatch = analysisResult.match(/```json\n(.*?)\n```/s);
-      if (jsonMatch) {
-        parsedAnalysis = JSON.parse(jsonMatch[1]);
-        console.log('🎯 Extracted', parsedAnalysis.length, 'analysis records from JSON block');
+      if (typeof analysisResult === 'string') {
+        // Try to extract JSON from markdown code blocks
+        const jsonMatch = analysisResult.match(/```json\n(.*?)\n```/s);
+        if (jsonMatch) {
+          parsedAnalysis = JSON.parse(jsonMatch[1]);
+          console.log('🎯 Extracted', parsedAnalysis.length, 'analysis records from JSON block');
+        } else {
+          // Try direct JSON parse
+          parsedAnalysis = JSON.parse(analysisResult);
+          console.log('🎯 Parsed', parsedAnalysis.length, 'analysis records directly');
+        }
       } else {
-        // Try direct JSON parse
-        parsedAnalysis = JSON.parse(analysisResult);
-        console.log('🎯 Parsed', parsedAnalysis.length, 'analysis records directly');
+        parsedAnalysis = analysisResult;
+        console.log('🎯 Using analysis result as object:', parsedAnalysis?.length || 'no length');
       }
     } catch (parseError) {
       console.error('❌ Failed to parse AI analysis:', parseError);
-      console.log('Raw analysis text:', analysisResult.substring(0, 500));
+      if (typeof analysisResult === 'string') {
+        console.log('Raw analysis text:', analysisResult.substring(0, 500));
+      }
       // Fallback: create basic analysis from raw data
       parsedAnalysis = hubspotData.map((contact, index) => ({
         contactId: contact.id,

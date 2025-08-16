@@ -13,6 +13,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { RealTimeTestResults } from './RealTimeTestResults';
 
 interface PlatformConnection {
   platform: 'salesforce' | 'hubspot' | 'native';
@@ -903,6 +904,16 @@ export function GlobalAIAgentRunner() {
           );
         })}
       </div>
+
+      {/* Real-Time Testing Component */}
+      <RealTimeTestResults 
+        agents={AI_AGENTS.map(agent => ({
+          id: agent.id,
+          name: agent.name,
+          type: agent.id.replace('-hubspot', '').replace('-salesforce', '').replace('-native', ''),
+          platform: agent.platforms[0]
+        }))} 
+      />
 
       {/* Real-Time Test Results Dashboard */}
       {agentResults.length > 0 && (
