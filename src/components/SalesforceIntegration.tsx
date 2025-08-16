@@ -224,88 +224,102 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ExternalLink className="h-5 w-5" />
-            Salesforce Developer Sandbox Integration
-          </CardTitle>
-          <CardDescription>
-            Connect your <strong>Salesforce Developer Sandbox</strong> to enable fully autonomous AI agents that make real changes to your CRM data
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant={isConnected ? "default" : "secondary"}>
-                {isConnected ? (
-                  <>
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Connected
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    Not Connected
-                  </>
+      {!user ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ExternalLink className="h-5 w-5" />
+              Salesforce Developer Sandbox Integration
+            </CardTitle>
+            <CardDescription>
+              You need to log in first to connect your Salesforce Developer Sandbox
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => window.location.href = '/auth'}>
+              Log In to Continue
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ExternalLink className="h-5 w-5" />
+              Salesforce Developer Sandbox Integration
+            </CardTitle>
+            <CardDescription>
+              Connect your <strong>Salesforce Developer Sandbox</strong> to enable AI agents
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Badge variant={isConnected ? "default" : "secondary"}>
+                  {isConnected ? (
+                    <>
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Connected
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      Not Connected
+                    </>
+                  )}
+                </Badge>
+                {lastSyncTime && (
+                  <span className="text-sm text-muted-foreground">
+                    Last sync: {new Date(lastSyncTime).toLocaleString()}
+                  </span>
                 )}
-              </Badge>
-              {lastSyncTime && (
-                <span className="text-sm text-muted-foreground">
-                  Last sync: {new Date(lastSyncTime).toLocaleString()}
-                </span>
+              </div>
+              
+              {!isConnected ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleConnect} 
+                      disabled={isConnecting}
+                      size="lg"
+                      className="flex items-center gap-2"
+                    >
+                      {isConnecting ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        'Connect Now'
+                      )}
+                    </Button>
+                    
+                    <Button 
+                      variant="outline"
+                      onClick={checkConnection}
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Check Status
+                    </Button>
+                  </div>
+                  
+                  <div className="text-xs text-muted-foreground">
+                    Need a developer sandbox? <a href="https://developer.salesforce.com" className="text-blue-600 hover:underline" target="_blank">Create one free →</a>
+                  </div>
+                </div>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsConnected(false)}
+                >
+                  Disconnect
+                </Button>
               )}
             </div>
-            
-            {!isConnected ? (
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleConnect} 
-                    disabled={isConnecting}
-                    className="flex items-center gap-2"
-                  >
-                    {isConnecting ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                        Connecting to Salesforce...
-                      </>
-                    ) : (
-                      'Connect Developer Sandbox'
-                    )}
-                  </Button>
-                  
-                  <Button 
-                    variant="outline"
-                    onClick={checkConnection}
-                    className="flex items-center gap-2"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                    Check Status
-                  </Button>
-                </div>
-                
-                <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded border border-blue-200 dark:border-blue-800">
-                  <strong>📚 Setup Instructions:</strong>
-                  <ol className="mt-2 space-y-1 list-decimal list-inside">
-                    <li>Create a <strong>Developer Sandbox</strong> at <a href="https://developer.salesforce.com" className="text-blue-600 hover:underline" target="_blank">developer.salesforce.com</a></li>
-                    <li>Enable API access in your sandbox settings</li>
-                    <li>Click "Connect Developer Sandbox" above to authenticate</li>
-                    <li>Your AI agents will then make <strong>real autonomous changes</strong> to leads, opportunities, and tasks</li>
-                  </ol>
-                </div>
-              </div>
-            ) : (
-              <Button 
-                variant="outline" 
-                onClick={() => setIsConnected(false)}
-              >
-                Disconnect
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {isConnected && (
         <>
