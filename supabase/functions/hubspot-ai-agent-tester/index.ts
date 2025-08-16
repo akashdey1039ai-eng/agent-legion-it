@@ -107,6 +107,16 @@ serve(async (req) => {
     let analysisResult;
 
     switch (agentType) {
+      case 'lead-intelligence':
+        hubspotData = await fetchHubSpotContacts(token);
+        analysisResult = await analyzeLeadIntelligence(hubspotData);
+        break;
+      
+      case 'pipeline-analysis':
+        hubspotData = await fetchHubSpotDeals(token);
+        analysisResult = await analyzePipelineAnalysis(hubspotData);
+        break;
+      
       case 'customer-sentiment':
         hubspotData = await fetchHubSpotContacts(token);
         analysisResult = await analyzeCustomerSentiment(hubspotData);
@@ -122,14 +132,19 @@ serve(async (req) => {
         analysisResult = await analyzeCustomerSegmentation(hubspotData);
         break;
 
-      case 'lead-scoring':
-        hubspotData = await fetchHubSpotContacts(token);
-        analysisResult = await analyzeLeadScoring(hubspotData);
+      case 'opportunity-scoring':
+        hubspotData = await fetchHubSpotDeals(token);
+        analysisResult = await analyzeOpportunityScoring(hubspotData);
         break;
 
-      case 'opportunity-analysis':
+      case 'communication-ai':
+        hubspotData = await fetchHubSpotContacts(token);
+        analysisResult = await analyzeCommunicationAI(hubspotData);
+        break;
+
+      case 'sales-coaching':
         hubspotData = await fetchHubSpotDeals(token);
-        analysisResult = await analyzeOpportunityAnalysis(hubspotData);
+        analysisResult = await analyzeSalesCoaching(hubspotData);
         break;
       
       default:
@@ -322,46 +337,118 @@ Return as a JSON array with detailed segmentation analysis.`;
   return await callOpenAI(prompt, 'customer segmentation');
 }
 
-async function analyzeLeadScoring(contacts: HubSpotContact[]) {
-  console.log('🎯 Analyzing lead scoring with AI...');
+async function analyzeLeadIntelligence(contacts: HubSpotContact[]) {
+  console.log('🧠 Analyzing lead intelligence with AI...');
   
-  const prompt = `Analyze and score these real HubSpot contacts for lead qualification and prioritization.
+  const prompt = `Analyze lead intelligence for these real HubSpot contacts with advanced scoring and qualification.
 
 Contacts data:
 ${JSON.stringify(contacts.slice(0, 10), null, 2)}
 
 For each contact, provide:
 1. Lead score (0-100)
-2. Qualification level (hot/warm/cold)
-3. Key scoring factors
-4. Recommended actions
-5. Confidence level (0-1)
-6. Follow-up priority
+2. Qualification level (MQL/SQL/hot/warm/cold)
+3. Buying intent signals
+4. Demographics scoring
+5. Behavioral scoring
+6. Recommended routing
+7. Confidence level (0-1)
 
-Return as a JSON array with detailed lead scoring analysis.`;
+Return as a JSON array with detailed lead intelligence analysis.`;
 
-  return await callOpenAI(prompt, 'lead scoring');
+  return await callOpenAI(prompt, 'lead intelligence');
 }
 
-async function analyzeOpportunityAnalysis(deals: HubSpotDeal[]) {
-  console.log('📈 Analyzing opportunities with AI...');
+async function analyzePipelineAnalysis(deals: HubSpotDeal[]) {
+  console.log('📊 Analyzing pipeline with AI...');
   
-  const prompt = `Analyze these real HubSpot deals for opportunity assessment and win probability prediction.
+  const prompt = `Analyze pipeline health and forecasting for these real HubSpot deals.
+
+Deals data:
+${JSON.stringify(deals.slice(0, 10), null, 2)}
+
+Provide pipeline analysis including:
+1. Revenue forecast accuracy
+2. Stage progression analysis
+3. Deal velocity metrics
+4. Pipeline health score
+5. Risk assessment per deal
+6. Recommended actions
+7. Win probability predictions
+8. Confidence level (0-1)
+
+Return as a JSON array with detailed pipeline analysis.`;
+
+  return await callOpenAI(prompt, 'pipeline analysis');
+}
+
+async function analyzeOpportunityScoring(deals: HubSpotDeal[]) {
+  console.log('🎯 Analyzing opportunity scoring with AI...');
+  
+  const prompt = `Analyze and score these real HubSpot deals for opportunity prioritization.
 
 Deals data:
 ${JSON.stringify(deals.slice(0, 10), null, 2)}
 
 For each deal, provide:
-1. Win probability (0-100)
-2. Deal health score
-3. Key opportunity factors
-4. Recommended actions
-5. Confidence level (0-1)
-6. Risk assessment
+1. Opportunity score (0-100)
+2. Win probability
+3. Deal health indicators
+4. Competitive risk assessment
+5. Revenue impact
+6. Recommended actions
+7. Priority level
+8. Confidence level (0-1)
 
-Return as a JSON array with detailed opportunity analysis.`;
+Return as a JSON array with detailed opportunity scoring.`;
 
-  return await callOpenAI(prompt, 'opportunity analysis');
+  return await callOpenAI(prompt, 'opportunity scoring');
+}
+
+async function analyzeCommunicationAI(contacts: HubSpotContact[]) {
+  console.log('📧 Analyzing communication optimization with AI...');
+  
+  const prompt = `Analyze communication patterns and optimization for these real HubSpot contacts.
+
+Contacts data:
+${JSON.stringify(contacts.slice(0, 10), null, 2)}
+
+For each contact, provide:
+1. Optimal communication channel
+2. Best send times
+3. Content personalization recommendations
+4. Engagement likelihood
+5. Message tone suggestions
+6. Follow-up cadence
+7. Response prediction
+8. Confidence level (0-1)
+
+Return as a JSON array with detailed communication analysis.`;
+
+  return await callOpenAI(prompt, 'communication optimization');
+}
+
+async function analyzeSalesCoaching(deals: HubSpotDeal[]) {
+  console.log('⭐ Analyzing sales coaching with AI...');
+  
+  const prompt = `Analyze sales performance and coaching opportunities from these real HubSpot deals.
+
+Deals data:
+${JSON.stringify(deals.slice(0, 10), null, 2)}
+
+Provide coaching analysis including:
+1. Performance metrics
+2. Skill gap identification
+3. Coaching recommendations
+4. Best practice examples
+5. Improvement areas
+6. Goal setting suggestions
+7. Training priorities
+8. Confidence level (0-1)
+
+Return as a JSON array with detailed sales coaching analysis.`;
+
+  return await callOpenAI(prompt, 'sales coaching');
 }
 
 async function callOpenAI(prompt: string, analysisType: string) {

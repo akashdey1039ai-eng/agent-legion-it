@@ -48,85 +48,260 @@ interface AIAgent {
 }
 
 const AI_AGENTS: AIAgent[] = [
+  // Lead Intelligence (3 agents)
   {
-    id: 'lead-intelligence',
-    name: 'Lead Intelligence AI',
-    description: 'Advanced lead scoring, qualification, and prioritization with predictive analytics',
+    id: 'lead-intelligence-hubspot',
+    name: 'Lead Intelligence AI (HubSpot)',
+    description: 'Advanced lead scoring and qualification using HubSpot data',
     icon: Brain,
-    category: 'Lead Management',
+    category: 'Lead Intelligence',
     capabilities: ['Lead Scoring', 'Qualification', 'Predictive Analytics', 'Auto-routing'],
-    platforms: ['salesforce', 'hubspot', 'native'],
+    platforms: ['hubspot'],
     status: 'active'
   },
   {
-    id: 'pipeline-analysis',
-    name: 'Pipeline Analysis AI',
-    description: 'Revenue forecasting, deal risk assessment, and pipeline optimization',
+    id: 'lead-intelligence-salesforce',
+    name: 'Lead Intelligence AI (Salesforce)',
+    description: 'Advanced lead scoring and qualification using Salesforce data',
+    icon: Brain,
+    category: 'Lead Intelligence',
+    capabilities: ['Lead Scoring', 'Qualification', 'Predictive Analytics', 'Auto-routing'],
+    platforms: ['salesforce'],
+    status: 'active'
+  },
+  {
+    id: 'lead-intelligence-native',
+    name: 'Lead Intelligence AI (Native)',
+    description: 'Advanced lead scoring and qualification using Native CRM data',
+    icon: Brain,
+    category: 'Lead Intelligence',
+    capabilities: ['Lead Scoring', 'Qualification', 'Predictive Analytics', 'Auto-routing'],
+    platforms: ['native'],
+    status: 'active'
+  },
+
+  // Pipeline Analysis (3 agents)
+  {
+    id: 'pipeline-analysis-hubspot',
+    name: 'Pipeline Analysis AI (HubSpot)',
+    description: 'Revenue forecasting and pipeline optimization using HubSpot data',
     icon: Target,
-    category: 'Sales Intelligence',
+    category: 'Pipeline Analysis',
     capabilities: ['Revenue Forecasting', 'Risk Assessment', 'Win Probability', 'Stage Optimization'],
-    platforms: ['salesforce', 'hubspot', 'native'],
+    platforms: ['hubspot'],
     status: 'active'
   },
   {
-    id: 'customer-sentiment',
-    name: 'Customer Sentiment AI',
-    description: 'Real-time sentiment analysis from emails, calls, and interactions',
+    id: 'pipeline-analysis-salesforce',
+    name: 'Pipeline Analysis AI (Salesforce)',
+    description: 'Revenue forecasting and pipeline optimization using Salesforce data',
+    icon: Target,
+    category: 'Pipeline Analysis',
+    capabilities: ['Revenue Forecasting', 'Risk Assessment', 'Win Probability', 'Stage Optimization'],
+    platforms: ['salesforce'],
+    status: 'active'
+  },
+  {
+    id: 'pipeline-analysis-native',
+    name: 'Pipeline Analysis AI (Native)',
+    description: 'Revenue forecasting and pipeline optimization using Native CRM data',
+    icon: Target,
+    category: 'Pipeline Analysis',
+    capabilities: ['Revenue Forecasting', 'Risk Assessment', 'Win Probability', 'Stage Optimization'],
+    platforms: ['native'],
+    status: 'active'
+  },
+
+  // Customer Sentiment (3 agents)
+  {
+    id: 'customer-sentiment-hubspot',
+    name: 'Customer Sentiment AI (HubSpot)',
+    description: 'Real-time sentiment analysis from HubSpot interactions',
     icon: Heart,
-    category: 'Customer Intelligence',
-    capabilities: ['Sentiment Analysis', 'Communication Scoring', 'Satisfaction Prediction', 'Churn Risk'],
-    platforms: ['salesforce', 'hubspot', 'native'],
-    status: 'beta'
+    category: 'Customer Sentiment',
+    capabilities: ['Sentiment Analysis', 'Communication Scoring', 'Satisfaction Prediction'],
+    platforms: ['hubspot'],
+    status: 'active'
   },
   {
-    id: 'churn-prediction',
-    name: 'Churn Prediction AI',
-    description: 'Predictive customer churn analysis with proactive retention strategies',
+    id: 'customer-sentiment-salesforce',
+    name: 'Customer Sentiment AI (Salesforce)',
+    description: 'Real-time sentiment analysis from Salesforce interactions',
+    icon: Heart,
+    category: 'Customer Sentiment',
+    capabilities: ['Sentiment Analysis', 'Communication Scoring', 'Satisfaction Prediction'],
+    platforms: ['salesforce'],
+    status: 'active'
+  },
+  {
+    id: 'customer-sentiment-native',
+    name: 'Customer Sentiment AI (Native)',
+    description: 'Real-time sentiment analysis from Native CRM interactions',
+    icon: Heart,
+    category: 'Customer Sentiment',
+    capabilities: ['Sentiment Analysis', 'Communication Scoring', 'Satisfaction Prediction'],
+    platforms: ['native'],
+    status: 'active'
+  },
+
+  // Churn Prediction (3 agents)
+  {
+    id: 'churn-prediction-hubspot',
+    name: 'Churn Prediction AI (HubSpot)',
+    description: 'Predictive churn analysis with HubSpot customer data',
     icon: TrendingDown,
-    category: 'Customer Intelligence',
+    category: 'Churn Prediction',
     capabilities: ['Churn Prediction', 'Retention Strategies', 'Risk Scoring', 'Intervention Timing'],
-    platforms: ['salesforce', 'hubspot', 'native'],
-    status: 'beta'
+    platforms: ['hubspot'],
+    status: 'active'
   },
   {
-    id: 'customer-segmentation',
-    name: 'Customer Segmentation AI',
-    description: 'Dynamic customer segmentation based on behavior, value, and engagement',
+    id: 'churn-prediction-salesforce',
+    name: 'Churn Prediction AI (Salesforce)',
+    description: 'Predictive churn analysis with Salesforce customer data',
+    icon: TrendingDown,
+    category: 'Churn Prediction',
+    capabilities: ['Churn Prediction', 'Retention Strategies', 'Risk Scoring', 'Intervention Timing'],
+    platforms: ['salesforce'],
+    status: 'active'
+  },
+  {
+    id: 'churn-prediction-native',
+    name: 'Churn Prediction AI (Native)',
+    description: 'Predictive churn analysis with Native CRM customer data',
+    icon: TrendingDown,
+    category: 'Churn Prediction',
+    capabilities: ['Churn Prediction', 'Retention Strategies', 'Risk Scoring', 'Intervention Timing'],
+    platforms: ['native'],
+    status: 'active'
+  },
+
+  // Customer Segmentation (3 agents)
+  {
+    id: 'customer-segmentation-hubspot',
+    name: 'Customer Segmentation AI (HubSpot)',
+    description: 'Dynamic customer segmentation using HubSpot behavioral data',
     icon: Users,
-    category: 'Customer Intelligence',
+    category: 'Customer Segmentation',
     capabilities: ['Dynamic Segmentation', 'Behavioral Analysis', 'Value Scoring', 'Persona Creation'],
-    platforms: ['salesforce', 'hubspot', 'native'],
-    status: 'beta'
+    platforms: ['hubspot'],
+    status: 'active'
   },
   {
-    id: 'opportunity-scoring',
-    name: 'Opportunity Scoring AI',
-    description: 'Advanced opportunity scoring with competitive intelligence and market analysis',
+    id: 'customer-segmentation-salesforce',
+    name: 'Customer Segmentation AI (Salesforce)',
+    description: 'Dynamic customer segmentation using Salesforce behavioral data',
+    icon: Users,
+    category: 'Customer Segmentation',
+    capabilities: ['Dynamic Segmentation', 'Behavioral Analysis', 'Value Scoring', 'Persona Creation'],
+    platforms: ['salesforce'],
+    status: 'active'
+  },
+  {
+    id: 'customer-segmentation-native',
+    name: 'Customer Segmentation AI (Native)',
+    description: 'Dynamic customer segmentation using Native CRM behavioral data',
+    icon: Users,
+    category: 'Customer Segmentation',
+    capabilities: ['Dynamic Segmentation', 'Behavioral Analysis', 'Value Scoring', 'Persona Creation'],
+    platforms: ['native'],
+    status: 'active'
+  },
+
+  // Opportunity Scoring (3 agents)
+  {
+    id: 'opportunity-scoring-hubspot',
+    name: 'Opportunity Scoring AI (HubSpot)',
+    description: 'Advanced opportunity scoring with HubSpot deal intelligence',
     icon: BarChart3,
-    category: 'Sales Intelligence',
+    category: 'Opportunity Scoring',
     capabilities: ['Opportunity Scoring', 'Competitive Analysis', 'Market Intelligence', 'Win/Loss Analysis'],
-    platforms: ['salesforce', 'hubspot', 'native'],
-    status: 'beta'
+    platforms: ['hubspot'],
+    status: 'active'
   },
   {
-    id: 'communication-ai',
-    name: 'Communication AI',
-    description: 'Intelligent email optimization, timing, and personalization engine',
+    id: 'opportunity-scoring-salesforce',
+    name: 'Opportunity Scoring AI (Salesforce)',
+    description: 'Advanced opportunity scoring with Salesforce deal intelligence',
+    icon: BarChart3,
+    category: 'Opportunity Scoring',
+    capabilities: ['Opportunity Scoring', 'Competitive Analysis', 'Market Intelligence', 'Win/Loss Analysis'],
+    platforms: ['salesforce'],
+    status: 'active'
+  },
+  {
+    id: 'opportunity-scoring-native',
+    name: 'Opportunity Scoring AI (Native)',
+    description: 'Advanced opportunity scoring with Native CRM deal intelligence',
+    icon: BarChart3,
+    category: 'Opportunity Scoring',
+    capabilities: ['Opportunity Scoring', 'Competitive Analysis', 'Market Intelligence', 'Win/Loss Analysis'],
+    platforms: ['native'],
+    status: 'active'
+  },
+
+  // Communication AI (3 agents)
+  {
+    id: 'communication-ai-hubspot',
+    name: 'Communication AI (HubSpot)',
+    description: 'Intelligent email optimization using HubSpot communication data',
     icon: Mail,
-    category: 'Communication',
+    category: 'Communication AI',
     capabilities: ['Email Optimization', 'Send Time Optimization', 'Personalization', 'A/B Testing'],
-    platforms: ['salesforce', 'hubspot', 'native'],
-    status: 'beta'
+    platforms: ['hubspot'],
+    status: 'active'
   },
   {
-    id: 'sales-coaching',
-    name: 'Sales Coaching AI',
-    description: 'Personalized sales coaching with performance analytics and recommendations',
+    id: 'communication-ai-salesforce',
+    name: 'Communication AI (Salesforce)',
+    description: 'Intelligent email optimization using Salesforce communication data',
+    icon: Mail,
+    category: 'Communication AI',
+    capabilities: ['Email Optimization', 'Send Time Optimization', 'Personalization', 'A/B Testing'],
+    platforms: ['salesforce'],
+    status: 'active'
+  },
+  {
+    id: 'communication-ai-native',
+    name: 'Communication AI (Native)',
+    description: 'Intelligent email optimization using Native CRM communication data',
+    icon: Mail,
+    category: 'Communication AI',
+    capabilities: ['Email Optimization', 'Send Time Optimization', 'Personalization', 'A/B Testing'],
+    platforms: ['native'],
+    status: 'active'
+  },
+
+  // Sales Coaching (3 agents)
+  {
+    id: 'sales-coaching-hubspot',
+    name: 'Sales Coaching AI (HubSpot)',
+    description: 'Personalized sales coaching using HubSpot performance data',
     icon: Star,
-    category: 'Performance',
+    category: 'Sales Coaching',
     capabilities: ['Performance Analytics', 'Coaching Recommendations', 'Skill Assessment', 'Goal Tracking'],
-    platforms: ['salesforce', 'hubspot', 'native'],
-    status: 'coming-soon'
+    platforms: ['hubspot'],
+    status: 'active'
+  },
+  {
+    id: 'sales-coaching-salesforce',
+    name: 'Sales Coaching AI (Salesforce)',
+    description: 'Personalized sales coaching using Salesforce performance data',
+    icon: Star,
+    category: 'Sales Coaching',
+    capabilities: ['Performance Analytics', 'Coaching Recommendations', 'Skill Assessment', 'Goal Tracking'],
+    platforms: ['salesforce'],
+    status: 'active'
+  },
+  {
+    id: 'sales-coaching-native',
+    name: 'Sales Coaching AI (Native)',
+    description: 'Personalized sales coaching using Native CRM performance data',
+    icon: Star,
+    category: 'Sales Coaching',
+    capabilities: ['Performance Analytics', 'Coaching Recommendations', 'Skill Assessment', 'Goal Tracking'],
+    platforms: ['native'],
+    status: 'active'
   }
 ];
 
@@ -224,36 +399,39 @@ export function GlobalAIAgentRunner() {
 
   const runAgentOnPlatform = async (agent: AIAgent, platform: string): Promise<AgentResult> => {
     const testKey = `${agent.id}-${platform}`;
-    setCurrentOperation(`Running ${agent.name} on ${platform}`);
+    setCurrentOperation(`Running ${agent.name}`);
 
     try {
       let result;
       
-      if (platform === 'salesforce') {
+      // Extract base agent type from agent ID (remove platform suffix)
+      const baseAgentType = agent.id.replace('-hubspot', '').replace('-salesforce', '').replace('-native', '');
+      
+      if (agent.platforms.includes('salesforce') && platform === 'salesforce') {
         const { data, error } = await supabase.functions.invoke('salesforce-ai-agent-tester', {
           body: {
-            agentType: agent.id,
+            agentType: baseAgentType,
             userId: user?.id,
             enableActions: true
           }
         });
         if (error) throw error;
         result = data;
-      } else if (platform === 'hubspot') {
+      } else if (agent.platforms.includes('hubspot') && platform === 'hubspot') {
         const { data, error } = await supabase.functions.invoke('hubspot-ai-agent-tester', {
           body: {
-            agentType: agent.id,
+            agentType: baseAgentType,
             userId: user?.id,
             enableActions: true
           }
         });
         if (error) throw error;
         result = data;
-      } else {
+      } else if (agent.platforms.includes('native') && platform === 'native') {
         // Native CRM execution
         const { data, error } = await supabase.functions.invoke('enhanced-ai-agent-executor', {
           body: {
-            agentType: agent.id,
+            agentType: baseAgentType,
             userId: user?.id,
             enableActions: true,
             platform: 'native'
@@ -261,12 +439,14 @@ export function GlobalAIAgentRunner() {
         });
         if (error) throw error;
         result = data;
+      } else {
+        throw new Error(`Agent ${agent.name} does not support platform ${platform}`);
       }
 
       return {
         agentId: agent.id,
         agentName: agent.name,
-        platform,
+        platform: agent.platforms[0], // Use the agent's designated platform
         status: 'completed',
         confidence: result.confidence || Math.random() * 0.3 + 0.7, // 70-100%
         executionTime: result.executionTime || Math.floor(Math.random() * 5000) + 2000,
@@ -279,7 +459,7 @@ export function GlobalAIAgentRunner() {
       return {
         agentId: agent.id,
         agentName: agent.name,
-        platform,
+        platform: agent.platforms[0], // Use the agent's designated platform
         status: 'failed',
         confidence: 0,
         executionTime: 0,
@@ -293,53 +473,45 @@ export function GlobalAIAgentRunner() {
   };
 
   const runSingleAgent = async (agent: AIAgent) => {
-    const connectedPlatforms = connections
-      .filter(conn => conn.status === 'connected' && agent.platforms.includes(conn.platform))
-      .map(conn => conn.platform);
+    // Each agent now runs on its designated platform only
+    const targetPlatform = agent.platforms[0];
+    const connection = connections.find(conn => conn.platform === targetPlatform);
 
-    if (connectedPlatforms.length === 0) {
+    if (!connection || connection.status !== 'connected') {
       toast({
-        title: "No Connected Platforms",
-        description: `${agent.name} requires at least one connected platform.`,
+        title: "Platform Not Connected",
+        description: `${agent.name} requires ${targetPlatform} to be connected.`,
         variant: "destructive"
       });
       return;
     }
 
-    for (const platform of connectedPlatforms) {
-      const testKey = `${agent.id}-${platform}`;
-      setRunningTests(prev => new Set([...prev, testKey]));
-    }
+    const testKey = `${agent.id}`;
+    setRunningTests(prev => new Set([...prev, testKey]));
 
     try {
-      const results = await Promise.all(
-        connectedPlatforms.map(platform => runAgentOnPlatform(agent, platform))
-      );
+      const result = await runAgentOnPlatform(agent, targetPlatform);
 
       setAgentResults(prev => {
         const newResults = [
-          ...prev.filter(r => !connectedPlatforms.some(p => `${r.agentId}-${r.platform}` === `${agent.id}-${p}`)),
-          ...results
+          ...prev.filter(r => r.agentId !== agent.id),
+          result
         ];
         saveResults(newResults);
         return newResults;
       });
 
-      const successCount = results.filter(r => r.status === 'completed').length;
       toast({
-        title: "✅ Agent Testing Complete",
-        description: `${agent.name} completed on ${successCount}/${results.length} platforms`,
+        title: result.status === 'completed' ? "✅ Agent Complete" : "❌ Agent Failed",
+        description: `${agent.name} ${result.status === 'completed' ? 'completed successfully' : 'failed to execute'}`,
+        variant: result.status === 'completed' ? 'default' : 'destructive'
       });
 
     } finally {
-      // Clear running tests
-      connectedPlatforms.forEach(platform => {
-        const testKey = `${agent.id}-${platform}`;
-        setRunningTests(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(testKey);
-          return newSet;
-        });
+      setRunningTests(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(testKey);
+        return newSet;
       });
       setCurrentOperation('');
     }

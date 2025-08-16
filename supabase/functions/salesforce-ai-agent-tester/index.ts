@@ -1,6 +1,13 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0';
+import { 
+  analyzeLeadIntelligence, 
+  analyzePipelineAnalysis, 
+  analyzeOpportunityScoring, 
+  analyzeCommunicationAI, 
+  analyzeSalesCoaching 
+} from './agent-functions.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,7 +21,7 @@ const supabase = createClient(
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
-interface SalesforceContact {
+export interface SalesforceContact {
   Id: string;
   FirstName: string;
   LastName: string;
@@ -32,7 +39,7 @@ interface SalesforceContact {
   LastModifiedDate: string;
 }
 
-interface SalesforceOpportunity {
+export interface SalesforceOpportunity {
   Id: string;
   Name: string;
   Amount?: number;
@@ -112,6 +119,16 @@ serve(async (req) => {
     let analysisResult;
 
     switch (agentType) {
+      case 'lead-intelligence':
+        salesforceData = await fetchSalesforceContacts(token);
+        analysisResult = await analyzeLeadIntelligence(salesforceData);
+        break;
+      
+      case 'pipeline-analysis':
+        salesforceData = await fetchSalesforceOpportunities(token);
+        analysisResult = await analyzePipelineAnalysis(salesforceData);
+        break;
+      
       case 'customer-sentiment':
         salesforceData = await fetchSalesforceContacts(token);
         analysisResult = await analyzeCustomerSentiment(salesforceData);
@@ -125,6 +142,21 @@ serve(async (req) => {
       case 'customer-segmentation':
         salesforceData = await fetchSalesforceContacts(token);
         analysisResult = await analyzeCustomerSegmentation(salesforceData);
+        break;
+
+      case 'opportunity-scoring':
+        salesforceData = await fetchSalesforceOpportunities(token);
+        analysisResult = await analyzeOpportunityScoring(salesforceData);
+        break;
+
+      case 'communication-ai':
+        salesforceData = await fetchSalesforceContacts(token);
+        analysisResult = await analyzeCommunicationAI(salesforceData);
+        break;
+
+      case 'sales-coaching':
+        salesforceData = await fetchSalesforceOpportunities(token);
+        analysisResult = await analyzeSalesCoaching(salesforceData);
         break;
       
       default:
