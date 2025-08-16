@@ -1,4 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { executeCustomerSentimentAnalysis, executeChurnPredictionAnalysis, executeCustomerSegmentationAnalysis } from './customer-sentiment.ts'
+import { executeOpportunityScoring, executeCommunicationAI, executeSalesCoaching } from './additional-functions.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -95,17 +97,14 @@ Deno.serve(async (req) => {
       throw new Error('Invalid request parameters')
     }
 
-    // Validate agent
-    const { data: agent, error: agentError } = await supabaseClient
-      .from('ai_agents')
-      .select('*')
-      .eq('id', agentId)
-      .eq('status', 'active')
-      .maybeSingle()
-
-    if (agentError || !agent) {
-      throw new Error('Agent not found or not active')
-    }
+    // Since we're using agentType, we'll create a mock agent for execution
+    // This is for direct AI agent testing without requiring database agents
+    const agent = {
+      id: `${agentType}-${platform}`,
+      name: `${agentType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} AI`,
+      type: agentType,
+      status: 'active'
+    };
 
     console.log(`🤖 Executing AI agent: ${agent.name} (Type: ${agent.type})`)
 
@@ -157,20 +156,29 @@ Deno.serve(async (req) => {
       // Execute AI agent with autonomous actions
       let result
       switch (agent.type) {
-        case 'lead_intelligence':
-          result = await executeEnhancedLeadIntelligence(supabaseClient, inputData, enableActions, openaiApiKey, salesforceAPI)
+        case 'lead-intelligence':
+          result = await executeEnhancedLeadIntelligence(supabaseClient, {}, enableActions, openaiApiKey, salesforceAPI)
           break
-        case 'pipeline_analysis':
-          result = await executeEnhancedPipelineAnalysis(supabaseClient, inputData, enableActions, openaiApiKey, salesforceAPI)
+        case 'pipeline-analysis':
+          result = await executeEnhancedPipelineAnalysis(supabaseClient, {}, enableActions, openaiApiKey, salesforceAPI)
           break
-        case 'customer_sentiment':
-          result = await executeCustomerSentimentAnalysis(supabaseClient, inputData, enableActions, openaiApiKey)
+        case 'customer-sentiment':
+          result = await executeCustomerSentimentAnalysis(supabaseClient, {}, enableActions, openaiApiKey)
           break
-        case 'churn_prediction':
-          result = await executeChurnPredictionAnalysis(supabaseClient, inputData, enableActions, openaiApiKey)
+        case 'churn-prediction':
+          result = await executeChurnPredictionAnalysis(supabaseClient, {}, enableActions, openaiApiKey)
           break
-        case 'customer_segmentation':
-          result = await executeCustomerSegmentationAnalysis(supabaseClient, inputData, enableActions, openaiApiKey)
+        case 'customer-segmentation':
+          result = await executeCustomerSegmentationAnalysis(supabaseClient, {}, enableActions, openaiApiKey)
+          break
+        case 'opportunity-scoring':
+          result = await executeOpportunityScoring(supabaseClient, {}, enableActions, openaiApiKey)
+          break
+        case 'communication-ai':
+          result = await executeCommunicationAI(supabaseClient, {}, enableActions, openaiApiKey)
+          break
+        case 'sales-coaching':
+          result = await executeSalesCoaching(supabaseClient, {}, enableActions, openaiApiKey)
           break
         default:
           throw new Error(`Unsupported agent type: ${agent.type}`)
@@ -186,9 +194,9 @@ Deno.serve(async (req) => {
         .from('ai_agent_executions')
         .insert({
           id: crypto.randomUUID(),
-          agent_id: agentId,
+          agent_id: agent.id,
           execution_type: 'autonomous_action',
-          input_data: inputData,
+          input_data: { agentType, platform },
           output_data: result,
           confidence_score: confidenceScore,
           execution_time_ms: executionTime,
@@ -236,13 +244,7 @@ Deno.serve(async (req) => {
 async function executeEnhancedLeadIntelligence(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string, salesforceAPI: SalesforceAPI | null) {
   console.log('🎯 Executing Enhanced Lead Intelligence with AI-powered actions')
   
-  const { contactIds } = inputData
-  
-  if (!contactIds || !Array.isArray(contactIds)) {
-    throw new Error('Invalid contact IDs provided')
-  }
-
-  // Fetch comprehensive contact data
+  // Get contacts from Supabase instead of requiring specific contactIds
   const { data: contacts, error } = await supabaseClient
     .from('contacts')
     .select(`
@@ -250,7 +252,7 @@ async function executeEnhancedLeadIntelligence(supabaseClient: any, inputData: a
       lead_source, lead_score, company_id, status, created_at,
       companies(name, industry, size, revenue)
     `)
-    .in('id', contactIds)
+    .limit(10)
 
   if (error) {
     throw new Error(`Failed to fetch contact data: ${error.message}`)
@@ -499,13 +501,8 @@ Respond in JSON format:
 async function executeEnhancedPipelineAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string, salesforceAPI: SalesforceAPI | null) {
   console.log('📈 Executing Enhanced Pipeline Analysis with AI-powered actions')
   
-  const { opportunityIds } = inputData
   
-  if (!opportunityIds || !Array.isArray(opportunityIds)) {
-    throw new Error('Invalid opportunity IDs provided')
-  }
-
-  // Fetch comprehensive opportunity data
+  // Get opportunities from Supabase without requiring specific IDs
   const { data: opportunities, error } = await supabaseClient
     .from('opportunities')
     .select(`
@@ -514,7 +511,7 @@ async function executeEnhancedPipelineAnalysis(supabaseClient: any, inputData: a
       companies(name, industry, size),
       contacts(first_name, last_name, title)
     `)
-    .in('id', opportunityIds)
+    .limit(10)
 
   if (error) {
     throw new Error(`Failed to fetch opportunity data: ${error.message}`)
@@ -886,20 +883,14 @@ Respond in JSON format:
 async function executeChurnPredictionAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string) {
   console.log('📈 Executing Churn Prediction Analysis')
   
-  const { platform, contactIds } = inputData
-  
-  if (!contactIds || !Array.isArray(contactIds)) {
-    throw new Error('Invalid contact IDs provided')
-  }
-
-  // Fetch contacts with recent activity data
+  // Get all contacts for churn analysis instead of requiring specific IDs
   const { data: contacts, error } = await supabaseClient
     .from('contacts')
     .select(`
       id, first_name, last_name, email, status, lead_score, created_at,
       companies(name, industry, size)
     `)
-    .in('id', contactIds)
+    .limit(10)
 
   if (error) throw new Error(`Failed to fetch contacts: ${error.message}`)
 
@@ -907,12 +898,11 @@ async function executeChurnPredictionAnalysis(supabaseClient: any, inputData: an
     return {
       analysis: 'No contacts found for churn prediction',
       confidence: 0,
-      actionsExecuted: 0,
-      platform: platform || 'unknown'
+      actionsExecuted: 0
     }
   }
 
-  console.log(`📊 Predicting churn for ${contacts.length} customers on ${platform}`)
+  console.log(`📊 Predicting churn for ${contacts.length} customers`)
 
   const analysisResults = []
   let actionsExecuted = 0
@@ -930,7 +920,7 @@ Customer Data:
 - Days Since Created: ${daysSinceCreated}
 - Company: ${contact.companies?.name || 'Unknown'}
 - Industry: ${contact.companies?.industry || 'Unknown'}
-- Platform: ${platform}
+- Platform: native
 
 Analyze and provide:
 1. Churn Risk Score (0-100, where 100 is highest risk)
@@ -1003,7 +993,7 @@ Respond in JSON format:
       analysisResults.push({
         contactId: contact.id,
         name: `${contact.first_name} ${contact.last_name}`,
-        platform: platform,
+        platform: 'native',
         churnRisk: aiAnalysis.churnRisk,
         riskCategory: aiAnalysis.riskCategory,
         timeToChurn: aiAnalysis.timeToChurn,
@@ -1017,7 +1007,7 @@ Respond in JSON format:
       analysisResults.push({
         contactId: contact.id,
         name: `${contact.first_name} ${contact.last_name}`,
-        platform: platform,
+        platform: 'native',
         churnRisk: 50,
         riskCategory: 'Medium',
         timeToChurn: 30,
@@ -1031,8 +1021,8 @@ Respond in JSON format:
   return {
     analysis: analysisResults,
     confidence: avgConfidence,
-    summary: `📈 Churn Prediction Analysis completed for ${contacts.length} customers on ${platform}. ${actionsExecuted} actions executed.`,
-    platform: platform,
+    summary: `📈 Churn Prediction Analysis completed for ${contacts.length} customers on native. ${actionsExecuted} actions executed.`,
+    platform: 'native',
     actionsExecuted
   }
 }
@@ -1041,19 +1031,14 @@ Respond in JSON format:
 async function executeCustomerSegmentationAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string) {
   console.log('🎯 Executing Customer Segmentation Analysis')
   
-  const { platform, contactIds } = inputData
-  
-  if (!contactIds || !Array.isArray(contactIds)) {
-    throw new Error('Invalid contact IDs provided')
-  }
-
+  // Get all contacts for segmentation instead of requiring specific IDs
   const { data: contacts, error } = await supabaseClient
     .from('contacts')
     .select(`
       id, first_name, last_name, email, status, lead_score, title, 
       created_at, companies(name, industry, size, revenue)
     `)
-    .in('id', contactIds)
+    .limit(10)
 
   if (error) throw new Error(`Failed to fetch contacts: ${error.message}`)
 
@@ -1061,12 +1046,11 @@ async function executeCustomerSegmentationAnalysis(supabaseClient: any, inputDat
     return {
       analysis: 'No contacts found for segmentation',
       confidence: 0,
-      actionsExecuted: 0,
-      platform: platform || 'unknown'
+      actionsExecuted: 0
     }
   }
 
-  console.log(`📊 Segmenting ${contacts.length} customers on ${platform}`)
+  console.log(`📊 Segmenting ${contacts.length} customers`)
 
   const analysisResults = []
   let actionsExecuted = 0
@@ -1083,7 +1067,7 @@ Customer Data:
 - Company: ${contact.companies?.name || 'Unknown'}
 - Industry: ${contact.companies?.industry || 'Unknown'}
 - Company Size: ${contact.companies?.size || 'Unknown'}
-- Platform: ${platform}
+- Platform: native
 
 Analyze and provide:
 1. Primary Segment (Enterprise/Mid-Market/SMB/Individual)
@@ -1178,7 +1162,7 @@ Respond in JSON format:
       analysisResults.push({
         contactId: contact.id,
         name: `${contact.first_name} ${contact.last_name}`,
-        platform: platform,
+        platform: 'native',
         primarySegment: aiAnalysis.primarySegment,
         behavioralSegment: aiAnalysis.behavioralSegment,
         valueTier: aiAnalysis.valueTier,
@@ -1193,7 +1177,7 @@ Respond in JSON format:
       analysisResults.push({
         contactId: contact.id,
         name: `${contact.first_name} ${contact.last_name}`,
-        platform: platform,
+        platform: 'native',
         primarySegment: 'SMB',
         behavioralSegment: 'Neutral',
         confidence: 0.3
@@ -1206,8 +1190,8 @@ Respond in JSON format:
   return {
     analysis: analysisResults,
     confidence: avgConfidence,
-    summary: `🎯 Customer Segmentation Analysis completed for ${contacts.length} customers on ${platform}. ${actionsExecuted} actions executed.`,
-    platform: platform,
+    summary: `🎯 Customer Segmentation Analysis completed for ${contacts.length} customers on native. ${actionsExecuted} actions executed.`,
+    platform: 'native',
     actionsExecuted
   }
 }
