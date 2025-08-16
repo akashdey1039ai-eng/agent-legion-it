@@ -51,15 +51,16 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
 
       // Listen for messages from the popup
       const handleMessage = (event: MessageEvent) => {
-        console.log('Received message from popup:', event.data);
+        console.log('🎉 Received message from popup:', event.data);
         if (event.data.type === 'SALESFORCE_AUTH_SUCCESS') {
+          console.log('✅ Auth success message received, stopping connecting state');
           setIsConnecting(false);
           
           // Wait a moment for the token to be stored, then check connection
           setTimeout(() => {
-            console.log('Checking connection after successful auth...');
+            console.log('🔄 Checking connection after successful auth...');
             checkConnection();
-          }, 2000);
+          }, 3000); // Increased timeout to 3 seconds
           
           toast({
             title: "Connected Successfully",
@@ -74,11 +75,15 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
       // Listen for the callback (fallback)
       const checkClosed = setInterval(() => {
         if (popup?.closed) {
+          console.log('🚪 Popup window closed, checking connection status');
           clearInterval(checkClosed);
           window.removeEventListener('message', handleMessage);
           setIsConnecting(false);
           // Check if connection was successful
-          checkConnection();
+          setTimeout(() => {
+            console.log('🔄 Final connection check after popup closed');
+            checkConnection();
+          }, 1000);
         }
       }, 1000);
 
@@ -241,20 +246,31 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
             
             {!isConnected ? (
               <div className="space-y-4">
-                <Button 
-                  onClick={handleConnect} 
-                  disabled={isConnecting}
-                  className="flex items-center gap-2"
-                >
-                  {isConnecting ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      Connecting to Salesforce...
-                    </>
-                  ) : (
-                    'Connect Developer Sandbox'
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleConnect} 
+                    disabled={isConnecting}
+                    className="flex items-center gap-2"
+                  >
+                    {isConnecting ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        Connecting to Salesforce...
+                      </>
+                    ) : (
+                      'Connect Developer Sandbox'
+                    )}
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={checkConnection}
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    Check Status
+                  </Button>
+                </div>
                 
                 <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded border border-blue-200 dark:border-blue-800">
                   <strong>📚 Setup Instructions:</strong>
