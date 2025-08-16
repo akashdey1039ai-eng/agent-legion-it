@@ -59,16 +59,34 @@ Deno.serve(async (req) => {
     // Store the code verifier temporarily (we'll need it in the callback)
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
+    // Clean up expired states first
     await supabaseClient
       .from('oauth_states')
-      .upsert({
+      .delete()
+      .lt('expires_at', new Date().toISOString())
+
+    // Delete any existing state for this user
+    await supabaseClient
+      .from('oauth_states')
+      .delete()
+      .eq('state', userId)
+
+    // Insert new state
+    const { error: insertError } = await supabaseClient
+      .from('oauth_states')
+      .insert({
         state: userId,
         code_verifier: codeVerifier,
         expires_at: new Date(Date.now() + 600000).toISOString() // 10 minutes
       })
+
+    if (insertError) {
+      console.error('Failed to store OAuth state:', insertError)
+      throw new Error('Failed to initialize OAuth flow')
+    }
 
     // Build the OAuth URL with PKCE
     const authUrl = new URL('https://login.salesforce.com/services/oauth2/authorize')

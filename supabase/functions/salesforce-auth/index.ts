@@ -51,15 +51,34 @@ Deno.serve(async (req) => {
     }
 
     // Retrieve the code verifier for PKCE
+    console.log('Looking for OAuth state for user:', state)
+    
     const { data: oauthState, error: stateError } = await supabaseClient
       .from('oauth_states')
-      .select('code_verifier')
+      .select('code_verifier, expires_at')
       .eq('state', state)
       .maybeSingle()
 
-    if (stateError || !oauthState) {
-      throw new Error('Invalid or expired OAuth state')
+    console.log('OAuth state query result:', { oauthState, stateError })
+
+    if (stateError) {
+      console.error('Error retrieving OAuth state:', stateError)
+      throw new Error('Failed to retrieve OAuth state')
     }
+
+    if (!oauthState) {
+      throw new Error('OAuth state not found. Please try connecting again.')
+    }
+
+    // Check if state has expired
+    const now = new Date()
+    const expiresAt = new Date(oauthState.expires_at)
+    if (expiresAt <= now) {
+      console.log('OAuth state expired:', { now, expiresAt })
+      throw new Error('OAuth session expired. Please try connecting again.')
+    }
+
+    console.log('Using code verifier for token exchange')
 
     console.log('Exchanging authorization code for access token')
 
@@ -106,17 +125,42 @@ Deno.serve(async (req) => {
       throw new Error('Failed to store authentication tokens')
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Salesforce authentication successful',
-        instance_url: tokenData.instance_url,
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    )
+    // Clean up the OAuth state after successful token exchange
+    await supabaseClient
+      .from('oauth_states')
+      .delete()
+      .eq('state', state)
+
+    console.log('Salesforce authentication completed successfully')
+
+    // Return an HTML response that closes the popup and notifies the parent window
+    const htmlResponse = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Salesforce Authentication</title>
+        </head>
+        <body>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({
+                type: 'SALESFORCE_AUTH_SUCCESS',
+                success: true,
+                message: 'Salesforce authentication successful'
+              }, '*');
+              window.close();
+            } else {
+              document.body.innerHTML = '<h2>✅ Authentication Successful!</h2><p>You can close this window.</p>';
+            }
+          </script>
+        </body>
+      </html>
+    `
+
+    return new Response(htmlResponse, {
+      headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+      status: 200,
+    })
 
   } catch (error) {
     console.error('Salesforce auth error:', error)
