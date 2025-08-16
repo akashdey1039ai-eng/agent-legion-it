@@ -664,41 +664,68 @@ export function GlobalAIAgentRunner() {
 
           {/* Global Progress */}
           {(globalProgress > 0 || currentOperation) && (
-            <div className="space-y-2 mb-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
-              <div className="flex justify-between text-sm">
-                <span className="font-medium">{currentOperation}</span>
-                <span>{Math.round(globalProgress)}%</span>
+            <div className="space-y-3 mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-sm font-medium">{currentOperation}</span>
+                </div>
+                <span className="text-sm text-muted-foreground">{Math.round(globalProgress)}%</span>
               </div>
-              <Progress value={globalProgress} className="w-full" />
+              <Progress value={globalProgress} className="h-3" />
+              <div className="text-xs text-muted-foreground">
+                Running {runningTests.size} agents • {agentResults.filter(r => r.status === 'completed').length} completed
+              </div>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <Button 
-              onClick={runAllAgents}
-              disabled={runningTests.size > 0}
-              className="flex-1"
-              size="lg"
-            >
-              {runningTests.size > 0 ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Running AI Agents...
-                </>
-              ) : (
-                <>
-                  <PlayCircle className="h-5 w-5 mr-2" />
-                  Run All AI Agents
-                </>
-              )}
-            </Button>
-            <Button variant="outline" onClick={exportResults} disabled={agentResults.length === 0}>
-              Export Results
-            </Button>
-            <Button variant="outline" onClick={clearAllResults} disabled={agentResults.length === 0}>
-              Clear Results
-            </Button>
+          {/* Global Controls */}
+          <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
+            <div className="flex gap-3">
+              <Button 
+                onClick={runAllAgents} 
+                disabled={runningTests.size > 0 || connections.filter(c => c.status === 'connected').length === 0}
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                size="lg"
+              >
+                {runningTests.size > 0 ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Running All 24 Agents
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Run All 24 AI Agents
+                  </>
+                )}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={exportResults}
+                disabled={agentResults.length === 0}
+              >
+                📊 Export Results
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={clearAllResults}
+                disabled={agentResults.length === 0}
+              >
+                🗑️ Clear Results
+              </Button>
+            </div>
+
+            <div className="bg-muted/50 px-3 py-2 rounded-lg">
+              <div className="text-sm font-medium">
+                {AI_AGENTS.length} AI Agents • {connections.filter(c => c.status === 'connected').length} Connected Platforms
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {agentResults.length} Test Results • {agentResults.filter(r => r.status === 'completed').length} Successful
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -762,39 +789,49 @@ export function GlobalAIAgentRunner() {
 
                 {/* Platform Results */}
                 <div className="space-y-2">
-                  <p className="text-xs font-medium">Platform Results:</p>
-                  {agent.platforms.map((platform) => {
-                    const platformResult = agentResults_filtered.find(r => r.platform === platform);
-                    const platformConnection = connections.find(c => c.platform === platform);
-                    const isConnected = platformConnection?.status === 'connected';
-                    const isPlatformRunning = runningTests.has(`${agent.id}-${platform}`);
-
-                    return (
-                      <div key={platform} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                        <div className="flex items-center gap-2">
-                          {getPlatformIcon(platform)}
-                          <span className="text-sm capitalize">{platform}</span>
-                          {!isConnected && <Badge variant="outline" className="text-xs">Disconnected</Badge>}
+                  <p className="text-xs font-medium">Test Results:</p>
+                  {agentResults_filtered.length > 0 ? (
+                    agentResults_filtered.map((result, index) => (
+                      <div key={index} className="p-2 bg-muted/30 rounded border">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            {getPlatformIcon(result.platform)}
+                            <span className="text-xs font-medium capitalize">{result.platform}</span>
+                          </div>
+                          {getStatusBadge(result.status)}
                         </div>
-                        <div className="flex items-center gap-2">
-                          {isPlatformRunning ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : platformResult ? (
-                            <>
-                              {getStatusBadge(platformResult.status)}
-                              {platformResult.status === 'completed' && (
-                                <span className="text-xs text-muted-foreground">
-                                  {Math.round(platformResult.confidence * 100)}%
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            <Badge variant="outline" className="text-xs">Not Run</Badge>
-                          )}
-                        </div>
+                        {result.status === 'completed' && (
+                          <div className="text-xs space-y-1">
+                            <div className="flex justify-between">
+                              <span>Confidence:</span>
+                              <span className="font-medium">{Math.round(result.confidence * 100)}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Records:</span>
+                              <span className="font-medium">{result.recordsProcessed}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Actions:</span>
+                              <span className="font-medium">{result.actionsExecuted}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Time:</span>
+                              <span className="font-medium">{result.executionTime}ms</span>
+                            </div>
+                          </div>
+                        )}
+                        {result.error && (
+                          <div className="text-xs text-red-600 mt-1">
+                            Error: {result.error}
+                          </div>
+                        )}
                       </div>
-                    );
-                  })}
+                    ))
+                  ) : (
+                    <div className="p-2 bg-muted/30 rounded text-center">
+                      <span className="text-xs text-muted-foreground">No test results yet</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Test Button */}
@@ -807,14 +844,14 @@ export function GlobalAIAgentRunner() {
                   {isRunning ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Testing...
+                      Testing on {agent.platforms[0]}...
                     </>
                   ) : agent.status === 'coming-soon' ? (
                     'Coming Soon'
                   ) : (
                     <>
                       <Zap className="h-4 w-4 mr-2" />
-                      Test Agent
+                      Test on {agent.platforms[0].charAt(0).toUpperCase() + agent.platforms[0].slice(1)}
                     </>
                   )}
                 </Button>
@@ -824,67 +861,132 @@ export function GlobalAIAgentRunner() {
         })}
       </div>
 
-      {/* Results Summary */}
+      {/* Real-Time Test Results Dashboard */}
       {agentResults.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Global AI Agent Results</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Live AI Agent Testing Results
+            </CardTitle>
             <CardDescription>
-              Comprehensive results from {agentResults.length} agent executions across all platforms
+              Real-time execution results from {agentResults.length} agent tests with autonomous CRM updates
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">
-                  {agentResults.filter(r => r.status === 'completed').length}
+              <Card className="p-4 border-green-200 bg-green-50/50">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">
+                    {agentResults.filter(r => r.status === 'completed').length}
+                  </div>
+                  <div className="text-sm text-green-700">Successful Tests</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {agentResults.length > 0 ? Math.round((agentResults.filter(r => r.status === 'completed').length / agentResults.length) * 100) : 0}% success rate
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">Successful Tests</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">
-                  {agentResults.reduce((sum, r) => sum + r.recordsProcessed, 0)}
+              </Card>
+              
+              <Card className="p-4 border-blue-200 bg-blue-50/50">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">
+                    {agentResults.reduce((sum, r) => sum + r.recordsProcessed, 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm text-blue-700">Records Analyzed</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Across all platforms
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">Records Processed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">
-                  {agentResults.reduce((sum, r) => sum + r.actionsExecuted, 0)}
+              </Card>
+              
+              <Card className="p-4 border-purple-200 bg-purple-50/50">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">
+                    {agentResults.reduce((sum, r) => sum + r.actionsExecuted, 0)}
+                  </div>
+                  <div className="text-sm text-purple-700">Autonomous Actions</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Auto-updates executed
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">Actions Executed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600">
-                  {agentResults.length > 0 ? Math.round(agentResults.reduce((sum, r) => sum + r.confidence, 0) / agentResults.length * 100) : 0}%
+              </Card>
+              
+              <Card className="p-4 border-orange-200 bg-orange-50/50">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-orange-600">
+                    {agentResults.length > 0 ? Math.round(agentResults.reduce((sum, r) => sum + r.confidence, 0) / agentResults.length * 100) : 0}%
+                  </div>
+                  <div className="text-sm text-orange-700">Avg Confidence</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    AI prediction accuracy
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">Avg Confidence</div>
+              </Card>
+            </div>
+
+            {/* Platform Performance */}
+            <div className="mb-6">
+              <h4 className="font-semibold mb-3">Platform Performance</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {['hubspot', 'salesforce', 'native'].map(platform => {
+                  const platformResults = agentResults.filter(r => r.platform === platform);
+                  const successRate = platformResults.length > 0 ? 
+                    Math.round((platformResults.filter(r => r.status === 'completed').length / platformResults.length) * 100) : 0;
+                  
+                  return (
+                    <div key={platform} className="p-3 border rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        {getPlatformIcon(platform)}
+                        <span className="font-medium capitalize">{platform} CRM</span>
+                      </div>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span>Tests:</span>
+                          <span className="font-medium">{platformResults.length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Success Rate:</span>
+                          <span className="font-medium">{successRate}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Records:</span>
+                          <span className="font-medium">{platformResults.reduce((sum, r) => sum + r.recordsProcessed, 0)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Recent Results */}
-            <div className="space-y-2">
-              <p className="font-medium">Recent Executions:</p>
-              {agentResults.slice(-5).map((result, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded">
-                  <div className="flex items-center gap-3">
-                    {getPlatformIcon(result.platform)}
-                    <div>
-                      <p className="font-medium text-sm">{result.agentName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(result.timestamp).toLocaleString()}
-                      </p>
+            {/* Recent Executions */}
+            <div className="space-y-3">
+              <h4 className="font-semibold">Recent Agent Executions</h4>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {agentResults.slice().reverse().map((result, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      {getPlatformIcon(result.platform)}
+                      <div>
+                        <p className="font-medium text-sm">{result.agentName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(result.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {getStatusBadge(result.status)}
+                      {result.status === 'completed' && (
+                        <div className="text-right text-xs">
+                          <div className="font-medium">{Math.round(result.confidence * 100)}% confidence</div>
+                          <div className="text-muted-foreground">{result.recordsProcessed} records • {result.actionsExecuted} actions</div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {getStatusBadge(result.status)}
-                    {result.status === 'completed' && (
-                      <span className="text-sm text-muted-foreground">
-                        {Math.round(result.confidence * 100)}% • {result.recordsProcessed} records
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
