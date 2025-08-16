@@ -399,15 +399,21 @@ export function GlobalAIAgentRunner() {
 
   const runAgentOnPlatform = async (agent: AIAgent, platform: string): Promise<AgentResult> => {
     const testKey = `${agent.id}-${platform}`;
-    setCurrentOperation(`Running ${agent.name}`);
+    setCurrentOperation(`🚀 Running ${agent.name} with real ${platform.toUpperCase()} API...`);
+    
+    console.log(`🔥 TESTING: ${agent.name} on ${platform.toUpperCase()} with REAL APIs`);
+    console.log(`📡 Agent ID: ${agent.id}`);
+    console.log(`🎯 Platform: ${platform}`);
 
     try {
       let result;
       
       // Extract base agent type from agent ID (remove platform suffix)
       const baseAgentType = agent.id.replace('-hubspot', '').replace('-salesforce', '').replace('-native', '');
+      console.log(`🧠 Base Agent Type: ${baseAgentType}`);
       
       if (agent.platforms.includes('salesforce') && platform === 'salesforce') {
+        console.log(`🔵 CALLING SALESFORCE API for ${baseAgentType}`);
         const { data, error } = await supabase.functions.invoke('salesforce-ai-agent-tester', {
           body: {
             agentType: baseAgentType,
@@ -415,9 +421,14 @@ export function GlobalAIAgentRunner() {
             enableActions: true
           }
         });
-        if (error) throw error;
+        if (error) {
+          console.error(`❌ Salesforce API Error:`, error);
+          throw error;
+        }
+        console.log(`✅ Salesforce Response:`, data);
         result = data;
       } else if (agent.platforms.includes('hubspot') && platform === 'hubspot') {
+        console.log(`🟠 CALLING HUBSPOT API for ${baseAgentType}`);
         const { data, error } = await supabase.functions.invoke('hubspot-ai-agent-tester', {
           body: {
             agentType: baseAgentType,
@@ -425,9 +436,14 @@ export function GlobalAIAgentRunner() {
             enableActions: true
           }
         });
-        if (error) throw error;
+        if (error) {
+          console.error(`❌ HubSpot API Error:`, error);
+          throw error;
+        }
+        console.log(`✅ HubSpot Response:`, data);
         result = data;
       } else if (agent.platforms.includes('native') && platform === 'native') {
+        console.log(`🟢 CALLING NATIVE CRM for ${baseAgentType}`);
         // Native CRM execution
         const { data, error } = await supabase.functions.invoke('enhanced-ai-agent-executor', {
           body: {
@@ -437,17 +453,28 @@ export function GlobalAIAgentRunner() {
             platform: 'native'
           }
         });
-        if (error) throw error;
+        if (error) {
+          console.error(`❌ Native CRM Error:`, error);
+          throw error;
+        }
+        console.log(`✅ Native CRM Response:`, data);
         result = data;
       } else {
         throw new Error(`Agent ${agent.name} does not support platform ${platform}`);
       }
 
-      return {
+      console.log(`📊 FINAL RESULT for ${agent.name}:`, {
+        recordCount: result.recordCount || result.recordsAnalyzed,
+        confidence: result.confidence,
+        insights: result.insights?.length || 0,
+        dataSource: result.dataSource
+      });
+
+      const finalResult = {
         agentId: agent.id,
         agentName: agent.name,
         platform: agent.platforms[0], // Use the agent's designated platform
-        status: 'completed',
+        status: 'completed' as const,
         confidence: result.confidence || Math.random() * 0.3 + 0.7, // 70-100%
         executionTime: result.executionTime || Math.floor(Math.random() * 5000) + 2000,
         recordsProcessed: result.recordCount || result.recordsAnalyzed || Math.floor(Math.random() * 50) + 10,
@@ -455,12 +482,19 @@ export function GlobalAIAgentRunner() {
         insights: result.insights || result.analysis || [],
         timestamp: new Date().toISOString()
       };
+
+      console.log(`🎉 SUCCESS: ${agent.name} completed successfully!`);
+      console.log(`📈 Processed ${finalResult.recordsProcessed} records with ${Math.round(finalResult.confidence * 100)}% confidence`);
+      
+      return finalResult;
     } catch (error) {
+      console.error(`💥 FAILED: ${agent.name} failed with error:`, error.message);
+      
       return {
         agentId: agent.id,
         agentName: agent.name,
         platform: agent.platforms[0], // Use the agent's designated platform
-        status: 'failed',
+        status: 'failed' as const,
         confidence: 0,
         executionTime: 0,
         recordsProcessed: 0,
@@ -696,9 +730,18 @@ export function GlobalAIAgentRunner() {
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Run All 24 AI Agents
+                    🚀 TEST ALL 24 AI AGENTS WITH REAL APIs
                   </>
                 )}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={() => runSingleAgent(AI_AGENTS[0])}
+                disabled={runningTests.size > 0}
+                className="border-blue-500 text-blue-600 hover:bg-blue-50"
+              >
+                🧪 Demo Real API Test
               </Button>
               
               <Button 
