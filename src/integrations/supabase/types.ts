@@ -96,6 +96,13 @@ export type Database = {
             foreignKeyName: "activities_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
+            referencedRelation: "safe_contacts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
             referencedRelation: "secure_contacts_view"
             referencedColumns: ["id"]
           },
@@ -443,6 +450,13 @@ export type Database = {
             foreignKeyName: "campaign_members_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
+            referencedRelation: "safe_contacts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_members_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
             referencedRelation: "secure_contacts_view"
             referencedColumns: ["id"]
           },
@@ -579,6 +593,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "safe_contacts_view"
             referencedColumns: ["id"]
           },
           {
@@ -954,6 +975,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "safe_contacts_view"
             referencedColumns: ["id"]
           },
           {
@@ -1356,6 +1384,13 @@ export type Database = {
             foreignKeyName: "leads_converted_contact_id_fkey"
             columns: ["converted_contact_id"]
             isOneToOne: false
+            referencedRelation: "safe_contacts_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_converted_contact_id_fkey"
+            columns: ["converted_contact_id"]
+            isOneToOne: false
             referencedRelation: "secure_contacts_view"
             referencedColumns: ["id"]
           },
@@ -1484,6 +1519,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "safe_contacts_view"
             referencedColumns: ["id"]
           },
           {
@@ -1860,6 +1902,51 @@ export type Database = {
       }
     }
     Views: {
+      safe_contacts_view: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          owner_id: string | null
+          title: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id?: string | null
+          last_name?: string | null
+          owner_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id?: string | null
+          last_name?: string | null
+          owner_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       secure_contacts_view: {
         Row: {
           company_id: string | null
