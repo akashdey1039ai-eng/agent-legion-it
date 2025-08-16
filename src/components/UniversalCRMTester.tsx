@@ -88,7 +88,25 @@ export function UniversalCRMTester() {
 
   useEffect(() => {
     checkCRMConnections();
+    
+    // Load persistent test results
+    const savedResults = localStorage.getItem('universal-crm-test-results');
+    if (savedResults) {
+      try {
+        const parsedResults = JSON.parse(savedResults);
+        setTestResults(parsedResults);
+      } catch (error) {
+        console.error('Failed to load saved test results:', error);
+      }
+    }
   }, []);
+
+  // Save results to localStorage whenever they change
+  useEffect(() => {
+    if (testResults.length > 0) {
+      localStorage.setItem('universal-crm-test-results', JSON.stringify(testResults));
+    }
+  }, [testResults]);
 
   const checkCRMConnections = async () => {
     if (!user) return;
@@ -327,7 +345,10 @@ export function UniversalCRMTester() {
                 </>
               )}
             </Button>
-            <Button variant="outline" onClick={() => setTestResults([])}>
+            <Button variant="outline" onClick={() => {
+              setTestResults([]);
+              localStorage.removeItem('universal-crm-test-results');
+            }}>
               Clear Results
             </Button>
           </div>

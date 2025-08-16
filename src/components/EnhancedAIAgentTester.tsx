@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { TestResultsViewer } from '@/components/TestResultsViewer';
+import { PlatformStatusIndicator } from '@/components/PlatformStatusIndicator';
 
 interface TestResult {
   agentId: string;
@@ -45,13 +46,66 @@ export function EnhancedAIAgentTester() {
   const [enableActions, setEnableActions] = useState(false);
   const [currentTest, setCurrentTest] = useState<string>('');
   const [progress, setProgress] = useState(0);
+  const [platformStatus, setPlatformStatus] = useState({
+    native: true, // Always true since we use native CRM
+    salesforce: false,
+    hubspot: false
+  });
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Clear test results on component mount
+  // Load persistent test results on component mount
   useEffect(() => {
-    setTestResults([]);
+    const savedResults = localStorage.getItem('enhanced-ai-test-results');
+    if (savedResults) {
+      try {
+        const parsedResults = JSON.parse(savedResults);
+        setTestResults(parsedResults);
+      } catch (error) {
+        console.error('Failed to load saved test results:', error);
+      }
+    }
+    
+    // Check platform connections
+    checkPlatformConnections();
   }, []);
+
+  // Save results to localStorage whenever they change
+  useEffect(() => {
+    if (testResults.length > 0) {
+      localStorage.setItem('enhanced-ai-test-results', JSON.stringify(testResults));
+    }
+  }, [testResults]);
+
+  const checkPlatformConnections = async () => {
+    if (!user) return;
+
+    try {
+      // Check Salesforce connection
+      const { data: salesforceTokens } = await supabase
+        .from('salesforce_tokens')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      // Check HubSpot connection
+      const { data: hubspotTokens } = await supabase
+        .from('hubspot_tokens')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      setPlatformStatus({
+        native: true, // Always active
+        salesforce: !!(salesforceTokens && salesforceTokens.length > 0),
+        hubspot: !!(hubspotTokens && hubspotTokens.length > 0)
+      });
+    } catch (error) {
+      console.error('Error checking platform connections:', error);
+    }
+  };
 
   const agentDefinitions: AgentDefinition[] = [
     // Currently Available Agents
@@ -428,6 +482,7 @@ export function EnhancedAIAgentTester() {
 
   const clearResults = () => {
     setTestResults([]);
+    localStorage.removeItem('enhanced-ai-test-results');
     toast({
       title: "🗑️ Results Cleared",
       description: "All test results have been cleared.",
@@ -517,77 +572,78 @@ export function EnhancedAIAgentTester() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-primary" />
-            Enhanced AI Agent Testing Suite
-          </CardTitle>
-          <CardDescription>
-            Test production-ready AI agents with OpenAI-powered intelligence and autonomous actions across all categories
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Autonomous Actions Toggle */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg">
-            <div className="flex items-center gap-3">
-              <Settings className="h-5 w-5 text-primary" />
-              <div>
-                <h4 className="font-semibold">Autonomous Actions</h4>
-                <p className="text-sm text-muted-foreground">
-                  Enable agents to automatically update CRM records and create tasks
-                </p>
+      {/* Header with Platform Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-primary" />
+                Enhanced AI Agents
+              </CardTitle>
+              <CardDescription>
+                Advanced AI agents with autonomous CRM actions. Running on Native CRM with external platform integration.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Autonomous Actions:</span>
+                  <Switch
+                    checked={enableActions}
+                    onCheckedChange={setEnableActions}
+                  />
+                  <Badge variant={enableActions ? "default" : "secondary"}>
+                    {enableActions ? "Enabled" : "Analysis Only"}
+                  </Badge>
+                </div>
               </div>
-            </div>
-            <Switch
-              checked={enableActions}
-              onCheckedChange={setEnableActions}
-              className="data-[state=checked]:bg-primary"
-            />
-          </div>
-
-          {/* Progress Bar */}
-          {runningAgents.size > 0 && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Testing: {currentTest}</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} className="w-full" />
-            </div>
-          )}
-
-          {/* Quick Actions */}
-          <div className="flex gap-3">
-            <Button 
-              onClick={runAllActiveAgents}
-              disabled={runningAgents.size > 0}
-              className="flex-1"
-            >
-              {runningAgents.size > 0 ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Running Tests...
-                </>
-              ) : (
-                <>
-                  <Brain className="h-4 w-4 mr-2" />
-                  Test All Active Agents
-                </>
+              
+              {/* Progress Bar */}
+              {runningAgents.size > 0 && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Testing: {currentTest}</span>
+                    <span>{Math.round(progress)}%</span>
+                  </div>
+                  <Progress value={progress} className="w-full" />
+                </div>
               )}
-            </Button>
-            <Button 
-              onClick={clearResults}
-              variant="outline"
-              disabled={testResults.length === 0}
-            >
-              <Database className="h-4 w-4 mr-2" />
-              Clear Results
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+
+              {/* Quick Actions */}
+              <div className="flex gap-3">
+                <Button 
+                  onClick={runAllActiveAgents}
+                  disabled={runningAgents.size > 0}
+                  className="flex-1"
+                >
+                  {runningAgents.size > 0 ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Running Tests...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="h-4 w-4 mr-2" />
+                      Test All Active Agents
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={clearResults}
+                  variant="outline"
+                  disabled={testResults.length === 0}
+                >
+                  <Database className="h-4 w-4 mr-2" />
+                  Clear Results
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <PlatformStatusIndicator platforms={platformStatus} />
+      </div>
 
       {/* Agent Categories */}
       <Tabs defaultValue="active" className="w-full">
@@ -724,7 +780,7 @@ export function EnhancedAIAgentTester() {
               <div>
                 <CardTitle>Test Results Overview</CardTitle>
                 <CardDescription>
-                  Summary of {testResults.length} test execution(s)
+                  Summary of {testResults.length} test execution(s) - Native CRM + Platform Integration
                 </CardDescription>
               </div>
               <div className="flex gap-2">
@@ -745,7 +801,7 @@ export function EnhancedAIAgentTester() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setTestResults([])}
+                  onClick={clearResults}
                 >
                   Clear Results
                 </Button>
@@ -782,12 +838,10 @@ export function EnhancedAIAgentTester() {
                           <span className="text-muted-foreground">Actions:</span>
                           <span className="font-medium">{result.actionsExecuted || 0}</span>
                         </div>
-                        {result.results?.insights?.length && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Records:</span>
-                            <span className="font-medium">{result.results.insights.length}</span>
-                          </div>
-                        )}
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Platform:</span>
+                          <span className="font-medium">Native CRM + {platformStatus.salesforce ? 'Salesforce' : 'Analysis Only'}</span>
+                        </div>
                       </div>
                     ) : (
                       <div className="text-xs text-destructive">
@@ -820,7 +874,7 @@ export function EnhancedAIAgentTester() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-600">
-                    {(testResults.reduce((sum, r) => sum + (r.confidence || 0), 0) / testResults.length * 100).toFixed(1)}%
+                    {testResults.length > 0 ? (testResults.reduce((sum, r) => sum + (r.confidence || 0), 0) / testResults.length * 100).toFixed(1) : 0}%
                   </div>
                   <div className="text-sm text-muted-foreground">Avg Confidence</div>
                 </div>
@@ -832,7 +886,7 @@ export function EnhancedAIAgentTester() {
           <TestResultsViewer 
             results={testResults.map(r => ({
               ...r,
-              platform: 'salesforce', // Default platform for EnhancedAIAgentTester
+              platform: `native-crm${platformStatus.salesforce ? '+salesforce' : ''}`,
               analysis: r.results?.insights || r.results?.analysis || [],
               logs: r.results?.logs || [],
               rawResponse: r.results,
