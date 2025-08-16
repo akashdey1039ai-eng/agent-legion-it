@@ -102,54 +102,47 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
     console.log('🔍 Checking Salesforce connection for user:', user.id);
     
     try {
-      // First, let's check what tokens exist in the database
-      const { data: allTokens, error: allError } = await supabase
-        .from('salesforce_tokens')
-        .select('*');
-      
-      console.log('🗂️ ALL tokens in database:', allTokens);
-      console.log('🗂️ Error fetching all tokens:', allError);
-      
-      // Now check for user-specific tokens
+      // Check for user-specific tokens with better error handling
       const { data, error } = await supabase
         .from('salesforce_tokens')
         .select('*')
         .eq('user_id', user.id)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .order('created_at', { ascending: false })
+        .limit(1);
 
       console.log('🎯 User-specific Salesforce token query result:', { data, error });
 
-      if (data && !error) {
+      if (error) {
+        console.log('💥 Database error:', error);
+        setIsConnected(false);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const token = data[0];
         // Check if token is still valid (not expired)
         const now = new Date();
-        const expiresAt = new Date(data.expires_at);
+        const expiresAt = new Date(token.expires_at);
         
         console.log('⏰ Token expiration check:', { 
           now: now.toISOString(), 
           expiresAt: expiresAt.toISOString(), 
           isValid: expiresAt > now,
-          accessToken: data.access_token ? '✅ Present' : '❌ Missing',
-          refreshToken: data.refresh_token ? '✅ Present' : '❌ Missing'
+          accessToken: token.access_token ? '✅ Present' : '❌ Missing',
+          refreshToken: token.refresh_token ? '✅ Present' : '❌ Missing'
         });
         
-        if (expiresAt > now) {
+        if (expiresAt > now && token.access_token) {
           console.log('✅ Setting connected to true - valid token found');
           setIsConnected(true);
-          setLastSyncTime(data.updated_at);
+          setLastSyncTime(token.updated_at);
         } else {
-          // Token is expired
-          console.log('⏰ Salesforce token has expired');
+          // Token is expired or invalid
+          console.log('⏰ Salesforce token has expired or is invalid');
           setIsConnected(false);
         }
       } else {
-        console.log('❌ No valid token found, setting connected to false');
-        if (error) {
-          console.log('💥 Specific error:', error);
-          console.log('🔍 Error code:', error.code);
-          console.log('🔍 Error message:', error.message);
-        }
+        console.log('❌ No tokens found for user');
         setIsConnected(false);
       }
     } catch (error) {
