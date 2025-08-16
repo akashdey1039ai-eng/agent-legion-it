@@ -11,6 +11,7 @@ import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
 import { AgentExecutionPanel } from "@/components/AgentExecutionPanel";
 import { AgentConfigurationSelector } from "@/components/AgentConfigurationSelector";
 import { EnhancedAIAgentTester } from "@/components/EnhancedAIAgentTester";
+import { GlobalAIAgentRunner } from "@/components/GlobalAIAgentRunner";
 import { ProductionReadyDashboard } from "@/components/ProductionReadyDashboard";
 import { UniversalCRMTester } from "@/components/UniversalCRMTester";
 import { Header } from "@/components/Header";
@@ -37,7 +38,7 @@ const Index = () => {
   const location = useLocation();
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("production");
+  const [activeTab, setActiveTab] = useState("global-ai");
   const [showAgentConfig, setShowAgentConfig] = useState<{platform: 'salesforce' | 'hubspot'; agentType: string} | null>(null);
   const [showAgentSelector, setShowAgentSelector] = useState<string | null>(null);
 
@@ -126,7 +127,12 @@ const Index = () => {
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 gap-1">
+              <TabsTrigger value="global-ai" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Global AI</span>
+                <span className="sm:hidden">AI</span>
+              </TabsTrigger>
               <TabsTrigger value="production" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Production</span>
@@ -150,7 +156,7 @@ const Index = () => {
               <TabsTrigger value="agents" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">AI Agents</span>
-                <span className="sm:hidden">AI</span>
+                <span className="sm:hidden">Enhanced</span>
               </TabsTrigger>
               <TabsTrigger value="dashboard" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <PieChart className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -158,6 +164,11 @@ const Index = () => {
                 <span className="sm:hidden">Stats</span>
               </TabsTrigger>
             </TabsList>
+
+            {/* Global AI Tab */}
+            <TabsContent value="global-ai" className="mt-6 sm:mt-8">
+              <GlobalAIAgentRunner />
+            </TabsContent>
 
             {/* Production Tab */}
             <TabsContent value="production" className="mt-6 sm:mt-8">
