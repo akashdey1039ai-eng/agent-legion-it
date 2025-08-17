@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, batchSize = 100, enableBackground = true } = await req.json();
+    const { userId, batchSize = 500, enableBackground = true } = await req.json();
     console.log(`🧪 Starting scalable AI agent tests for user: ${userId}`);
 
     const testId = crypto.randomUUID();
@@ -49,7 +49,7 @@ serve(async (req) => {
         testId,
         message: 'Large-scale AI agent testing started in background',
         trackingUrl: `/api/test-status/${testId}`,
-        estimatedDuration: '10-30 minutes for 10,000+ records'
+        estimatedDuration: '30-60 minutes for 50,000 records'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -213,9 +213,10 @@ async function runBatchedAgentTest(testId: string, userId: string, platform: str
       result.batchesProcessed++;
       result.insights.push(...(batchResult.insights || []));
       
-      // Add small delay to respect rate limits
+      // Add adaptive delay based on batch size for rate limiting
       if (batchIndex < totalBatches - 1) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        const delay = batchSize > 250 ? 200 : 50; // Longer delay for larger batches
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
 
     } catch (error) {
@@ -261,13 +262,13 @@ async function getRecordCount(platform: string, userId: string): Promise<number>
   switch (platform) {
     case 'salesforce':
     case 'hubspot':
-      // For external platforms, we'll estimate based on typical datasets
-      return 5000; // This would be fetched from actual API in production
+      // For external platforms, scale to handle larger datasets
+      return 16667; // ~50,000 total records / 3 platforms
     case 'native':
       const { count } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true });
-      return count || 0;
+      return Math.min(count || 0, 16667); // Cap at 1/3 of 50K for balanced testing
     default:
       return 0;
   }
