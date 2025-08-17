@@ -5,6 +5,7 @@ import { Bot, Brain, TrendingUp, Zap, Calendar, Target, Play, Settings, Activity
 import { useNavigate } from "react-router-dom";
 import { ComprehensiveAITester } from '@/components/ComprehensiveAITester';
 import { AIDiagnostics } from '@/components/AIDiagnostics';
+import { RealTimeTestDashboard } from '@/components/RealTimeTestDashboard';
 
 const agents = [
   {
@@ -79,6 +80,9 @@ export default function AIAgents() {
 
   return (
     <div className="space-y-6">
+      {/* Real-Time Test Dashboard */}
+      <RealTimeTestDashboard />
+      
       {/* AI Diagnostics - Priority Tool to Find Root Cause */}
       <AIDiagnostics />
       
