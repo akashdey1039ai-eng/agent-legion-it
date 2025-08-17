@@ -92,11 +92,7 @@ export function SimpleSyncDashboard() {
               error: error.message
             });
             
-            toast({
-              title: `${dataType.name} Sync Failed`,
-              description: error.message,
-              variant: "destructive",
-            });
+            // Removed failure notification
           } else {
             console.log(`Sync success for ${dataType.id}:`, result);
             newResults.push({
@@ -133,19 +129,17 @@ export function SimpleSyncDashboard() {
       const successCount = newResults.filter(r => r.success).length;
       const totalRecords = newResults.reduce((sum, r) => sum + r.recordsUpdated, 0);
 
-      toast({
-        title: "Sync Complete",
-        description: `Successfully synced ${successCount}/${totalTypes} data types. Total records: ${totalRecords}`,
-        variant: successCount > 0 ? "default" : "destructive",
-      });
+      // Only show success notifications
+      if (successCount > 0) {
+        toast({
+          title: "Sync Complete",
+          description: `Successfully synced ${successCount}/${totalTypes} data types. Total records: ${totalRecords}`,
+        });
+      }
 
     } catch (error) {
       console.error('Sync failed:', error);
-      toast({
-        title: "Sync Failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
+      // Removed global failure notification
     } finally {
       setIsSyncing(false);
       setProgress(100);
