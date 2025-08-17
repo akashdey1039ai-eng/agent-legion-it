@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Bot, Brain, TrendingUp, Zap, Calendar, Target, Play, Settings, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ComprehensiveAITester } from '@/components/ComprehensiveAITester';
+import { AIDiagnostics } from '@/components/AIDiagnostics';
 
 const agents = [
   {
@@ -78,7 +79,10 @@ export default function AIAgents() {
 
   return (
     <div className="space-y-6">
-      {/* Comprehensive AI Agent Tester - Priority Component */}
+      {/* AI Diagnostics - Priority Tool to Find Root Cause */}
+      <AIDiagnostics />
+      
+      {/* Comprehensive AI Agent Tester */}
       <ComprehensiveAITester />
       
       <div className="flex items-center justify-between">
