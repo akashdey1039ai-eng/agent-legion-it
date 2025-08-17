@@ -31,43 +31,55 @@ export default function DirectSalesforce() {
     setIsTesting(true);
     
     try {
-      // Test the connection directly
-      const response = await fetch(`${instanceUrl}/services/data/v58.0/sobjects/Account/describe`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
+      // First try to save the credentials to bypass CORS issues
+      const { error } = await supabase
+        .from('salesforce_tokens')
+        .upsert({
+          user_id: user?.id,
+          access_token: accessToken,
+          instance_url: instanceUrl,
+          token_type: 'Bearer',
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) throw error;
+
+      // Test the connection through our edge function instead of direct API call
+      const { data, error: testError } = await supabase.functions.invoke('salesforce-ai-agent-tester', {
+        body: {
+          agentType: 'test_connection',
+          userId: user?.id
         }
       });
 
-      if (response.ok) {
-        // Save the working credentials
-        const { error } = await supabase
-          .from('salesforce_tokens')
-          .upsert({
-            user_id: user?.id,
-            access_token: accessToken,
-            instance_url: instanceUrl,
-            token_type: 'Bearer',
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
-          }, {
-            onConflict: 'user_id'
-          });
-
-        if (error) throw error;
-
-        setIsConnected(true);
-        toast({
-          title: "✅ Connected Successfully!",
-          description: "Your Salesforce sandbox is now connected and ready to use.",
-        });
-      } else {
-        throw new Error(`Connection failed: ${response.status} ${response.statusText}`);
+      if (testError) {
+        throw new Error(testError.message || 'Failed to test connection');
       }
+
+      setIsConnected(true);
+      toast({
+        title: "✅ Connected Successfully!",
+        description: "Your Salesforce sandbox is now connected and ready to use.",
+      });
+
     } catch (error) {
       console.error('Connection test failed:', error);
+      
+      let errorMessage = "Failed to connect to Salesforce. ";
+      
+      if (error.message?.includes('fetch')) {
+        errorMessage += "This is likely due to CORS restrictions. Your token has been saved and you can try using the AI agents directly.";
+      } else if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        errorMessage += "Your session token appears to be invalid or expired. Please get a fresh token.";
+      } else {
+        errorMessage += error.message || "Please check your credentials and try again.";
+      }
+      
       toast({
         title: "Connection Failed",
-        description: error.message || "Failed to connect to Salesforce. Please check your credentials.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
