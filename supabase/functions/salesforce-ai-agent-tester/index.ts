@@ -346,8 +346,7 @@ Return as a JSON array with detailed analysis for each contact.`;
         },
         { role: 'user', content: prompt }
       ],
-      max_tokens: 2000,
-      temperature: 0.7
+      max_completion_tokens: 2000
     }),
   });
 
@@ -413,8 +412,7 @@ Return as a JSON array with detailed churn analysis.`;
         },
         { role: 'user', content: prompt }
       ],
-      max_tokens: 2000,
-      temperature: 0.7
+      max_completion_tokens: 2000
     }),
   });
 
@@ -480,8 +478,7 @@ Return as a JSON array with detailed segmentation analysis.`;
         },
         { role: 'user', content: prompt }
       ],
-      max_tokens: 2000,
-      temperature: 0.7
+      max_completion_tokens: 2000
     }),
   });
 
