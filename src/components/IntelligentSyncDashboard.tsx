@@ -178,17 +178,22 @@ export function IntelligentSyncDashboard() {
 
             try {
               console.log(`Starting sync: ${platform} -> ${dataType}`);
+              console.log('Session data:', session.session);
               
               const functionName = platform === 'salesforce' ? 'salesforce-sync' : 'hubspot-sync';
               
+              const requestBody = {
+                objectType: dataType,
+                direction: 'from_salesforce',
+                intelligent: true
+              };
+              
+              console.log('Invoking function with body:', requestBody);
+              
               const { data: result, error } = await supabase.functions.invoke(functionName, {
-                body: {
-                  objectType: dataType,
-                  direction: 'from_salesforce',
-                  intelligent: true
-                },
+                body: requestBody,
                 headers: {
-                  Authorization: `Bearer ${session.session.access_token}`,
+                  'Authorization': `Bearer ${session.session.access_token}`,
                   'Content-Type': 'application/json'
                 },
               });

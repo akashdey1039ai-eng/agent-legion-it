@@ -29,9 +29,33 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    // Parse request body with validation
-    const body: RequestBody = await req.json().catch(() => ({}))
+    // Parse request body with better error handling
+    let body: RequestBody = {}
+    const contentType = req.headers.get('content-type') || ''
+    
+    try {
+      if (contentType.includes('application/json')) {
+        const rawBody = await req.text()
+        console.log('Raw request body:', rawBody)
+        
+        if (rawBody.trim()) {
+          body = JSON.parse(rawBody)
+          console.log('Parsed request body:', JSON.stringify(body, null, 2))
+        } else {
+          console.log('Empty request body received')
+        }
+      } else {
+        console.log('Non-JSON content type:', contentType)
+      }
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError)
+      const fallbackText = await req.text().catch(() => '')
+      console.log('Raw body that failed to parse:', fallbackText)
+    }
+
     const { objectType, direction = 'from_salesforce', intelligent = false } = body
+
+    console.log('Extracted parameters:', { objectType, direction, intelligent })
 
     // Extract userId from JWT token
     const authHeader = req.headers.get('authorization')
@@ -40,20 +64,26 @@ Deno.serve(async (req) => {
     if (!userId && authHeader) {
       try {
         const token = authHeader.replace('Bearer ', '')
+        console.log('Attempting to extract user from token...')
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
         if (user && !userError) {
           userId = user.id
+          console.log('Extracted userId from token:', userId)
+        } else {
+          console.log('Failed to extract user from token:', userError)
         }
       } catch (e) {
-        console.log('Could not extract user from token:', e)
+        console.log('Token extraction error:', e)
       }
     }
 
     if (!objectType) {
-      throw new Error('objectType is required')
+      console.error('Missing objectType parameter. Body received:', JSON.stringify(body, null, 2))
+      throw new Error('objectType is required. Received body: ' + JSON.stringify(body))
     }
 
     if (!userId) {
+      console.error('Missing userId. Auth header:', authHeader ? 'present' : 'missing')
       throw new Error('User authentication required')
     }
 
