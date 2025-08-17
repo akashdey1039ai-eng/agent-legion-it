@@ -351,8 +351,27 @@ Return as a JSON array with detailed analysis for each contact.`;
     }),
   });
 
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`❌ OpenAI API error (${response.status}):`, errorText);
+    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+  }
+
   const data = await response.json();
+  console.log('✅ OpenAI API response received');
+
+  // Properly check if the response has the expected structure
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    console.error('❌ Unexpected OpenAI response structure:', JSON.stringify(data, null, 2));
+    throw new Error('Unexpected OpenAI response structure');
+  }
+
   const analysis = data.choices[0].message.content;
+  
+  if (!analysis) {
+    console.error('❌ No content in OpenAI response');
+    throw new Error('No content returned from OpenAI');
+  }
   
   try {
     return JSON.parse(analysis);
@@ -399,8 +418,27 @@ Return as a JSON array with detailed churn analysis.`;
     }),
   });
 
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`❌ OpenAI API error (${response.status}):`, errorText);
+    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+  }
+
   const data = await response.json();
+  console.log('✅ OpenAI API response received');
+
+  // Properly check if the response has the expected structure
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    console.error('❌ Unexpected OpenAI response structure:', JSON.stringify(data, null, 2));
+    throw new Error('Unexpected OpenAI response structure');
+  }
+
   const analysis = data.choices[0].message.content;
+  
+  if (!analysis) {
+    console.error('❌ No content in OpenAI response');
+    throw new Error('No content returned from OpenAI');
+  }
   
   try {
     return JSON.parse(analysis);
@@ -447,8 +485,27 @@ Return as a JSON array with detailed segmentation analysis.`;
     }),
   });
 
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`❌ OpenAI API error (${response.status}):`, errorText);
+    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+  }
+
   const data = await response.json();
+  console.log('✅ OpenAI API response received');
+
+  // Properly check if the response has the expected structure
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    console.error('❌ Unexpected OpenAI response structure:', JSON.stringify(data, null, 2));
+    throw new Error('Unexpected OpenAI response structure');
+  }
+
   const analysis = data.choices[0].message.content;
+  
+  if (!analysis) {
+    console.error('❌ No content in OpenAI response');
+    throw new Error('No content returned from OpenAI');
+  }
   
   try {
     return JSON.parse(analysis);

@@ -117,27 +117,69 @@ Return as a JSON array with detailed sales coaching analysis.`;
 }
 
 async function callOpenAI(prompt: string, analysisType: string) {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-5-2025-08-07',
-      messages: [
-        { 
-          role: 'system', 
-          content: `You are an expert CRM analyst specializing in ${analysisType}. Analyze real Salesforce data and provide actionable insights in JSON format.` 
-        },
-        { role: 'user', content: prompt }
-      ],
-      max_completion_tokens: 2000
-    }),
-  });
+  try {
+    console.log(`🤖 Calling OpenAI API for ${analysisType}...`);
+    
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key is not configured');
+    }
 
-  const data = await response.json();
-  const analysis = data.choices[0].message.content;
-  
-  return analysis;
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-2025-08-07',
+        messages: [
+          { 
+            role: 'system', 
+            content: `You are an expert CRM analyst specializing in ${analysisType}. Analyze real Salesforce data and provide actionable insights in JSON format.` 
+          },
+          { role: 'user', content: prompt }
+        ],
+        max_completion_tokens: 2000
+      }),
+    });
+
+    console.log(`📡 OpenAI API response status: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ OpenAI API error (${response.status}):`, errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ OpenAI API response received');
+
+    // Properly check if the response has the expected structure
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('❌ Unexpected OpenAI response structure:', JSON.stringify(data, null, 2));
+      throw new Error('Unexpected OpenAI response structure');
+    }
+
+    const analysis = data.choices[0].message.content;
+    
+    if (!analysis) {
+      console.error('❌ No content in OpenAI response');
+      throw new Error('No content returned from OpenAI');
+    }
+
+    console.log(`✅ ${analysisType} analysis completed`);
+    return analysis;
+
+  } catch (error) {
+    console.error(`❌ Error in callOpenAI for ${analysisType}:`, error);
+    
+    // Return a fallback response instead of crashing
+    return {
+      error: true,
+      message: `Failed to analyze ${analysisType}: ${error.message}`,
+      fallback_analysis: `Unable to perform AI analysis for ${analysisType} due to API issues. Please check OpenAI configuration.`,
+      confidence: 0,
+      timestamp: new Date().toISOString()
+    };
+  }
 }
