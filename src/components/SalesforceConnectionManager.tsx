@@ -104,14 +104,8 @@ export function SalesforceConnectionManager() {
       return;
     }
 
-    // Prevent multiple concurrent connections
-    if (isConnecting) {
-      console.log('Connection already in progress, ignoring...');
-      return;
-    }
-
     setIsConnecting(true);
-    console.log('Starting Salesforce connection process for user:', user.id);
+    console.log('Starting Salesforce connection for user:', user.id);
     
     try {
       const { data, error } = await supabase.functions.invoke('salesforce-auth-url', {
@@ -127,83 +121,10 @@ export function SalesforceConnectionManager() {
         throw new Error('Failed to get Salesforce authorization URL');
       }
 
-      console.log('Opening Salesforce OAuth popup with URL:', data.authUrl);
+      console.log('Redirecting to Salesforce OAuth:', data.authUrl);
       
-      let isAuthComplete = false;
-      let checkClosed: NodeJS.Timeout;
-      let autoReset: NodeJS.Timeout;
-      let handleAuthMessage: (event: MessageEvent) => void;
-      
-      // Listen for messages from the popup
-      handleAuthMessage = (event: MessageEvent) => {
-        console.log('Received message from popup:', event.data, 'from origin:', event.origin);
-        
-        // Only process messages from our Salesforce auth popup
-        if (event.data?.type === 'SALESFORCE_AUTH_SUCCESS' && !isAuthComplete) {
-          console.log('Processing successful auth message');
-          isAuthComplete = true;
-          setIsConnecting(false);
-          clearTimeout(autoReset);
-          clearInterval(checkClosed);
-          window.removeEventListener('message', handleAuthMessage);
-          
-          // Check connection after a short delay
-          setTimeout(() => {
-            console.log('Checking connection after successful auth');
-            checkConnection();
-          }, 2000);
-          
-          toast({
-            title: "Authentication Successful",
-            description: "Checking connection status...",
-          });
-        }
-      };
-
-      // Open Salesforce OAuth in new window
-      const popup = window.open(
-        data.authUrl,
-        'salesforce-auth',
-        'width=600,height=700,scrollbars=yes,resizable=yes'
-      );
-
-      if (!popup) {
-        throw new Error('Failed to open popup. Please allow popups for this site.');
-      }
-
-      // Auto-reset after 5 minutes if still connecting
-      autoReset = setTimeout(() => {
-        if (!isAuthComplete) {
-          console.log('Auto-resetting connection state after timeout');
-          isAuthComplete = true;
-          setIsConnecting(false);
-          clearInterval(checkClosed);
-          window.removeEventListener('message', handleAuthMessage);
-          toast({
-            title: "Connection Timeout",
-            description: "Connection attempt timed out. Please try again.",
-            variant: "destructive",
-          });
-        }
-      }, 300000); // 5 minutes
-
-      window.addEventListener('message', handleAuthMessage);
-
-      // Check if popup was closed without success
-      checkClosed = setInterval(() => {
-        if (popup?.closed && !isAuthComplete) {
-          console.log('Popup closed without success, cleaning up');
-          isAuthComplete = true;
-          setIsConnecting(false);
-          clearTimeout(autoReset);
-          window.removeEventListener('message', handleAuthMessage);
-          // Check connection in case auth was successful but message was missed
-          setTimeout(() => {
-            console.log('Checking connection after popup closed');
-            checkConnection();
-          }, 1000);
-        }
-      }, 1000);
+      // Simple redirect - no popup complications
+      window.location.href = data.authUrl;
 
     } catch (error) {
       console.error('Connection error:', error);
@@ -228,7 +149,21 @@ export function SalesforceConnectionManager() {
   // Check connection on mount and when user changes
   useEffect(() => {
     if (user) {
-      checkConnection();
+      // Check for successful auth redirect
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('salesforce_success') === 'true') {
+        // Remove the parameter and check connection
+        window.history.replaceState({}, document.title, window.location.pathname);
+        toast({
+          title: "Authentication Successful",
+          description: "Checking connection status...",
+        });
+        setTimeout(() => {
+          checkConnection();
+        }, 1000);
+      } else {
+        checkConnection();
+      }
     } else {
       setConnectionStatus('error');
       setDebugInfo('No user logged in');
