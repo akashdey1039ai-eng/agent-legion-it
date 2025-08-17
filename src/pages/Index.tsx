@@ -51,34 +51,46 @@ const Index = () => {
   const [salesforceConnected, setSalesforceConnected] = useState(false);
   const [hubspotConnected, setHubspotConnected] = useState(false);
 
-  // Optimized connection status check with parallel requests
+  // Optimized connection status check with better error handling
   const checkConnectionStatus = async () => {
     if (!user) return;
     
     try {
-      // Use Promise.all for parallel requests and select only 'id' for faster queries
-      const [sfResult, hsResult] = await Promise.all([
+      // Use Promise.allSettled to handle failures gracefully
+      const [sfResult, hsResult] = await Promise.allSettled([
         supabase
           .from('salesforce_tokens')
-          .select('id')
+          .select('id, expires_at')
           .eq('user_id', user.id)
           .gt('expires_at', new Date().toISOString())
           .limit(1)
           .maybeSingle(),
         supabase
           .from('hubspot_tokens')
-          .select('id')
+          .select('id, expires_at')
           .eq('user_id', user.id)
           .gt('expires_at', new Date().toISOString())
           .limit(1)
           .maybeSingle()
       ]);
       
-      setSalesforceConnected(!!sfResult.data);
-      setHubspotConnected(!!hsResult.data);
+      // Handle Salesforce result
+      if (sfResult.status === 'fulfilled' && !sfResult.value.error) {
+        setSalesforceConnected(!!sfResult.value.data);
+      } else {
+        console.warn('Salesforce connection check failed:', sfResult.status === 'rejected' ? sfResult.reason : sfResult.value.error);
+        setSalesforceConnected(false);
+      }
+      
+      // Handle HubSpot result
+      if (hsResult.status === 'fulfilled' && !hsResult.value.error) {
+        setHubspotConnected(!!hsResult.value.data);
+      } else {
+        console.warn('HubSpot connection check failed:', hsResult.status === 'rejected' ? hsResult.reason : hsResult.value.error);
+        setHubspotConnected(false);
+      }
     } catch (error) {
       console.error('Error checking connection status:', error);
-      // Set to false on error to prevent infinite loading
       setSalesforceConnected(false);
       setHubspotConnected(false);
     }
