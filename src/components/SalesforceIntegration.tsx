@@ -12,12 +12,16 @@ interface SalesforceIntegrationProps {
 }
 
 export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationProps) {
+  console.log('🔧 SalesforceIntegration component rendering...');
+  
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  console.log('🔧 Component state:', { isConnecting, isSyncing, isConnected, user: user?.id });
 
   const handleConnect = async () => {
     console.log('🚀 Connect button clicked');
