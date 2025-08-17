@@ -131,7 +131,7 @@ async function callOpenAI(prompt: string, analysisType: string) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [
           { 
             role: 'system', 
@@ -139,7 +139,8 @@ async function callOpenAI(prompt: string, analysisType: string) {
           },
           { role: 'user', content: prompt }
         ],
-        max_completion_tokens: 2000
+        max_tokens: 2000,
+        temperature: 0.3
       }),
     });
 

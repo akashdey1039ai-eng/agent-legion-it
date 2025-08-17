@@ -832,12 +832,13 @@ Respond in JSON format:
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-5-2025-08-07',
+          model: 'gpt-4o-mini',
           messages: [
             { role: 'system', content: 'You are an expert customer sentiment analysis AI specialized in CRM data analysis.' },
             { role: 'user', content: aiPrompt }
           ],
-          max_completion_tokens: 500
+          max_tokens: 500,
+          temperature: 0.3
         }),
       })
 
@@ -994,12 +995,13 @@ Respond in JSON format:
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-5-2025-08-07',
+          model: 'gpt-4o-mini',
           messages: [
             { role: 'system', content: 'You are an expert churn prediction AI specialized in customer retention analysis.' },
             { role: 'user', content: aiPrompt }
           ],
-          max_completion_tokens: 500
+          max_tokens: 500,
+          temperature: 0.3
         }),
       })
 
@@ -1142,12 +1144,13 @@ Respond in JSON format:
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-5-2025-08-07',
+          model: 'gpt-4o-mini',
           messages: [
             { role: 'system', content: 'You are an expert customer segmentation AI specialized in B2B customer analysis.' },
             { role: 'user', content: aiPrompt }
           ],
-          max_completion_tokens: 500
+          max_tokens: 500,
+          temperature: 0.3
         }),
       })
 
