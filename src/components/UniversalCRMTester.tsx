@@ -101,6 +101,12 @@ export function UniversalCRMTester() {
     }
   }, []);
 
+  // Add interval to refresh record counts
+  useEffect(() => {
+    const interval = setInterval(checkCRMConnections, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Save results to localStorage whenever they change
   useEffect(() => {
     if (testResults.length > 0) {
