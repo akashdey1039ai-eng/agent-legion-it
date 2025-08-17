@@ -132,15 +132,20 @@ export function SalesforceConnectionManager() {
       let isAuthComplete = false;
       let checkClosed: NodeJS.Timeout;
       let autoReset: NodeJS.Timeout;
+      let handleAuthMessage: (event: MessageEvent) => void;
       
       // Listen for messages from the popup
-      const handleAuthMessage = (event: MessageEvent) => {
+      handleAuthMessage = (event: MessageEvent) => {
         console.log('Received message from popup:', event.data, 'from origin:', event.origin);
         
         // Only process messages from our Salesforce auth popup
         if (event.data?.type === 'SALESFORCE_AUTH_SUCCESS' && !isAuthComplete) {
           console.log('Processing successful auth message');
-          cleanup();
+          isAuthComplete = true;
+          setIsConnecting(false);
+          clearTimeout(autoReset);
+          clearInterval(checkClosed);
+          window.removeEventListener('message', handleAuthMessage);
           
           // Check connection after a short delay
           setTimeout(() => {
@@ -154,19 +159,7 @@ export function SalesforceConnectionManager() {
           });
         }
       };
-      
-      // Cleanup function
-      const cleanup = () => {
-        isAuthComplete = true;
-        setIsConnecting(false);
-        clearTimeout(autoReset);
-        clearInterval(checkClosed);
-        window.removeEventListener('message', handleAuthMessage);
-      };
 
-      // Clear any existing event listeners to prevent duplicates
-      window.removeEventListener('message', handleAuthMessage);
-      
       // Open Salesforce OAuth in new window
       const popup = window.open(
         data.authUrl,
@@ -182,7 +175,10 @@ export function SalesforceConnectionManager() {
       autoReset = setTimeout(() => {
         if (!isAuthComplete) {
           console.log('Auto-resetting connection state after timeout');
-          cleanup();
+          isAuthComplete = true;
+          setIsConnecting(false);
+          clearInterval(checkClosed);
+          window.removeEventListener('message', handleAuthMessage);
           toast({
             title: "Connection Timeout",
             description: "Connection attempt timed out. Please try again.",
@@ -197,7 +193,10 @@ export function SalesforceConnectionManager() {
       checkClosed = setInterval(() => {
         if (popup?.closed && !isAuthComplete) {
           console.log('Popup closed without success, cleaning up');
-          cleanup();
+          isAuthComplete = true;
+          setIsConnecting(false);
+          clearTimeout(autoReset);
+          window.removeEventListener('message', handleAuthMessage);
           // Check connection in case auth was successful but message was missed
           setTimeout(() => {
             console.log('Checking connection after popup closed');
