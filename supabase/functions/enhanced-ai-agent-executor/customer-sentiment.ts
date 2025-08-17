@@ -101,7 +101,7 @@ Respond in JSON format:
         await supabaseClient
           .from('contacts')
           .update({
-            status: sentimentAnalysis.classification === 'positive' ? 'engaged' : 'nurturing'
+            status: sentimentAnalysis.classification === 'positive' ? 'hot' : 'nurturing'
           })
           .eq('id', contact.id);
         
@@ -235,7 +235,7 @@ export async function executeCustomerSegmentationAnalysis(supabaseClient: any, i
         .from('contacts')
         .update({ 
           tags: [segment.toLowerCase()],
-          status: segment === 'Enterprise' ? 'high-value' : 'standard'
+          status: segment === 'Enterprise' ? 'hot' : segment === 'Mid-Market' ? 'warm' : 'new'
         })
         .eq('id', contact.id);
       

@@ -88,8 +88,7 @@ export async function executeCommunicationAI(supabaseClient: any, inputData: any
       await supabaseClient
         .from('contacts')
         .update({
-          preferred_contact_time: bestTime,
-          preferred_channel: channel
+          preferred_contact_method: channel
         })
         .eq('id', contact.id);
       
