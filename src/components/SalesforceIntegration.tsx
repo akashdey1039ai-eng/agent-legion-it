@@ -118,18 +118,29 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
     }
 
     console.log('🔍 Checking Salesforce connection for user:', user.id);
+    console.log('🔍 User email:', user.email);
     
     try {
-      // Check for user-specific tokens with better error handling
+      // First, let's check what tokens exist in the database
+      const { data: allTokens, error: allTokensError } = await supabase
+        .from('salesforce_tokens')
+        .select('user_id, expires_at, created_at')
+        .order('created_at', { ascending: false });
+
+      console.log('🗂️ All Salesforce tokens in database:', allTokens);
+      console.log('🗂️ All tokens error:', allTokensError);
+
+      // Now check for user-specific tokens
       const { data, error } = await supabase
         .from('salesforce_tokens')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle(); // Use maybeSingle to avoid errors when no data found
+        .maybeSingle();
 
       console.log('🎯 User-specific Salesforce token query result:', { data, error });
+      console.log('🎯 Query was for user_id:', user.id);
 
       if (error) {
         console.log('💥 Database error:', error);
@@ -147,25 +158,46 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
           expiresAt: expiresAt.toISOString(), 
           isValid: expiresAt > now,
           accessToken: data.access_token ? '✅ Present' : '❌ Missing',
-          refreshToken: data.refresh_token ? '✅ Present' : '❌ Missing'
+          refreshToken: data.refresh_token ? '✅ Present' : '❌ Missing',
+          timeDiffMinutes: Math.round((expiresAt.getTime() - now.getTime()) / (1000 * 60))
         });
         
         if (expiresAt > now && data.access_token) {
           console.log('✅ Setting connected to true - valid token found');
           setIsConnected(true);
           setLastSyncTime(data.updated_at);
+          toast({
+            title: "Connection Verified",
+            description: "Salesforce Developer Sandbox is connected and ready!",
+          });
         } else {
           // Token is expired or invalid
           console.log('⏰ Salesforce token has expired or is invalid');
           setIsConnected(false);
+          toast({
+            title: "Token Expired",
+            description: "Please reconnect to Salesforce Developer Sandbox.",
+            variant: "destructive",
+          });
         }
       } else {
-        console.log('❌ No tokens found for user');
+        console.log('❌ No tokens found for current user');
+        console.log('❌ Current user ID:', user.id);
         setIsConnected(false);
+        toast({
+          title: "Not Connected",
+          description: "No Salesforce connection found. Please connect first.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('💥 Exception during connection check:', error);
       setIsConnected(false);
+      toast({
+        title: "Connection Check Failed",
+        description: "Unable to verify Salesforce connection status.",
+        variant: "destructive",
+      });
     }
   };
 
