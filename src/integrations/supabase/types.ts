@@ -351,9 +351,69 @@ export type Database = {
           },
         ]
       }
+      ai_test_batches: {
+        Row: {
+          agent_type: string
+          batch_number: number
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          offset_end: number
+          offset_start: number
+          platform: string
+          records_processed: number | null
+          started_at: string | null
+          status: string
+          test_run_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_type: string
+          batch_number: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          offset_end: number
+          offset_start: number
+          platform: string
+          records_processed?: number | null
+          started_at?: string | null
+          status?: string
+          test_run_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_type?: string
+          batch_number?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          offset_end?: number
+          offset_start?: number
+          platform?: string
+          records_processed?: number | null
+          started_at?: string | null
+          status?: string
+          test_run_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_test_batches_test_run_id_fkey"
+            columns: ["test_run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_test_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_test_progress: {
         Row: {
           agent_type: string
+          batch_number: number | null
           confidence: number | null
           created_at: string
           error_message: string | null
@@ -367,6 +427,7 @@ export type Database = {
         }
         Insert: {
           agent_type: string
+          batch_number?: number | null
           confidence?: number | null
           created_at?: string
           error_message?: string | null
@@ -380,6 +441,7 @@ export type Database = {
         }
         Update: {
           agent_type?: string
+          batch_number?: number | null
           confidence?: number | null
           created_at?: string
           error_message?: string | null
@@ -2073,6 +2135,10 @@ export type Database = {
           phone_masked: string
           title: string
         }[]
+      }
+      get_platform_record_count: {
+        Args: { p_platform: string; p_user_id: string }
+        Returns: number
       }
       get_record_counts: {
         Args: Record<PropertyKey, never>

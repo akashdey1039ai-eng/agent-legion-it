@@ -290,20 +290,19 @@ async function processBatch(platform: string, agentType: string, userId: string,
 }
 
 async function getRecordCount(platform: string, userId: string): Promise<number> {
-  switch (platform) {
-    case 'salesforce':
-    case 'hubspot':
-      // Each external platform now handles 50,000 records
-      return 50000;
-    case 'native':
-      // For native, we cap at 50,000 but check actual count
-      const { count } = await supabase
-        .from('contacts')
-        .select('*', { count: 'exact', head: true });
-      return Math.min(count || 0, 50000);
-    default:
-      return 0;
+  // Use the optimized database function for accurate counts
+  const { data, error } = await supabase.rpc('get_platform_record_count', {
+    p_platform: platform,
+    p_user_id: userId
+  });
+  
+  if (error) {
+    console.error(`❌ Error getting record count for ${platform}:`, error);
+    // Fallback to default values if database function fails
+    return platform === 'native' ? 10000 : 50000;
   }
+  
+  return data || 0;
 }
 
 async function updateTestProgress(testId: string, platform: string, agentType: string, result: any) {
