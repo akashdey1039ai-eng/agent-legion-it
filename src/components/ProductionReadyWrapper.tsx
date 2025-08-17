@@ -78,52 +78,19 @@ export const ProductionReadyWrapper = ({ children }: ProductionReadyWrapperProps
     );
   };
 
-  // Security warnings for development
+  // Security warnings for development - simplified and non-intrusive
   const SecurityAlerts = () => {
     if (isProduction) return null;
 
     return (
-      <div className="p-4 space-y-4">
-        <Alert>
+      <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+        <Alert className="bg-background/95 backdrop-blur">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Development Environment</AlertTitle>
-          <AlertDescription>
-            This is a development environment. Ensure all security measures are enabled before production deployment.
+          <AlertTitle>Dev Mode</AlertTitle>
+          <AlertDescription className="text-xs">
+            Development environment active
           </AlertDescription>
         </Alert>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Production Readiness Checklist</CardTitle>
-            <CardDescription>
-              Complete these items before deploying to production
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge variant={isSecure ? "default" : "secondary"}>
-                {isSecure ? "✓" : "○"}
-              </Badge>
-              <span className="text-sm">HTTPS enabled</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">✓</Badge>
-              <span className="text-sm">RLS policies configured</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">✓</Badge>
-              <span className="text-sm">Audit logging enabled</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">✓</Badge>
-              <span className="text-sm">Mobile responsive design</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">✓</Badge>
-              <span className="text-sm">Input validation implemented</span>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     );
   };
@@ -137,7 +104,7 @@ export const ProductionReadyWrapper = ({ children }: ProductionReadyWrapperProps
         {children}
       </div>
       
-      {/* Development-only security alerts */}
+      {/* Development-only security alerts - now non-intrusive */}
       <SecurityAlerts />
     </div>
   );
