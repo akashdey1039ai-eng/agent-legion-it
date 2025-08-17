@@ -310,10 +310,10 @@ export function EnhancedAIAgentTester() {
         }
       ]);
 
-      toast({
-        title: "✅ Lead Intelligence Test Successful",
-        description: `AI Agent executed with ${(result.confidence * 100).toFixed(1)}% confidence and performed ${result.actionsExecuted} autonomous actions.`,
-      });
+      // toast({
+      //   title: "✅ Lead Intelligence Test Successful",
+      //   description: `AI Agent executed with ${(result.confidence * 100).toFixed(1)}% confidence and performed ${result.actionsExecuted} autonomous actions.`,
+      // });
 
     } catch (error) {
       console.error('Enhanced test failed:', error);
@@ -416,10 +416,10 @@ export function EnhancedAIAgentTester() {
         }
       ]);
 
-      toast({
-        title: "✅ Pipeline Analysis Test Successful",
-        description: `AI Agent executed with ${(result.confidence * 100).toFixed(1)}% confidence and performed ${result.actionsExecuted} autonomous actions.`,
-      });
+      // toast({
+      //   title: "✅ Pipeline Analysis Test Successful",
+      //   description: `AI Agent executed with ${(result.confidence * 100).toFixed(1)}% confidence and performed ${result.actionsExecuted} autonomous actions.`,
+      // });
 
     } catch (error) {
       console.error('Enhanced test failed:', error);

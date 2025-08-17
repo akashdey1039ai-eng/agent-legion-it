@@ -57,10 +57,10 @@ export function TestDataGenerator() {
 
       setProgress(100);
       
-      toast({
-        title: "✅ Test Data Generated Successfully",
-        description: `Created ${companies.length} companies, ${contacts.length} contacts, ${leads.length} leads, ${opportunities.length} opportunities, and ${activities.length} activities.`,
-      });
+      // toast({
+      //   title: "✅ Test Data Generated Successfully",
+      //   description: `Created ${companies.length} companies, ${contacts.length} contacts, ${leads.length} leads, ${opportunities.length} opportunities, and ${activities.length} activities.`,
+      // });
 
     } catch (error) {
       console.error('Test data generation failed:', error);

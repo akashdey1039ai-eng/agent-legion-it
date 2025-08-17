@@ -191,10 +191,10 @@ export function UniversalCRMTester() {
         testResult
       ]);
 
-      toast({
-        title: "✅ Test Completed Successfully",
-        description: `${agent.name} analyzed ${testResult.recordsProcessed} records from ${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
-      });
+      // toast({
+      //   title: "✅ Test Completed Successfully",
+      //   description: `${agent.name} analyzed ${testResult.recordsProcessed} records from ${platform.charAt(0).toUpperCase() + platform.slice(1)}`,
+      // });
 
     } catch (error) {
       console.error('Test failed:', error);
