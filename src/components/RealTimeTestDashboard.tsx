@@ -368,13 +368,39 @@ export const RealTimeTestDashboard = () => {
     }
   };
 
-  const stopTest = () => {
-    setIsRunning(false);
-    setTestRunId(null);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+  const stopTest = async () => {
+    try {
+      setIsRunning(false);
+      setTestRunId(null);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      toast.info("Stopping all running tests...");
+
+      const { data, error } = await supabase.functions.invoke('stop-ai-tests', {
+        body: { userId: user?.id }
+      });
+
+      if (error) {
+        console.error('Stop test error:', error);
+        toast.error('Failed to stop tests: ' + error.message);
+        return;
+      }
+
+      if (data?.success) {
+        toast.success(data.message || 'Tests stopped successfully');
+        // Reload historical data to show updated status
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        toast.error(data?.error || 'Failed to stop tests');
+      }
+    } catch (error) {
+      console.error('Stop test error:', error);
+      toast.error('Failed to stop tests');
     }
-    toast.info("Test stopped");
   };
 
   const getTotalRecordsProcessed = () => {
