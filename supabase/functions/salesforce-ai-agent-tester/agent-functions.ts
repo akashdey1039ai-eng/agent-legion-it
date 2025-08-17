@@ -184,3 +184,72 @@ async function callOpenAI(prompt: string, analysisType: string) {
     };
   }
 }
+
+// Customer Sentiment Analysis
+export async function analyzeCustomerSentiment(contacts: SalesforceContact[]) {
+  console.log('🧠 Analyzing customer sentiment with AI...');
+  
+  const prompt = `Analyze customer sentiment for these real Salesforce contacts.
+
+Contacts data:
+${JSON.stringify(contacts.slice(0, 10), null, 2)}
+
+For each contact, provide:
+1. Sentiment score (-1 to 1, where -1 is negative, 0 is neutral, 1 is positive)
+2. Sentiment classification (positive/neutral/negative)
+3. Key sentiment indicators
+4. Communication tone analysis
+5. Relationship health score
+6. Recommended engagement approach
+7. Confidence level (0-1)
+
+Return as a JSON array with detailed sentiment analysis.`;
+
+  return await callOpenAI(prompt, 'customer sentiment');
+}
+
+// Churn Prediction Analysis
+export async function analyzeChurnPrediction(opportunities: SalesforceOpportunity[]) {
+  console.log('📈 Analyzing churn prediction with AI...');
+  
+  const prompt = `Analyze churn risk for these real Salesforce opportunities.
+
+Opportunities data:
+${JSON.stringify(opportunities.slice(0, 10), null, 2)}
+
+For each opportunity, provide:
+1. Churn risk score (0-100, where 100 is highest risk)
+2. Churn probability (0-1)
+3. Risk factors identified
+4. Customer health indicators
+5. Engagement pattern analysis
+6. Retention recommendations
+7. Confidence level (0-1)
+
+Return as a JSON array with detailed churn prediction analysis.`;
+
+  return await callOpenAI(prompt, 'churn prediction');
+}
+
+// Customer Segmentation Analysis
+export async function analyzeCustomerSegmentation(contacts: SalesforceContact[]) {
+  console.log('🎯 Analyzing customer segmentation with AI...');
+  
+  const prompt = `Analyze customer segmentation for these real Salesforce contacts.
+
+Contacts data:
+${JSON.stringify(contacts.slice(0, 10), null, 2)}
+
+For each contact, provide:
+1. Customer segment (Enterprise/Mid-market/SMB/Startup)
+2. Persona type (Decision Maker/Influencer/User/Champion)
+3. Purchase behavior classification
+4. Value tier (High/Medium/Low)
+5. Engagement preferences
+6. Recommended marketing approach
+7. Confidence level (0-1)
+
+Return as a JSON array with detailed segmentation analysis.`;
+
+  return await callOpenAI(prompt, 'customer segmentation');
+}
