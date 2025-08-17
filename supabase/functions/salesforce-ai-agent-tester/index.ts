@@ -119,6 +119,24 @@ serve(async (req) => {
     let analysisResult;
 
     switch (agentType) {
+      case 'test_connection':
+        // Simple connection test - just fetch a small amount of data to verify credentials
+        console.log('🔍 Testing Salesforce connection...');
+        try {
+          salesforceData = await fetchSalesforceContacts(token);
+          analysisResult = {
+            success: true,
+            message: 'Connection successful',
+            recordCount: salesforceData.length,
+            testTimestamp: new Date().toISOString()
+          };
+          console.log('✅ Connection test successful');
+        } catch (error) {
+          console.error('❌ Connection test failed:', error);
+          throw error;
+        }
+        break;
+        
       case 'lead-intelligence':
         salesforceData = await fetchSalesforceContacts(token);
         analysisResult = await analyzeLeadIntelligence(salesforceData);
