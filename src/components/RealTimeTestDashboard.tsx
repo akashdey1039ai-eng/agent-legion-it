@@ -113,78 +113,88 @@ export const RealTimeTestDashboard = () => {
   const { toast } = useToast();
 
   // Load historical data on component mount
+  const loadHistoricalData = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      console.log('Loading historical data for user:', user.id);
+      
+      // Load past test runs
+      const { data: runs } = await supabase
+        .from('ai_test_runs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      console.log('Loaded test runs:', runs);
+
+      if (runs) {
+        setPastRuns(runs);
+      }
+
+      // Load recent progress data for metrics
+      const { data: recentProgress } = await supabase
+        .from('ai_test_progress')
+        .select('*')
+        .gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()) // Last 10 minutes
+        .order('created_at', { ascending: false });
+
+      if (recentProgress && recentProgress.length > 0) {
+        // Calculate metrics from recent data
+        const totalRecords = recentProgress.reduce((sum, p) => sum + (p.records_processed || 0), 0);
+        const avgConfidence = recentProgress.reduce((sum, p) => sum + (p.confidence || 0), 0) / recentProgress.length;
+        
+        setAgentMetrics(prev => ({
+          ...prev,
+          recordsAnalyzed: totalRecords,
+          avgConfidence: avgConfidence,
+          totalActions: recentProgress.length
+        }));
+
+        // Convert to batches format for display
+        const historicalBatches = recentProgress.slice(0, 20).map(p => ({
+          batchId: p.id,
+          agentType: p.agent_type,
+          platform: p.platform,
+          status: p.status as 'completed' | 'processing' | 'failed',
+          recordsProcessed: p.records_processed || 0,
+          confidence: (p.confidence || 0) / 100,
+          apiCalls: Math.floor((p.records_processed || 0) / 10),
+          startTime: new Date(p.created_at).getTime() - 5000,
+          endTime: new Date(p.updated_at).getTime(),
+        }));
+        setBatches(historicalBatches);
+      }
+
+      toast({
+        title: "Success",
+        description: `Loaded ${runs?.length || 0} past runs. Recent data shows ${recentProgress?.reduce((sum, p) => sum + (p.records_processed || 0), 0).toLocaleString()} records processed in last 10 minutes.`,
+      });
+    } catch (error) {
+      console.error('Failed to load historical data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load historical data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadHistoricalData = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        // Load past test runs
-        const { data: runs } = await supabase
-          .from('ai_test_runs')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        if (runs) {
-          setPastRuns(runs);
-        }
-
-        // Load recent progress data for metrics
-        const { data: recentProgress } = await supabase
-          .from('ai_test_progress')
-          .select('*')
-          .gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()) // Last 10 minutes
-          .order('created_at', { ascending: false });
-
-        if (recentProgress && recentProgress.length > 0) {
-          // Calculate metrics from recent data
-          const totalRecords = recentProgress.reduce((sum, p) => sum + (p.records_processed || 0), 0);
-          const avgConfidence = recentProgress.reduce((sum, p) => sum + (p.confidence || 0), 0) / recentProgress.length;
-          
-          setAgentMetrics(prev => ({
-            ...prev,
-            recordsAnalyzed: totalRecords,
-            avgConfidence: avgConfidence,
-            totalActions: recentProgress.length
-          }));
-
-          // Convert to batches format for display
-          const historicalBatches = recentProgress.slice(0, 20).map(p => ({
-            batchId: p.id,
-            agentType: p.agent_type,
-            platform: p.platform,
-            status: p.status as 'completed' | 'processing' | 'failed',
-            recordsProcessed: p.records_processed || 0,
-            confidence: (p.confidence || 0) / 100,
-            apiCalls: Math.floor((p.records_processed || 0) / 10),
-            startTime: new Date(p.created_at).getTime() - 5000,
-            endTime: new Date(p.updated_at).getTime(),
-          }));
-          setBatches(historicalBatches);
-        }
-
-        toast({
-          title: "Success",
-          description: `Loaded ${runs?.length || 0} past runs. Recent data shows ${recentProgress?.reduce((sum, p) => sum + (p.records_processed || 0), 0).toLocaleString()} records processed in last 10 minutes.`,
-        });
-      } catch (error) {
-        console.error('Failed to load historical data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load historical data",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadHistoricalData();
   }, [user]);
+
+  // Add refresh function  
+  const refreshData = () => {
+    setIsLoading(true);
+    loadHistoricalData();
+  };
 
   // Real-time data simulation with agent actions
   useEffect(() => {
@@ -426,10 +436,8 @@ export const RealTimeTestDashboard = () => {
           title: "Success",
           description: data.message || 'Tests stopped successfully',
         });
-        // Reload historical data to show updated status
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+        // Refresh data immediately instead of page reload
+        refreshData();
       } else {
         toast({
           title: "Error",
