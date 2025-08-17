@@ -493,13 +493,22 @@ export const RealTimeTestDashboard = () => {
             </div>
             <div className="flex gap-2">
               {!isRunning ? (
-                <button
-                  onClick={startRealTest}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2"
-                >
-                  <Play className="w-4 h-4" />
-                  Start Real Test
-                </button>
+                <>
+                  <button
+                    onClick={startRealTest}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4" />
+                    Start Real Test
+                  </button>
+                  <button
+                    onClick={stopTest}
+                    className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 flex items-center gap-2"
+                  >
+                    <Square className="w-4 h-4" />
+                    Stop All Tests
+                  </button>
+                </>
               ) : (
                 <button
                   onClick={stopTest}
