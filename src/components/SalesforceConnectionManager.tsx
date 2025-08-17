@@ -105,6 +105,8 @@ export function SalesforceConnectionManager() {
     }
 
     setIsConnecting(true);
+    console.log('Starting Salesforce connection process...');
+    
     try {
       const { data, error } = await supabase.functions.invoke('salesforce-auth-url', {
         body: { userId: user.id }
@@ -116,6 +118,8 @@ export function SalesforceConnectionManager() {
         throw new Error('Failed to get Salesforce authorization URL');
       }
 
+      console.log('Opening Salesforce OAuth popup...');
+      
       // Open Salesforce OAuth in new window
       const popup = window.open(
         data.authUrl,
@@ -123,9 +127,26 @@ export function SalesforceConnectionManager() {
         'width=600,height=700,scrollbars=yes,resizable=yes'
       );
 
+      if (!popup) {
+        throw new Error('Failed to open popup. Please allow popups for this site.');
+      }
+
+      // Auto-reset after 5 minutes if still connecting
+      const autoReset = setTimeout(() => {
+        console.log('Auto-resetting connection state after timeout');
+        setIsConnecting(false);
+        toast({
+          title: "Connection Timeout",
+          description: "Connection attempt timed out. Please try again.",
+          variant: "destructive",
+        });
+      }, 300000); // 5 minutes
+
       // Listen for messages from the popup
       const handleMessage = (event: MessageEvent) => {
+        console.log('Received message from popup:', event.data);
         if (event.data.type === 'SALESFORCE_AUTH_SUCCESS') {
+          clearTimeout(autoReset);
           setIsConnecting(false);
           
           // Check connection after a short delay
@@ -146,7 +167,9 @@ export function SalesforceConnectionManager() {
       // Check if popup was closed without success
       const checkClosed = setInterval(() => {
         if (popup?.closed) {
+          console.log('Popup closed, resetting connection state');
           clearInterval(checkClosed);
+          clearTimeout(autoReset);
           window.removeEventListener('message', handleMessage);
           setIsConnecting(false);
           // Check connection in case auth was successful but message was missed
@@ -163,6 +186,15 @@ export function SalesforceConnectionManager() {
       });
       setIsConnecting(false);
     }
+  };
+
+  const resetConnectionState = () => {
+    setIsConnecting(false);
+    console.log('Connection state manually reset');
+    toast({
+      title: "State Reset",
+      description: "Connection state has been reset. You can try connecting again.",
+    });
   };
 
   // Check connection on mount and when user changes
@@ -272,6 +304,15 @@ export function SalesforceConnectionManager() {
                   'Connect Now'
                 )}
               </Button>
+              
+              {isConnecting && (
+                <Button 
+                  variant="destructive"
+                  onClick={resetConnectionState}
+                >
+                  Cancel & Reset
+                </Button>
+              )}
               
               <Button 
                 variant="outline"
