@@ -88,11 +88,11 @@ Deno.serve(async (req) => {
       throw new Error('Failed to initialize OAuth flow')
     }
 
-    // Build the OAuth URL with PKCE
+    // Build the OAuth URL with PKCE - use the correct redirect URL that matches Salesforce app config
     const authUrl = new URL('https://login.salesforce.com/services/oauth2/authorize')
     authUrl.searchParams.set('response_type', 'code')
     authUrl.searchParams.set('client_id', clientId)
-    authUrl.searchParams.set('redirect_uri', `${supabaseUrl}/functions/v1/salesforce-auth`)
+    authUrl.searchParams.set('redirect_uri', 'https://vhagttufdirweivhgtlo.supabase.co/functions/v1/salesforce-auth')
     authUrl.searchParams.set('scope', 'api refresh_token offline_access')
     authUrl.searchParams.set('state', userId)
     authUrl.searchParams.set('code_challenge', codeChallenge)
