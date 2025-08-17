@@ -351,6 +351,107 @@ export type Database = {
           },
         ]
       }
+      ai_test_progress: {
+        Row: {
+          agent_type: string
+          confidence: number | null
+          created_at: string
+          error_message: string | null
+          id: string
+          insights: Json | null
+          platform: string
+          records_processed: number
+          status: string
+          test_run_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_type: string
+          confidence?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          insights?: Json | null
+          platform: string
+          records_processed?: number
+          status: string
+          test_run_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_type?: string
+          confidence?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          insights?: Json | null
+          platform?: string
+          records_processed?: number
+          status?: string
+          test_run_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_test_progress_test_run_id_fkey"
+            columns: ["test_run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_test_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_test_runs: {
+        Row: {
+          batch_size: number
+          completed_at: string | null
+          completion_time: number | null
+          created_at: string
+          error_message: string | null
+          id: string
+          results: Json | null
+          started_at: string
+          status: string
+          total_agent_types: number
+          total_platforms: number
+          total_records: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_size?: number
+          completed_at?: string | null
+          completion_time?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          results?: Json | null
+          started_at?: string
+          status: string
+          total_agent_types?: number
+          total_platforms?: number
+          total_records?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_size?: number
+          completed_at?: string | null
+          completion_time?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          results?: Json | null
+          started_at?: string
+          status?: string
+          total_agent_types?: number
+          total_platforms?: number
+          total_records?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           created_at: string
