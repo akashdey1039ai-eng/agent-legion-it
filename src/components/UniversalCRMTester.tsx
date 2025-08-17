@@ -132,20 +132,17 @@ export function UniversalCRMTester() {
       const { count: salesforceContacts } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true })
-        .not('salesforce_id', 'is', null)
-        .eq('owner_id', user.id);
+        .not('salesforce_id', 'is', null);
 
       const { count: salesforceCompanies } = await supabase
         .from('companies')
         .select('*', { count: 'exact', head: true })
-        .not('salesforce_id', 'is', null)
-        .eq('assigned_user_id', user.id);
+        .not('salesforce_id', 'is', null);
 
       const { count: hubspotContacts } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true })
-        .not('hubspot_id', 'is', null)
-        .eq('owner_id', user.id);
+        .not('hubspot_id', 'is', null);
 
       const salesforceRecordCount = (salesforceContacts || 0) + (salesforceCompanies || 0);
       const hubspotRecordCount = (hubspotContacts || 0);
