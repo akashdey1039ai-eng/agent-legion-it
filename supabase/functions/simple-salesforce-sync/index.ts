@@ -31,8 +31,20 @@ Deno.serve(async (req) => {
 
     console.log('User authenticated:', user.id)
 
-    // Get request body
-    const { dataType } = await req.json()
+    // Get request body safely
+    let requestBody = {}
+    try {
+      const text = await req.text()
+      console.log('Raw request body:', text)
+      if (text) {
+        requestBody = JSON.parse(text)
+      }
+    } catch (err) {
+      console.error('Request body parsing error:', err)
+      // Use default if no body provided
+    }
+    
+    const dataType = requestBody.dataType || 'contacts'
     console.log('Sync request for:', dataType)
 
     // Get Salesforce token
