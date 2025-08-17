@@ -2053,24 +2053,24 @@ export type Database = {
         Insert: {
           company_id?: string | null
           created_at?: string | null
-          email?: string | null
+          email?: never
           first_name?: string | null
           id?: string | null
           last_name?: string | null
           owner_id?: string | null
-          phone?: string | null
+          phone?: never
           title?: string | null
           updated_at?: string | null
         }
         Update: {
           company_id?: string | null
           created_at?: string | null
-          email?: string | null
+          email?: never
           first_name?: string | null
           id?: string | null
           last_name?: string | null
           owner_id?: string | null
-          phone?: string | null
+          phone?: never
           title?: string | null
           updated_at?: string | null
         }
