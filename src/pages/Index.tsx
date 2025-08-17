@@ -51,30 +51,36 @@ const Index = () => {
   const [salesforceConnected, setSalesforceConnected] = useState(false);
   const [hubspotConnected, setHubspotConnected] = useState(false);
 
-  // Check connection status
+  // Optimized connection status check with parallel requests
   const checkConnectionStatus = async () => {
     if (!user) return;
     
     try {
-      // Check Salesforce connection
-      const { data: salesforceTokens } = await supabase
-        .from('salesforce_tokens')
-        .select('*')
-        .eq('user_id', user.id)
-        .gt('expires_at', new Date().toISOString());
+      // Use Promise.all for parallel requests and select only 'id' for faster queries
+      const [sfResult, hsResult] = await Promise.all([
+        supabase
+          .from('salesforce_tokens')
+          .select('id')
+          .eq('user_id', user.id)
+          .gt('expires_at', new Date().toISOString())
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('hubspot_tokens')
+          .select('id')
+          .eq('user_id', user.id)
+          .gt('expires_at', new Date().toISOString())
+          .limit(1)
+          .maybeSingle()
+      ]);
       
-      setSalesforceConnected(salesforceTokens && salesforceTokens.length > 0);
-      
-      // Check HubSpot connection
-      const { data: hubspotTokens } = await supabase
-        .from('hubspot_tokens')
-        .select('*')
-        .eq('user_id', user.id)
-        .gt('expires_at', new Date().toISOString());
-      
-      setHubspotConnected(hubspotTokens && hubspotTokens.length > 0);
+      setSalesforceConnected(!!sfResult.data);
+      setHubspotConnected(!!hsResult.data);
     } catch (error) {
       console.error('Error checking connection status:', error);
+      // Set to false on error to prevent infinite loading
+      setSalesforceConnected(false);
+      setHubspotConnected(false);
     }
   };
 
@@ -109,19 +115,22 @@ const Index = () => {
   };
 
   useEffect(() => {
-    // Clear previous test results on page load
     clearTestResults();
     
     if (!loading && !user) {
       navigate('/auth');
+      return;
     }
 
-    // Check connection status when component mounts or user changes
+    // Optimize connection status check with debouncing
     if (user) {
-      checkConnectionStatus();
+      const timeoutId = setTimeout(checkConnectionStatus, 100);
+      return () => clearTimeout(timeoutId);
     }
+  }, [user, loading, navigate]);
 
-    // Handle navigation state for agent management
+  // Separate effect for navigation state to avoid re-checking connections
+  useEffect(() => {
     const state = location.state as { activeTab?: string; openAgent?: string } | null;
     
     if (state?.activeTab) {
@@ -131,7 +140,7 @@ const Index = () => {
       setActiveTab('agents');
       setActiveAgent(state.openAgent);
     }
-  }, [user, loading, navigate, location.state]);
+  }, [location.state]);
 
   if (loading) {
     return (
