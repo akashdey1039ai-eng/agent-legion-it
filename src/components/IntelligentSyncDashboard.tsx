@@ -141,67 +141,105 @@ export function IntelligentSyncDashboard() {
       failed: []
     });
 
-    try {
-      const platforms = [];
-      if ((selectedPlatform === 'both' || selectedPlatform === 'salesforce') && connections.salesforce) {
-        platforms.push('salesforce');
-      }
-      if ((selectedPlatform === 'both' || selectedPlatform === 'hubspot') && connections.hubspot) {
-        platforms.push('hubspot');
-      }
+      try {
+        const platforms = [];
+        if ((selectedPlatform === 'both' || selectedPlatform === 'salesforce') && connections.salesforce) {
+          platforms.push('salesforce');
+        }
+        if ((selectedPlatform === 'both' || selectedPlatform === 'hubspot') && connections.hubspot) {
+          platforms.push('hubspot');
+        }
 
-      let totalSteps = platforms.length * selectedDataTypes.length;
-      let currentStep = 0;
+        if (platforms.length === 0) {
+          throw new Error('No connected platforms selected for sync');
+        }
 
-      for (const platform of platforms) {
-        for (const dataType of selectedDataTypes) {
-          currentStep++;
-          const progress = (currentStep / totalSteps) * 100;
-          
-          setSyncStatus(prev => ({
-            ...prev,
-            progress,
-            currentTask: `Syncing ${dataType} from ${platform}...`
-          }));
+        let totalSteps = platforms.length * selectedDataTypes.length;
+        let currentStep = 0;
+        let totalSuccess = 0;
+        let totalFailed = 0;
 
-          try {
-            const functionName = platform === 'salesforce' ? 'salesforce-sync' : 'hubspot-sync';
+        // Get current session token
+        const { data: session } = await supabase.auth.getSession();
+        if (!session.session) {
+          throw new Error('User not authenticated');
+        }
+
+        for (const platform of platforms) {
+          for (const dataType of selectedDataTypes) {
+            currentStep++;
+            const progress = (currentStep / totalSteps) * 100;
             
-            const { error } = await supabase.functions.invoke(functionName, {
-              body: {
-                objectType: dataType,
-                direction: 'from',
-                intelligent: true // Enable AI-powered sync
-              },
-              headers: {
-                Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-              },
-            });
+            setSyncStatus(prev => ({
+              ...prev,
+              progress,
+              currentTask: `Syncing ${dataType} from ${platform}...`
+            }));
 
-            if (error) {
+            try {
+              console.log(`Starting sync: ${platform} -> ${dataType}`);
+              
+              const functionName = platform === 'salesforce' ? 'salesforce-sync' : 'hubspot-sync';
+              
+              const { data: result, error } = await supabase.functions.invoke(functionName, {
+                body: {
+                  objectType: dataType,
+                  direction: 'from_salesforce',
+                  intelligent: true
+                },
+                headers: {
+                  Authorization: `Bearer ${session.session.access_token}`,
+                  'Content-Type': 'application/json'
+                },
+              });
+
+              if (error) {
+                console.error(`Sync error for ${dataType} from ${platform}:`, error);
+                setSyncStatus(prev => ({
+                  ...prev,
+                  failed: [...prev.failed, `${platform}:${dataType}`]
+                }));
+                totalFailed++;
+                
+                toast({
+                  title: "Sync Warning",
+                  description: `Failed to sync ${dataType} from ${platform}: ${error.message}`,
+                  variant: "destructive",
+                });
+              } else {
+                console.log(`Sync successful for ${dataType} from ${platform}:`, result);
+                setSyncStatus(prev => ({
+                  ...prev,
+                  completed: [...prev.completed, `${platform}:${dataType}`]
+                }));
+                totalSuccess++;
+                
+                const recordsInfo = result?.recordsProcessed ? ` (${result.recordsProcessed} records)` : '';
+                toast({
+                  title: "Sync Success",
+                  description: `${dataType} synced from ${platform}${recordsInfo}`,
+                });
+              }
+
+              // Brief delay to show progress and prevent overwhelming
+              await new Promise(resolve => setTimeout(resolve, 800));
+              
+            } catch (error) {
               console.error(`Error syncing ${dataType} from ${platform}:`, error);
               setSyncStatus(prev => ({
                 ...prev,
                 failed: [...prev.failed, `${platform}:${dataType}`]
               }));
-            } else {
-              setSyncStatus(prev => ({
-                ...prev,
-                completed: [...prev.completed, `${platform}:${dataType}`]
-              }));
+              totalFailed++;
+              
+              toast({
+                title: "Sync Error",
+                description: `Failed to sync ${dataType} from ${platform}`,
+                variant: "destructive",
+              });
             }
-
-            // Small delay to show progress
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          } catch (error) {
-            console.error(`Error syncing ${dataType} from ${platform}:`, error);
-            setSyncStatus(prev => ({
-              ...prev,
-              failed: [...prev.failed, `${platform}:${dataType}`]
-            }));
           }
         }
-      }
 
       setSyncStatus(prev => ({
         ...prev,
