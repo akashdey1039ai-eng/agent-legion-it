@@ -87,7 +87,10 @@ export function UniversalCRMTester() {
   const { user } = useAuth();
 
   useEffect(() => {
-    checkCRMConnections();
+    // Only check connections on mount, no automatic testing
+    if (user) {
+      checkCRMConnections();
+    }
     
     // Load persistent test results
     const savedResults = localStorage.getItem('universal-crm-test-results');
@@ -99,13 +102,9 @@ export function UniversalCRMTester() {
         console.error('Failed to load saved test results:', error);
       }
     }
-  }, []);
+  }, [user]);
 
-  // Add interval to refresh record counts
-  useEffect(() => {
-    const interval = setInterval(checkCRMConnections, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // Remove automatic refresh interval - make it manual only
 
   // Save results to localStorage whenever they change
   useEffect(() => {
