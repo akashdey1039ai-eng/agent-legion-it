@@ -131,16 +131,8 @@ export function SalesforceConnectionManager() {
       
       let isAuthComplete = false;
       let checkClosed: NodeJS.Timeout;
+      let autoReset: NodeJS.Timeout;
       
-      // Cleanup function
-      const cleanup = () => {
-        isAuthComplete = true;
-        setIsConnecting(false);
-        clearTimeout(autoReset);
-        clearInterval(checkClosed);
-        window.removeEventListener('message', handleAuthMessage);
-      };
-
       // Listen for messages from the popup
       const handleAuthMessage = (event: MessageEvent) => {
         console.log('Received message from popup:', event.data, 'from origin:', event.origin);
@@ -162,6 +154,15 @@ export function SalesforceConnectionManager() {
           });
         }
       };
+      
+      // Cleanup function
+      const cleanup = () => {
+        isAuthComplete = true;
+        setIsConnecting(false);
+        clearTimeout(autoReset);
+        clearInterval(checkClosed);
+        window.removeEventListener('message', handleAuthMessage);
+      };
 
       // Clear any existing event listeners to prevent duplicates
       window.removeEventListener('message', handleAuthMessage);
@@ -178,7 +179,7 @@ export function SalesforceConnectionManager() {
       }
 
       // Auto-reset after 5 minutes if still connecting
-      const autoReset = setTimeout(() => {
+      autoReset = setTimeout(() => {
         if (!isAuthComplete) {
           console.log('Auto-resetting connection state after timeout');
           cleanup();
