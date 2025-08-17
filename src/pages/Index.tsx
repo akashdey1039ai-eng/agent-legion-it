@@ -24,7 +24,7 @@ import { TestDataGenerator } from '@/components/TestDataGenerator';
 import { CustomerIntelligenceTestSuite } from '@/components/CustomerIntelligenceTestSuite';
 import { SalesforceDebugger } from '@/components/SalesforceDebugger';
 import { AISecurityMonitor } from '@/components/AISecurityMonitor';
-import { IntelligentSyncDashboard } from '@/components/IntelligentSyncDashboard';
+import { SimpleSyncDashboard } from '@/components/SimpleSyncDashboard';
 import heroCommand from "@/assets/hero-command.jpg";
 import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings, Smartphone, Monitor, BookOpen, CheckCircle, XCircle, Unplug } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -278,10 +278,9 @@ const Index = () => {
               <EnterpriseWelcomeDashboard />
             </TabsContent>
 
-            {/* Smart Sync Tab - NEW NEXT-GEN INTERFACE */}
-            <TabsContent value="smart-sync" className="mt-6 sm:mt-8">
-              <IntelligentSyncDashboard />
-            </TabsContent>
+              <TabsContent value="smart-sync" className="space-y-6">
+                <SimpleSyncDashboard />
+              </TabsContent>
 
             {/* Global AI Tab */}
             <TabsContent value="global-ai" className="mt-6 sm:mt-8">
