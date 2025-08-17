@@ -87,6 +87,32 @@ export default function DirectSalesforce() {
     }
   };
 
+  const handleDisconnect = async () => {
+    try {
+      // Remove the stored token
+      const { error } = await supabase
+        .from('salesforce_tokens')
+        .delete()
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      setIsConnected(false);
+      setAccessToken('');
+      toast({
+        title: "Disconnected",
+        description: "Salesforce connection has been removed.",
+      });
+    } catch (error) {
+      console.error('Disconnect failed:', error);
+      toast({
+        title: "Disconnect Failed",
+        description: error.message || "Failed to disconnect from Salesforce.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isConnected) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
@@ -109,9 +135,19 @@ export default function DirectSalesforce() {
                 </AlertDescription>
               </Alert>
               
-              <Button onClick={() => window.location.href = '/ai-agents'}>
-                Go to AI Agents →
-              </Button>
+              <div className="space-y-4">
+                <Button onClick={() => window.location.href = '/ai-agents'}>
+                  Go to AI Agents →
+                </Button>
+                
+                <Button 
+                  onClick={handleDisconnect}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Disconnect Salesforce
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
