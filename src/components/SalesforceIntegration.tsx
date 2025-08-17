@@ -331,7 +331,11 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
                     
                     <Button 
                       variant="outline"
-                      onClick={checkConnection}
+                      onClick={() => {
+                        console.log('🔄 Check Status button clicked directly');
+                        console.log('👤 User at button click:', user);
+                        checkConnection();
+                      }}
                       className="flex items-center gap-2"
                     >
                       <RefreshCw className="h-4 w-4" />
