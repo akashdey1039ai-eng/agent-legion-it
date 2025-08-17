@@ -54,7 +54,7 @@ serve(async (req) => {
     console.log(`Analyzing ${opportunities?.length || 0} opportunities`)
 
     // Perform pipeline analysis
-    const analysis = performPipelineAnalysis(opportunities || [], inputData)
+    const analysis = await performPipelineAnalysis(opportunities || [], inputData)
 
     // Log the execution
     const { error: logError } = await supabaseClient
@@ -101,8 +101,18 @@ serve(async (req) => {
   }
 })
 
-function performPipelineAnalysis(opportunities: any[], inputData: any) {
-  console.log('Performing pipeline analysis on', opportunities.length, 'opportunities')
+async function performPipelineAnalysis(opportunities: any[], inputData: any) {
+  console.log('Performing AI-powered pipeline analysis on', opportunities.length, 'opportunities')
+  
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+  if (!openaiApiKey) {
+    console.error('OpenAI API key not configured')
+    return {
+      success: false,
+      error: 'OpenAI API key not configured',
+      confidence: 0
+    }
+  }
   
   // Calculate basic metrics
   const totalValue = opportunities.reduce((sum, opp) => sum + (opp.amount || 0), 0)
