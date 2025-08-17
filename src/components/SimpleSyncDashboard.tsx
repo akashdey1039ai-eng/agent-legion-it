@@ -26,9 +26,15 @@ interface SyncResult {
 export function SimpleSyncDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('salesforce');
   const [issyncing, setIsSyncing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<SyncResult[]>([]);
+
+  const platformTypes = [
+    { id: 'salesforce', name: 'Salesforce', color: 'bg-blue-500' },
+    { id: 'hubspot', name: 'HubSpot', color: 'bg-orange-500' },
+  ];
 
   const dataTypes = [
     { id: 'contacts', name: 'Contacts', icon: Users },
@@ -65,10 +71,11 @@ export function SimpleSyncDashboard() {
         setProgress(progressValue);
 
         try {
-          console.log(`Syncing ${dataType.id}...`);
+          console.log(`Syncing ${dataType.id} from ${selectedPlatform}...`);
           
-          const { data: result, error } = await supabase.functions.invoke('simple-salesforce-sync', {
-            body: { dataType: dataType.id },
+          const functionName = selectedPlatform === 'salesforce' ? 'simple-salesforce-sync' : 'hubspot-sync';
+          const { data: result, error } = await supabase.functions.invoke(functionName, {
+            body: { dataType: dataType.id, platform: selectedPlatform },
             headers: {
               'Authorization': `Bearer ${session.session.access_token}`,
               'Content-Type': 'application/json'
@@ -149,12 +156,31 @@ export function SimpleSyncDashboard() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Simple Salesforce Sync</CardTitle>
+          <CardTitle>Smart CRM Sync</CardTitle>
           <CardDescription>
-            Sync your Salesforce data directly without complications
+            Sync your CRM data from Salesforce or HubSpot
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Platform Selection */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Platform</label>
+            <div className="flex gap-2">
+              {platformTypes.map((platform) => (
+                <Button
+                  key={platform.id}
+                  variant={selectedPlatform === platform.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedPlatform(platform.id)}
+                  disabled={issyncing}
+                  className="flex items-center gap-2"
+                >
+                  <div className={`w-3 h-3 rounded-full ${platform.color}`} />
+                  {platform.name}
+                </Button>
+              ))}
+            </div>
+          </div>
           <div className="grid grid-cols-3 gap-4">
             {dataTypes.map((type) => {
               const Icon = type.icon;
@@ -210,7 +236,7 @@ export function SimpleSyncDashboard() {
 
           {!user && (
             <p className="text-sm text-muted-foreground text-center">
-              Please log in to sync your Salesforce data
+              Please log in to sync your CRM data
             </p>
           )}
         </CardContent>
