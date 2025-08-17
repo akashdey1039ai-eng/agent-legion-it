@@ -2159,6 +2159,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_ai_agent_test: {
+        Args: {
+          p_agent_type: string
+          p_confidence: number
+          p_platform: string
+          p_records_processed: number
+          p_status: string
+          p_test_run_id?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       mask_sensitive_data: {
         Args: { data: string; mask_type?: string }
         Returns: string
