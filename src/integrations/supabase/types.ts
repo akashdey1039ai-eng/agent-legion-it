@@ -677,6 +677,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "companies_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "companies_parent_company_id_fkey"
             columns: ["parent_company_id"]
             isOneToOne: false
@@ -774,6 +781,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -935,6 +949,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "deals_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "deals_company_id_fkey"
             columns: ["company_id"]
@@ -1897,6 +1918,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
