@@ -18,6 +18,7 @@ import { UserPlaybook } from "@/components/UserPlaybook";
 import { EnterpriseSafetyDashboard } from "@/components/EnterpriseSafetyDashboard";
 import { VideoDemoStudio } from "@/components/VideoDemoStudio";
 import { UniversalCRMTester } from "@/components/UniversalCRMTester";
+import { ScalableAITester } from "@/components/ScalableAITester";
 import { Header } from "@/components/Header";
 import { SandboxConnector } from "@/components/SandboxConnector";
 import { TestDataGenerator } from '@/components/TestDataGenerator';
@@ -285,6 +286,11 @@ const Index = () => {
             {/* Global AI Tab */}
             <TabsContent value="global-ai" className="mt-6 sm:mt-8">
               <GlobalAIAgentRunner />
+              
+              {/* Scalable AI Agent Testing */}
+              <div className="mt-8">
+                <ScalableAITester />
+              </div>
             </TabsContent>
 
             {/* Video Demo Tab */}
