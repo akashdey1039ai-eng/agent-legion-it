@@ -699,39 +699,87 @@ Respond in JSON format:
 async function executeCustomerSentimentAnalysis(supabaseClient: any, inputData: any, enableActions: boolean, openaiApiKey: string) {
   console.log('🎭 Executing Customer Sentiment Analysis')
   
-  const { platform, contactIds } = inputData
+  const { platform = 'native', contactIds } = inputData
   
-  if (!contactIds || !Array.isArray(contactIds)) {
-    throw new Error('Invalid contact IDs provided')
-  }
+  // For platform-specific analysis, contactIds are optional - we can fetch from database
+  console.log(`🔍 Platform: ${platform}, ContactIds provided: ${contactIds ? contactIds.length : 'none'}`)
 
   // Fetch contact data based on platform
   let contacts = []
   
   if (platform === 'hubspot') {
-    // For HubSpot, get contacts with HubSpot IDs
-    const { data: hubspotContacts, error } = await supabaseClient
-      .from('contacts')
-      .select(`
-        id, first_name, last_name, email, phone, title, 
-        status, lead_score, created_at, salesforce_id
-      `)
-      .in('id', contactIds)
-
-    if (error) throw new Error(`Failed to fetch HubSpot contacts: ${error.message}`)
-    contacts = hubspotContacts || []
+    // For HubSpot, get contacts with HubSpot IDs if specified, otherwise get recent ones
+    if (contactIds && Array.isArray(contactIds)) {
+      const { data: hubspotContacts, error } = await supabaseClient
+        .from('contacts')
+        .select(`
+          id, first_name, last_name, email, phone, title, department,
+          hubspot_id, status, lead_source, created_at,
+          companies(name, industry, size)
+        `)
+        .in('hubspot_id', contactIds)
+        .limit(50)
+      
+      if (error) {
+        throw new Error(`Failed to fetch HubSpot contacts: ${error.message}`)
+      }
+      
+      contacts = hubspotContacts || []
+    } else {
+      // If no specific contact IDs, get recent HubSpot contacts
+      const { data: recentContacts, error } = await supabaseClient
+        .from('contacts')
+        .select(`
+          id, first_name, last_name, email, phone, title, department,
+          hubspot_id, status, lead_source, created_at,
+          companies(name, industry, size)
+        `)
+        .not('hubspot_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      
+      if (error) {
+        throw new Error(`Failed to fetch recent HubSpot contacts: ${error.message}`)
+      }
+      
+      contacts = recentContacts || []
+    }
   } else {
-    // Default/Salesforce contacts
-    const { data: defaultContacts, error } = await supabaseClient
-      .from('contacts')
-      .select(`
-        id, first_name, last_name, email, phone, title, 
-        status, lead_score, created_at, salesforce_id
-      `)
-      .in('id', contactIds)
-
-    if (error) throw new Error(`Failed to fetch contacts: ${error.message}`)
-    contacts = defaultContacts || []
+    // For native platform, get all contacts or specific ones
+    if (contactIds && Array.isArray(contactIds)) {
+      const { data: nativeContacts, error } = await supabaseClient
+        .from('contacts')
+        .select(`
+          id, first_name, last_name, email, phone, title, department,
+          status, lead_source, created_at,
+          companies(name, industry, size)
+        `)
+        .in('id', contactIds)
+        .limit(50)
+      
+      if (error) {
+        throw new Error(`Failed to fetch contacts: ${error.message}`)
+      }
+      
+      contacts = nativeContacts || []
+    } else {
+      // If no specific contact IDs, get recent contacts
+      const { data: allContacts, error } = await supabaseClient
+        .from('contacts')
+        .select(`
+          id, first_name, last_name, email, phone, title, department,
+          status, lead_source, created_at,
+          companies(name, industry, size)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      
+      if (error) {
+        throw new Error(`Failed to fetch recent contacts: ${error.message}`)
+      }
+      
+      contacts = allContacts || []
+    }
   }
 
   if (!contacts || contacts.length === 0) {
