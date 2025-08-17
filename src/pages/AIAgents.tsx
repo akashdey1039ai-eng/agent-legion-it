@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Bot, Brain, TrendingUp, Zap, Calendar, Target, Play, Settings, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ComprehensiveAITester } from '@/components/ComprehensiveAITester';
+import { ScalableAITester } from '@/components/ScalableAITester';
 import { AIDiagnostics } from '@/components/AIDiagnostics';
 
 const agents = [
@@ -81,6 +82,9 @@ export default function AIAgents() {
     <div className="space-y-6">
       {/* AI Diagnostics - Priority Tool to Find Root Cause */}
       <AIDiagnostics />
+      
+      {/* Scalable AI Tester for 150K Records */}
+      <ScalableAITester />
       
       {/* Comprehensive AI Agent Tester */}
       <ComprehensiveAITester />
