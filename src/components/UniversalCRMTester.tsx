@@ -129,20 +129,28 @@ export function UniversalCRMTester() {
         .limit(1);
 
       // Count synced records for each platform
-      const { count: salesforceContacts } = await supabase
+      const { count: salesforceContacts, error: sfContactError } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true })
         .not('salesforce_id', 'is', null);
 
-      const { count: salesforceCompanies } = await supabase
+      const { count: salesforceCompanies, error: sfCompanyError } = await supabase
         .from('companies')
         .select('*', { count: 'exact', head: true })
         .not('salesforce_id', 'is', null);
 
-      const { count: hubspotContacts } = await supabase
+      const { count: hubspotContacts, error: hsContactError } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true })
         .not('hubspot_id', 'is', null);
+
+      // Debug logging
+      console.log('Record counts:', {
+        salesforceContacts,
+        salesforceCompanies,
+        hubspotContacts,
+        errors: { sfContactError, sfCompanyError, hsContactError }
+      });
 
       const salesforceRecordCount = (salesforceContacts || 0) + (salesforceCompanies || 0);
       const hubspotRecordCount = (hubspotContacts || 0);
