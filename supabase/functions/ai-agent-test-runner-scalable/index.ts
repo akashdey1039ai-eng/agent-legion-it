@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, batchSize = 500, enableBackground = true } = await req.json();
+    const { userId, batchSize = 1000, enableBackground = true, maxConcurrency = 3 } = await req.json();
     console.log(`🧪 Starting scalable AI agent tests for user: ${userId}`);
 
     const testId = crypto.randomUUID();
@@ -36,12 +36,13 @@ serve(async (req) => {
       total_platforms: 3,
       total_agent_types: agentTypes.length,
       batch_size: batchSize,
+      total_records: 150000, // 50K per platform
       started_at: new Date().toISOString()
     });
 
     if (enableBackground) {
-      // Start background processing without blocking response
-      EdgeRuntime.waitUntil(runScalableTests(testId, userId, agentTypes, batchSize));
+      // Start background processing with concurrency control
+      EdgeRuntime.waitUntil(runScalableTests(testId, userId, agentTypes, batchSize, maxConcurrency));
       
       // Return immediate response with test ID for tracking
       return new Response(JSON.stringify({
@@ -49,13 +50,13 @@ serve(async (req) => {
         testId,
         message: 'Large-scale AI agent testing started in background',
         trackingUrl: `/api/test-status/${testId}`,
-        estimatedDuration: '30-60 minutes for 50,000 records'
+        estimatedDuration: '45-90 minutes for 150,000 records'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     } else {
       // Run synchronously for smaller datasets
-      const results = await runScalableTests(testId, userId, agentTypes, batchSize);
+      const results = await runScalableTests(testId, userId, agentTypes, batchSize, maxConcurrency);
       return new Response(JSON.stringify(results), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -73,7 +74,7 @@ serve(async (req) => {
   }
 });
 
-async function runScalableTests(testId: string, userId: string, agentTypes: string[], batchSize: number) {
+async function runScalableTests(testId: string, userId: string, agentTypes: string[], batchSize: number, maxConcurrency: number = 3) {
   console.log(`🚀 Running scalable tests (ID: ${testId})`);
   
   const platforms = ['salesforce', 'hubspot', 'native'];
@@ -81,13 +82,18 @@ async function runScalableTests(testId: string, userId: string, agentTypes: stri
     testId,
     platforms: {},
     summary: { totalTests: 0, passed: 0, failed: 0, totalRecords: 0 },
-    performance: { startTime: Date.now(), batches: 0 }
+    performance: { 
+      startTime: Date.now(), 
+      batches: 0, 
+      concurrency: maxConcurrency,
+      recordsPerPlatform: 50000 
+    }
   };
 
   try {
-    // Run all platforms in parallel for better performance
+    // Run platforms with controlled concurrency for better resource management
     const platformPromises = platforms.map(platform => 
-      runPlatformTests(testId, userId, platform, agentTypes, batchSize)
+      runPlatformTests(testId, userId, platform, agentTypes, batchSize, maxConcurrency)
     );
 
     const platformResults = await Promise.allSettled(platformPromises);
@@ -137,7 +143,7 @@ async function runScalableTests(testId: string, userId: string, agentTypes: stri
   }
 }
 
-async function runPlatformTests(testId: string, userId: string, platform: string, agentTypes: string[], batchSize: number) {
+async function runPlatformTests(testId: string, userId: string, platform: string, agentTypes: string[], batchSize: number, maxConcurrency: number) {
   console.log(`🔍 Testing ${platform} platform with batched processing`);
   
   const results = {
@@ -154,10 +160,18 @@ async function runPlatformTests(testId: string, userId: string, platform: string
   const totalRecords = await getRecordCount(platform, userId);
   console.log(`📊 ${platform}: ${totalRecords} total records to process`);
 
-  // Process each agent type with batching
-  for (const agentType of agentTypes) {
+  // Process agent types with controlled concurrency
+  const semaphore = new Array(maxConcurrency).fill(null);
+  let agentIndex = 0;
+  
+  const processNextAgent = async (): Promise<void> => {
+    if (agentIndex >= agentTypes.length) return;
+    
+    const currentIndex = agentIndex++;
+    const agentType = agentTypes[currentIndex];
+    
     try {
-      console.log(`🤖 Testing ${platform} ${agentType} with ${totalRecords} records`);
+      console.log(`🤖 Testing ${platform} ${agentType} with ${totalRecords} records (${currentIndex + 1}/${agentTypes.length})`);
       
       const agentResult = await runBatchedAgentTest(
         testId, userId, platform, agentType, batchSize, totalRecords
@@ -184,7 +198,13 @@ async function runPlatformTests(testId: string, userId: string, platform: string
       results.testsFailed++;
       results.testsCompleted++;
     }
-  }
+    
+    // Continue with next agent
+    await processNextAgent();
+  };
+
+  // Start concurrent processing
+  await Promise.all(semaphore.map(() => processNextAgent()));
 
   return results;
 }
@@ -200,28 +220,39 @@ async function runBatchedAgentTest(testId: string, userId: string, platform: str
   };
 
   const totalBatches = Math.ceil(totalRecords / batchSize);
-  console.log(`📦 Processing ${totalBatches} batches of ${batchSize} records each`);
+  console.log(`📦 Processing ${totalBatches} batches of ${batchSize} records each for ${platform}`);
 
-  for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-    const offset = batchIndex * batchSize;
+  // Process batches with controlled parallelism to avoid overwhelming APIs
+  const maxParallelBatches = platform === 'native' ? 5 : 2; // Native can handle more parallel requests
+  
+  for (let startBatch = 0; startBatch < totalBatches; startBatch += maxParallelBatches) {
+    const endBatch = Math.min(startBatch + maxParallelBatches, totalBatches);
+    const batchPromises = [];
     
-    try {
-      // Process batch with appropriate function
-      const batchResult = await processBatch(platform, agentType, userId, offset, batchSize);
+    for (let batchIndex = startBatch; batchIndex < endBatch; batchIndex++) {
+      const offset = batchIndex * batchSize;
       
-      result.recordsProcessed += batchResult.recordsProcessed;
-      result.batchesProcessed++;
-      result.insights.push(...(batchResult.insights || []));
-      
-      // Add adaptive delay based on batch size for rate limiting
-      if (batchIndex < totalBatches - 1) {
-        const delay = batchSize > 250 ? 200 : 50; // Longer delay for larger batches
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-
-    } catch (error) {
-      console.error(`❌ Batch ${batchIndex + 1} failed:`, error);
-      // Continue with next batch instead of failing entire test
+      batchPromises.push(
+        processBatch(platform, agentType, userId, offset, batchSize)
+          .then(batchResult => {
+            result.recordsProcessed += batchResult.recordsProcessed;
+            result.batchesProcessed++;
+            result.insights.push(...(batchResult.insights || []));
+          })
+          .catch(error => {
+            console.error(`❌ Batch ${batchIndex + 1} failed:`, error);
+            // Continue with next batch instead of failing entire test
+          })
+      );
+    }
+    
+    // Wait for this chunk of batches to complete
+    await Promise.allSettled(batchPromises);
+    
+    // Add progressive delay based on platform to respect rate limits
+    if (endBatch < totalBatches) {
+      const delay = platform === 'native' ? 100 : 500; // Longer delays for external APIs
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
@@ -262,13 +293,14 @@ async function getRecordCount(platform: string, userId: string): Promise<number>
   switch (platform) {
     case 'salesforce':
     case 'hubspot':
-      // For external platforms, scale to handle larger datasets
-      return 16667; // ~50,000 total records / 3 platforms
+      // Each external platform now handles 50,000 records
+      return 50000;
     case 'native':
+      // For native, we cap at 50,000 but check actual count
       const { count } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true });
-      return Math.min(count || 0, 16667); // Cap at 1/3 of 50K for balanced testing
+      return Math.min(count || 0, 50000);
     default:
       return 0;
   }
