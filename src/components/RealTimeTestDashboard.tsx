@@ -20,7 +20,12 @@ import {
   Bot,
   Brain,
   Play,
-  Square
+  Square,
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  TrendingDown,
+  Gauge
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -98,6 +103,7 @@ export const RealTimeTestDashboard = () => {
     autonomousDecisions: 0
   });
   const [pastRuns, setPastRuns] = useState<any[]>([]);
+  const [expandedRun, setExpandedRun] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [testRunId, setTestRunId] = useState<string | null>(null);
@@ -823,57 +829,252 @@ export const RealTimeTestDashboard = () => {
             ) : (
               <div className="space-y-3">
                 {pastRuns.map(run => (
-                  <div key={run.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        {run.status === 'completed' ? (
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                        ) : run.status === 'failed' ? (
-                          <XCircle className="w-5 h-5 text-red-500" />
-                        ) : run.status === 'cancelled' ? (
-                          <Square className="w-5 h-5 text-orange-500" />
-                        ) : (
-                          <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
-                        )}
-                        <Badge variant={
-                          run.status === 'completed' ? 'default' : 
-                          run.status === 'failed' ? 'destructive' : 
-                          run.status === 'cancelled' ? 'outline' :
-                          'secondary'
-                        }>
-                          {run.status}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium">
-                          {run.total_records?.toLocaleString() || 'N/A'} records targeted
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          Started: {new Date(run.started_at).toLocaleString()}
-                          {run.completed_at && ` • Completed: ${new Date(run.completed_at).toLocaleString()}`}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                      <div className="text-center">
-                        <div className="font-medium">{run.total_agent_types}</div>
-                        <div className="text-xs">Agents</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-medium">{run.total_platforms}</div>
-                        <div className="text-xs">Platforms</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-medium">{run.batch_size}</div>
-                        <div className="text-xs">Batch Size</div>
-                      </div>
-                      {run.completion_time && (
-                        <div className="text-center">
-                          <div className="font-medium">{Math.round(run.completion_time / 1000)}s</div>
-                          <div className="text-xs">Duration</div>
+                  <div key={run.id} className="border rounded-lg">
+                    <div className="flex items-center justify-between p-4 cursor-pointer"
+                         onClick={() => setExpandedRun(expandedRun === run.id ? null : run.id)}>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          {run.status === 'completed' ? (
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                          ) : run.status === 'failed' ? (
+                            <XCircle className="w-5 h-5 text-red-500" />
+                          ) : run.status === 'cancelled' ? (
+                            <Square className="w-5 h-5 text-orange-500" />
+                          ) : (
+                            <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                          )}
+                          <Badge variant={
+                            run.status === 'completed' ? 'default' : 
+                            run.status === 'failed' ? 'destructive' : 
+                            run.status === 'cancelled' ? 'outline' :
+                            'secondary'
+                          }>
+                            {run.status}
+                          </Badge>
                         </div>
-                      )}
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {run.total_records?.toLocaleString() || 'N/A'} records targeted
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            Started: {new Date(run.started_at).toLocaleString()}
+                            {run.completed_at && ` • Completed: ${new Date(run.completed_at).toLocaleString()}`}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                        <div className="text-center">
+                          <div className="font-medium">{run.total_agent_types}</div>
+                          <div className="text-xs">Agents</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium">{run.total_platforms}</div>
+                          <div className="text-xs">Platforms</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium">{run.batch_size}</div>
+                          <div className="text-xs">Batch Size</div>
+                        </div>
+                        {run.completion_time && (
+                          <div className="text-center">
+                            <div className="font-medium">{Math.round(run.completion_time / 1000)}s</div>
+                            <div className="text-xs">Duration</div>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          {run.status === 'completed' && (
+                            <Eye className="w-4 h-4 text-blue-500" />
+                          )}
+                          {expandedRun === run.id ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
+                          )}
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Expanded Details */}
+                    {expandedRun === run.id && run.results && (
+                      <div className="border-t bg-muted/20 p-4">
+                        <Tabs defaultValue="summary" className="w-full">
+                          <TabsList className="grid w-full grid-cols-4">
+                            <TabsTrigger value="summary">Performance Summary</TabsTrigger>
+                            <TabsTrigger value="platforms">Platform Details</TabsTrigger>
+                            <TabsTrigger value="agents">Agent Performance</TabsTrigger>
+                            <TabsTrigger value="traffic">Traffic Analysis</TabsTrigger>
+                          </TabsList>
+
+                          <TabsContent value="summary" className="space-y-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <Card>
+                                <CardContent className="p-4 text-center">
+                                  <Gauge className="w-6 h-6 mx-auto mb-2 text-blue-500" />
+                                  <div className="text-2xl font-bold">{run.results.summary?.totalRecords?.toLocaleString() || '0'}</div>
+                                  <div className="text-xs text-muted-foreground">Total Records</div>
+                                </CardContent>
+                              </Card>
+                              <Card>
+                                <CardContent className="p-4 text-center">
+                                  <CheckCircle className="w-6 h-6 mx-auto mb-2 text-green-500" />
+                                  <div className="text-2xl font-bold">{run.results.summary?.passed || 0}</div>
+                                  <div className="text-xs text-muted-foreground">Tests Passed</div>
+                                </CardContent>
+                              </Card>
+                              <Card>
+                                <CardContent className="p-4 text-center">
+                                  <XCircle className="w-6 h-6 mx-auto mb-2 text-red-500" />
+                                  <div className="text-2xl font-bold">{run.results.summary?.failed || 0}</div>
+                                  <div className="text-xs text-muted-foreground">Tests Failed</div>
+                                </CardContent>
+                              </Card>
+                              <Card>
+                                <CardContent className="p-4 text-center">
+                                  <Timer className="w-6 h-6 mx-auto mb-2 text-orange-500" />
+                                  <div className="text-2xl font-bold">{run.results.performance?.recordsPerSecond?.toLocaleString() || '0'}</div>
+                                  <div className="text-xs text-muted-foreground">Records/Sec</div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          </TabsContent>
+
+                          <TabsContent value="platforms" className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {run.results.platforms && Object.entries(run.results.platforms).map(([platform, data]: [string, any]) => (
+                                <Card key={platform}>
+                                  <CardHeader className="pb-3">
+                                    <Badge variant={platform === 'salesforce' ? 'default' : platform === 'hubspot' ? 'secondary' : 'outline'}>
+                                      {platform}
+                                    </Badge>
+                                  </CardHeader>
+                                  <CardContent className="pt-0">
+                                    <div className="space-y-2 text-sm">
+                                      <div className="flex justify-between">
+                                        <span>Records Processed:</span>
+                                        <span className="font-medium">{data.recordsProcessed?.toLocaleString() || 0}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span>Tests Completed:</span>
+                                        <span className="font-medium text-green-600">{data.testsCompleted || 0}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span>Tests Failed:</span>
+                                        <span className="font-medium text-red-600">{data.testsFailed || 0}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span>Batches Processed:</span>
+                                        <span className="font-medium">{data.batchesProcessed || 0}</span>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </TabsContent>
+
+                          <TabsContent value="agents" className="space-y-4">
+                            <div className="space-y-3 max-h-96 overflow-y-auto">
+                              {run.results.platforms && Object.entries(run.results.platforms).map(([platform, platformData]: [string, any]) => 
+                                platformData.agents && Object.entries(platformData.agents).map(([agentType, agentData]: [string, any]) => (
+                                  <div key={`${platform}-${agentType}`} className="flex items-center justify-between p-3 border rounded-lg">
+                                    <div className="flex items-center gap-3">
+                                      <Bot className="w-4 h-4 text-blue-600" />
+                                      <div className="flex flex-col">
+                                        <span className="font-medium text-sm">{agentType}</span>
+                                        <Badge variant="outline" className="w-fit">{platform}</Badge>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                      <div className="text-center">
+                                        <div className="font-medium">{agentData.recordsProcessed?.toLocaleString() || 0}</div>
+                                        <div className="text-xs">Records</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="font-medium">{agentData.batchesProcessed || 0}</div>
+                                        <div className="text-xs">Batches</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="font-medium text-green-600">{((agentData.confidence || 0) * 100).toFixed(1)}%</div>
+                                        <div className="text-xs">Confidence</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="font-medium">{agentData.performance?.duration || 0}ms</div>
+                                        <div className="text-xs">Duration</div>
+                                      </div>
+                                      <div className="text-center">
+                                        {agentData.success ? (
+                                          <CheckCircle className="w-4 h-4 text-green-500" />
+                                        ) : (
+                                          <XCircle className="w-4 h-4 text-red-500" />
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </TabsContent>
+
+                          <TabsContent value="traffic" className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="text-lg">Performance Metrics</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                      <span>Total Batches:</span>
+                                      <span className="font-medium">{run.results.performance?.batches || 0}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Concurrency Level:</span>
+                                      <span className="font-medium">{run.results.performance?.concurrency || 0}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Total Duration:</span>
+                                      <span className="font-medium">{Math.round((run.results.performance?.duration || 0) / 1000)}s</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Records Per Platform:</span>
+                                      <span className="font-medium">{run.results.performance?.recordsPerPlatform?.toLocaleString() || 0}</span>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="text-lg">API Statistics</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                      <span>Total Tests:</span>
+                                      <span className="font-medium">{run.results.summary?.totalTests || 0}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Success Rate:</span>
+                                      <span className="font-medium text-green-600">
+                                        {run.results.summary?.totalTests ? 
+                                          ((run.results.summary.passed / run.results.summary.totalTests) * 100).toFixed(1) : 0}%
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Avg Processing Time:</span>
+                                      <span className="font-medium">
+                                        {run.results.performance?.recordsPerSecond ? 
+                                          (1000 / run.results.performance.recordsPerSecond).toFixed(0) : 0}ms/record
+                                      </span>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
