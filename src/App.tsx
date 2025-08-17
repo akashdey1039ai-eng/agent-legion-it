@@ -10,6 +10,7 @@ import { ProductionReadyWrapper } from "@/components/ProductionReadyWrapper";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import DirectSalesforce from "./pages/DirectSalesforce";
 import SalesforceCallback from "./pages/SalesforceCallback";
 import HubSpotCallback from "./pages/HubSpotCallback";
 import AIAgents from "./pages/AIAgents";
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/crm" element={<CRM />} />
                 <Route path="/ai-agents" element={<AIAgents />} />
+                <Route path="/salesforce" element={<DirectSalesforce />} />
                 <Route path="/salesforce-callback" element={<SalesforceCallback />} />
                 <Route path="/hubspot-callback" element={<HubSpotCallback />} />
                 <Route path="*" element={<NotFound />} />
