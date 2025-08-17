@@ -128,18 +128,40 @@ export function UniversalCRMTester() {
         .order('created_at', { ascending: false })
         .limit(1);
 
+      // Count synced records for each platform
+      const { count: salesforceContacts } = await supabase
+        .from('contacts')
+        .select('*', { count: 'exact', head: true })
+        .not('salesforce_id', 'is', null)
+        .eq('owner_id', user.id);
+
+      const { count: salesforceCompanies } = await supabase
+        .from('companies')
+        .select('*', { count: 'exact', head: true })
+        .not('salesforce_id', 'is', null)
+        .eq('assigned_user_id', user.id);
+
+      const { count: hubspotContacts } = await supabase
+        .from('contacts')
+        .select('*', { count: 'exact', head: true })
+        .not('hubspot_id', 'is', null)
+        .eq('owner_id', user.id);
+
+      const salesforceRecordCount = (salesforceContacts || 0) + (salesforceCompanies || 0);
+      const hubspotRecordCount = (hubspotContacts || 0);
+
       setCrmConnections([
         {
           platform: 'salesforce',
           status: salesforceTokens && salesforceTokens.length > 0 ? 'connected' : 'disconnected',
           lastSync: salesforceTokens?.[0]?.updated_at || 'Never',
-          recordCount: 0 // Will be populated after data sync
+          recordCount: salesforceRecordCount
         },
         {
           platform: 'hubspot',
           status: hubspotTokens && hubspotTokens.length > 0 ? 'connected' : 'disconnected',
           lastSync: hubspotTokens?.[0]?.updated_at || 'Never',
-          recordCount: 0 // Will be populated after data sync
+          recordCount: hubspotRecordCount
         }
       ]);
     } catch (error) {
