@@ -24,6 +24,7 @@ import { TestDataGenerator } from '@/components/TestDataGenerator';
 import { CustomerIntelligenceTestSuite } from '@/components/CustomerIntelligenceTestSuite';
 import { SalesforceDebugger } from '@/components/SalesforceDebugger';
 import { AISecurityMonitor } from '@/components/AISecurityMonitor';
+import { IntelligentSyncDashboard } from '@/components/IntelligentSyncDashboard';
 import heroCommand from "@/assets/hero-command.jpg";
 import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings, Smartphone, Monitor, BookOpen, CheckCircle, XCircle, Unplug } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -219,11 +220,16 @@ const Index = () => {
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 sm:grid-cols-9 gap-1">
+            <TabsList className="grid w-full grid-cols-5 sm:grid-cols-10 gap-1">
               <TabsTrigger value="enterprise" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Enterprise</span>
                 <span className="sm:hidden">Home</span>
+              </TabsTrigger>
+              <TabsTrigger value="smart-sync" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Smart Sync</span>
+                <span className="sm:hidden">Sync</span>
               </TabsTrigger>
               <TabsTrigger value="global-ai" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -265,21 +271,16 @@ const Index = () => {
                 <span className="hidden sm:inline">Native CRM</span>
                 <span className="sm:hidden">CRM</span>
               </TabsTrigger>
-              <TabsTrigger value="agents" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">AI Agents</span>
-                <span className="sm:hidden">Enhanced</span>
-              </TabsTrigger>
-              <TabsTrigger value="dashboard" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <PieChart className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Dashboard</span>
-                <span className="sm:hidden">Stats</span>
-              </TabsTrigger>
             </TabsList>
 
             {/* Enterprise Welcome Tab */}
             <TabsContent value="enterprise" className="mt-6 sm:mt-8">
               <EnterpriseWelcomeDashboard />
+            </TabsContent>
+
+            {/* Smart Sync Tab - NEW NEXT-GEN INTERFACE */}
+            <TabsContent value="smart-sync" className="mt-6 sm:mt-8">
+              <IntelligentSyncDashboard />
             </TabsContent>
 
             {/* Global AI Tab */}
