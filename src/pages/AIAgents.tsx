@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bot, Brain, TrendingUp, Zap, Calendar, Target, Play, Settings, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ComprehensiveAITester } from '@/components/ComprehensiveAITester';
 
 const agents = [
   {
@@ -77,6 +78,9 @@ export default function AIAgents() {
 
   return (
     <div className="space-y-6">
+      {/* Comprehensive AI Agent Tester - Priority Component */}
+      <ComprehensiveAITester />
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">AI Agents</h1>

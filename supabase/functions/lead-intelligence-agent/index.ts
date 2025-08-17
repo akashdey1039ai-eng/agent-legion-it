@@ -88,7 +88,7 @@ Respond only with valid JSON.`;
           { role: 'user', content: prompt }
         ],
         max_tokens: 800,
-        temperature: 0.7,
+        temperature: 0.7
       }),
     });
 
