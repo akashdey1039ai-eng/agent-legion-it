@@ -134,30 +134,21 @@ export function UniversalCRMTester() {
         .order('created_at', { ascending: false })
         .limit(1);
 
-      // Get actual record counts from database
-      const { data: counts } = await supabase.rpc('get_record_counts');
-      
-      // Fallback to direct queries if RPC fails
-      let salesforceRecordCount = 0;
-      let hubspotRecordCount = 0;
-      
-      if (!counts) {
-        const { count: sfContacts } = await supabase
-          .from('contacts')
-          .select('*', { count: 'exact', head: true })
-          .not('salesforce_id', 'is', null);
-          
-        const { count: hsContacts } = await supabase
-          .from('contacts')
-          .select('*', { count: 'exact', head: true })
-          .not('hubspot_id', 'is', null);
-          
-        salesforceRecordCount = sfContacts || 0;
-        hubspotRecordCount = hsContacts || 0;
-      } else {
-        salesforceRecordCount = counts.salesforce_contacts || 0;
-        hubspotRecordCount = counts.hubspot_contacts || 0;
-      }
+      // Direct count queries for accurate results
+      const { count: sfContacts } = await supabase
+        .from('contacts')
+        .select('*', { count: 'exact', head: true })
+        .not('salesforce_id', 'is', null);
+        
+      const { count: hsContacts } = await supabase
+        .from('contacts')
+        .select('*', { count: 'exact', head: true })
+        .not('hubspot_id', 'is', null);
+        
+      const salesforceRecordCount = sfContacts || 0;
+      const hubspotRecordCount = hsContacts || 0;
+
+      console.log('Record counts:', { salesforceRecordCount, hubspotRecordCount });
 
       setCrmConnections([
         {
