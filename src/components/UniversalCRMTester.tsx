@@ -115,40 +115,51 @@ export function UniversalCRMTester() {
   }, [testResults]);
 
   const checkCRMConnections = async () => {
+    console.log('checkCRMConnections called, user:', user?.id);
     if (!user) return;
 
     try {
       // Check Salesforce connection
-      const { data: salesforceTokens } = await supabase
+      const { data: salesforceTokens, error: sfError } = await supabase
         .from('salesforce_tokens')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1);
 
+      console.log('Salesforce tokens:', salesforceTokens, 'Error:', sfError);
+
       // Check HubSpot connection
-      const { data: hubspotTokens } = await supabase
+      const { data: hubspotTokens, error: hsError } = await supabase
         .from('hubspot_tokens')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1);
 
+      console.log('HubSpot tokens:', hubspotTokens, 'Error:', hsError);
+
       // Count synced records for each platform
-      const { count: salesforceContacts } = await supabase
+      const { count: salesforceContacts, error: sfCountError } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true })
         .not('salesforce_id', 'is', null);
 
-      const { count: hubspotContacts } = await supabase
+      console.log('Salesforce count:', salesforceContacts, 'Error:', sfCountError);
+
+      const { count: hubspotContacts, error: hsCountError } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true })
         .not('hubspot_id', 'is', null);
 
+      console.log('HubSpot count:', hubspotContacts, 'Error:', hsCountError);
+
       const salesforceRecordCount = salesforceContacts || 0;
       const hubspotRecordCount = hubspotContacts || 0;
 
-      setCrmConnections([
+      console.log('Final counts:', { salesforceRecordCount, hubspotRecordCount });
+
+      const newConnections: CRMConnection[] = [
         {
           platform: 'salesforce',
           status: salesforceTokens && salesforceTokens.length > 0 ? 'connected' : 'disconnected',
@@ -161,7 +172,10 @@ export function UniversalCRMTester() {
           lastSync: hubspotTokens?.[0]?.updated_at || 'Never',
           recordCount: hubspotRecordCount
         }
-      ]);
+      ];
+
+      console.log('Setting new connections:', newConnections);
+      setCrmConnections(newConnections);
     } catch (error) {
       console.error('Error checking CRM connections:', error);
     }
@@ -364,6 +378,9 @@ export function UniversalCRMTester() {
                   Run All Tests
                 </>
               )}
+            </Button>
+            <Button variant="outline" onClick={checkCRMConnections}>
+              Refresh Counts
             </Button>
             <Button variant="outline" onClick={() => {
               setTestResults([]);
