@@ -252,9 +252,15 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ Error in Salesforce AI agent tester:', error);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error name:', error.name);
+    console.error('❌ Error message:', error.message);
+    
     return new Response(JSON.stringify({
-      error: error.message,
-      details: error.stack
+      error: error.message || 'Unknown error occurred',
+      details: error.stack || 'No stack trace available',
+      errorType: error.name || 'Unknown error type',
+      timestamp: new Date().toISOString()
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
