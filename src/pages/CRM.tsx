@@ -38,7 +38,7 @@ import DealForm from '@/components/DealForm';
 import TaskForm from '@/components/TaskForm';
 import CompanyForm from '@/components/CompanyForm';
 import Analytics from '@/components/Analytics';
-import { SalesforceIntegration } from '@/components/SalesforceIntegration';
+import { SalesforceConnectionManager } from '@/components/SalesforceConnectionManager';
 
 interface DashboardStats {
   totalLeads: number;
@@ -917,7 +917,7 @@ const CRM = () => {
                 <p className="text-muted-foreground">Connect external platforms and services</p>
               </div>
             </div>
-            <SalesforceIntegration onSyncComplete={handleFormSave} />
+            <SalesforceConnectionManager />
           </TabsContent>
         </Tabs>
       </div>

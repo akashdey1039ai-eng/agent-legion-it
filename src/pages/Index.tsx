@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CrmDashboard } from "@/components/CrmDashboard";
-import { SalesforceIntegration } from "@/components/SalesforceIntegration";
+import { SalesforceConnectionManager } from "@/components/SalesforceConnectionManager";
 import HubSpotIntegration from "@/components/HubSpotIntegration";
 import { AgentConfiguration } from "@/components/AgentConfiguration";
 import LeadIntelligenceAgent from "@/components/LeadIntelligenceAgent";
@@ -356,7 +356,7 @@ const Index = () => {
                 </div>
                 
                 {/* Integration content */}
-                {selectedPlatform === 'salesforce' && <SalesforceIntegration />}
+                {selectedPlatform === 'salesforce' && <SalesforceConnectionManager />}
                 {selectedPlatform === 'hubspot' && <HubSpotIntegration />}
                 {selectedPlatform === 'native' && (
                   <div className="text-center py-8 sm:py-12">
