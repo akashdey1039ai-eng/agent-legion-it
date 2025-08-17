@@ -134,21 +134,19 @@ export function UniversalCRMTester() {
         .order('created_at', { ascending: false })
         .limit(1);
 
-      // Direct count queries for accurate results
-      const { count: sfContacts } = await supabase
+      // Count synced records for each platform
+      const { count: salesforceContacts } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true })
         .not('salesforce_id', 'is', null);
-        
-      const { count: hsContacts } = await supabase
+
+      const { count: hubspotContacts } = await supabase
         .from('contacts')
         .select('*', { count: 'exact', head: true })
         .not('hubspot_id', 'is', null);
-        
-      const salesforceRecordCount = sfContacts || 0;
-      const hubspotRecordCount = hsContacts || 0;
 
-      console.log('Record counts:', { salesforceRecordCount, hubspotRecordCount });
+      const salesforceRecordCount = salesforceContacts || 0;
+      const hubspotRecordCount = hubspotContacts || 0;
 
       setCrmConnections([
         {
