@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
         refresh_token: tokenData.refresh_token,
         instance_url: tokenData.instance_url,
         token_type: tokenData.token_type,
-        expires_at: new Date(Date.now() + 3600000), // 1 hour from now
+        expires_at: new Date(Date.now() + 86400000), // 24 hours from now
         updated_at: new Date().toISOString(),
       })
 
