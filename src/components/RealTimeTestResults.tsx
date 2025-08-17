@@ -34,18 +34,10 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [currentTest, setCurrentTest] = useState<string | null>(null);
   const [overallProgress, setOverallProgress] = useState(0);
-  const [autoRunCompleted, setAutoRunCompleted] = useState(false);
+  // Removed autoRunCompleted state
   const { toast } = useToast();
 
-  // Auto-run tests on mount to verify fixes
-  useEffect(() => {
-    if (!autoRunCompleted) {
-      setTimeout(() => {
-        runAllTests();
-        setAutoRunCompleted(true);
-      }, 1000);
-    }
-  }, [autoRunCompleted]);
+  // Removed auto-run functionality - tests must be manually triggered
 
   const runAllTests = async () => {
     setIsRunning(true);
