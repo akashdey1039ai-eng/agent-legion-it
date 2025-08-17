@@ -74,8 +74,7 @@ Respond in JSON format:
             { role: 'system', content: 'You are an expert in customer sentiment analysis. Analyze contact data and provide actionable insights.' },
             { role: 'user', content: aiPrompt }
           ],
-          temperature: 0.3,
-          max_tokens: 500
+          max_completion_tokens: 500
         }),
       });
 

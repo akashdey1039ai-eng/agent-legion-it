@@ -59,8 +59,7 @@ async function executeContactAnalysisAgent(supabaseClient: any, agentType: strin
             { role: 'system', content: `You are an expert CRM AI that provides actionable insights for ${agentType}.` },
             { role: 'user', content: aiPrompt }
           ],
-          temperature: 0.3,
-          max_tokens: 500
+          max_completion_tokens: 500
         }),
       })
 
@@ -206,8 +205,7 @@ async function executeDealAnalysisAgent(supabaseClient: any, agentType: string, 
             { role: 'system', content: `You are an expert sales AI that provides actionable insights for ${agentType}.` },
             { role: 'user', content: aiPrompt }
           ],
-          temperature: 0.3,
-          max_tokens: 500
+          max_completion_tokens: 500
         }),
       })
 

@@ -318,8 +318,7 @@ Respond in JSON format:
             { role: 'system', content: 'You are an expert sales intelligence AI that provides actionable insights for lead qualification.' },
             { role: 'user', content: aiPrompt }
           ],
-          temperature: 0.3,
-          max_tokens: 500
+          max_completion_tokens: 500
         }),
       })
 
@@ -576,8 +575,7 @@ Respond in JSON format:
             { role: 'system', content: 'You are an expert sales pipeline analyst that identifies risks and recommends actions.' },
             { role: 'user', content: aiPrompt }
           ],
-          temperature: 0.3,
-          max_tokens: 500
+          max_completion_tokens: 500
         }),
       })
 
