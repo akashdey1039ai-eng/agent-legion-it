@@ -97,7 +97,9 @@ export const RealTimeTestDashboard = () => {
     recordsAnalyzed: 0,
     autonomousDecisions: 0
   });
+  const [pastRuns, setPastRuns] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [testRunId, setTestRunId] = useState<string | null>(null);
   const [testParameters, setTestParameters] = useState({
     batchSize: 1000,
@@ -108,6 +110,73 @@ export const RealTimeTestDashboard = () => {
   });
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useAuth();
+
+  // Load historical data on component mount
+  useEffect(() => {
+    const loadHistoricalData = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Load past test runs
+        const { data: runs } = await supabase
+          .from('ai_test_runs')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (runs) {
+          setPastRuns(runs);
+        }
+
+        // Load recent progress data for metrics
+        const { data: recentProgress } = await supabase
+          .from('ai_test_progress')
+          .select('*')
+          .gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()) // Last 10 minutes
+          .order('created_at', { ascending: false });
+
+        if (recentProgress && recentProgress.length > 0) {
+          // Calculate metrics from recent data
+          const totalRecords = recentProgress.reduce((sum, p) => sum + (p.records_processed || 0), 0);
+          const avgConfidence = recentProgress.reduce((sum, p) => sum + (p.confidence || 0), 0) / recentProgress.length;
+          
+          setAgentMetrics(prev => ({
+            ...prev,
+            recordsAnalyzed: totalRecords,
+            avgConfidence: avgConfidence,
+            totalActions: recentProgress.length
+          }));
+
+          // Convert to batches format for display
+          const historicalBatches = recentProgress.slice(0, 20).map(p => ({
+            batchId: p.id,
+            agentType: p.agent_type,
+            platform: p.platform,
+            status: p.status as 'completed' | 'processing' | 'failed',
+            recordsProcessed: p.records_processed || 0,
+            confidence: (p.confidence || 0) / 100,
+            apiCalls: Math.floor((p.records_processed || 0) / 10),
+            startTime: new Date(p.created_at).getTime() - 5000,
+            endTime: new Date(p.updated_at).getTime(),
+          }));
+          setBatches(historicalBatches);
+        }
+
+        toast.success(`Loaded ${runs?.length || 0} past runs. Recent data shows ${recentProgress?.reduce((sum, p) => sum + (p.records_processed || 0), 0).toLocaleString()} records processed in last 10 minutes.`);
+      } catch (error) {
+        console.error('Failed to load historical data:', error);
+        toast.error('Failed to load historical data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadHistoricalData();
+  }, [user]);
 
   // Real-time data simulation with agent actions
   useEffect(() => {
@@ -645,6 +714,87 @@ export const RealTimeTestDashboard = () => {
             </CardContent>
           </Card>
         </>
+      )}
+
+      {/* Past Test Runs - Always Visible */}
+      {!isLoading && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Past Test Runs
+            </CardTitle>
+            <CardDescription>
+              Historical test runs and their results
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {pastRuns.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No past test runs found. Start a new test to see results here.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pastRuns.map(run => (
+                  <div key={run.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        {run.status === 'completed' ? (
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        ) : run.status === 'failed' ? (
+                          <XCircle className="w-5 h-5 text-red-500" />
+                        ) : (
+                          <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                        )}
+                        <Badge variant={run.status === 'completed' ? 'default' : run.status === 'failed' ? 'destructive' : 'secondary'}>
+                          {run.status}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {run.total_records?.toLocaleString() || 'N/A'} records targeted
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          Started: {new Date(run.started_at).toLocaleString()}
+                          {run.completed_at && ` • Completed: ${new Date(run.completed_at).toLocaleString()}`}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                      <div className="text-center">
+                        <div className="font-medium">{run.total_agent_types}</div>
+                        <div className="text-xs">Agents</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-medium">{run.total_platforms}</div>
+                        <div className="text-xs">Platforms</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-medium">{run.batch_size}</div>
+                        <div className="text-xs">Batch Size</div>
+                      </div>
+                      {run.completion_time && (
+                        <div className="text-center">
+                          <div className="font-medium">{Math.round(run.completion_time / 1000)}s</div>
+                          <div className="text-xs">Duration</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {isLoading && (
+        <Card>
+          <CardContent className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin mr-2" />
+            Loading historical data...
+          </CardContent>
+        </Card>
       )}
     </div>
   );
