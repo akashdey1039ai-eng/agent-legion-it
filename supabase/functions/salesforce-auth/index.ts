@@ -134,10 +134,14 @@ Deno.serve(async (req) => {
     console.log('Salesforce authentication completed successfully')
 
     // Redirect back to the app with success parameter
+    const referer = req.headers.get('referer') || req.headers.get('origin') || 'https://39ed96a2-ffc6-48c5-9851-b801787f8221.lovableproject.com/';
+    const redirectUrl = new URL(referer);
+    redirectUrl.searchParams.set('salesforce_success', 'true');
+    
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': `https://39ed96a2-ffc6-48c5-9851-b801787f8221.lovableproject.com/?salesforce_success=true`,
+        'Location': redirectUrl.toString(),
       }
     })
 
