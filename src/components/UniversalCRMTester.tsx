@@ -134,24 +134,30 @@ export function UniversalCRMTester() {
         .order('created_at', { ascending: false })
         .limit(1);
 
-      // Count synced records for each platform
-      const { count: salesforceContacts } = await supabase
-        .from('contacts')
-        .select('*', { count: 'exact', head: true })
-        .not('salesforce_id', 'is', null);
-
-      const { count: salesforceCompanies } = await supabase
-        .from('companies')
-        .select('*', { count: 'exact', head: true })
-        .not('salesforce_id', 'is', null);
-
-      const { count: hubspotContacts } = await supabase
-        .from('contacts')
-        .select('*', { count: 'exact', head: true })
-        .not('hubspot_id', 'is', null);
-
-      const salesforceRecordCount = (salesforceContacts || 0) + (salesforceCompanies || 0);
-      const hubspotRecordCount = (hubspotContacts || 0);
+      // Get actual record counts from database
+      const { data: counts } = await supabase.rpc('get_record_counts');
+      
+      // Fallback to direct queries if RPC fails
+      let salesforceRecordCount = 0;
+      let hubspotRecordCount = 0;
+      
+      if (!counts) {
+        const { count: sfContacts } = await supabase
+          .from('contacts')
+          .select('*', { count: 'exact', head: true })
+          .not('salesforce_id', 'is', null);
+          
+        const { count: hsContacts } = await supabase
+          .from('contacts')
+          .select('*', { count: 'exact', head: true })
+          .not('hubspot_id', 'is', null);
+          
+        salesforceRecordCount = sfContacts || 0;
+        hubspotRecordCount = hsContacts || 0;
+      } else {
+        salesforceRecordCount = counts.salesforce_contacts || 0;
+        hubspotRecordCount = counts.hubspot_contacts || 0;
+      }
 
       setCrmConnections([
         {
