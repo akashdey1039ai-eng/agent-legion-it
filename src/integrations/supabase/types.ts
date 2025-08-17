@@ -2002,6 +2002,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      validate_oauth_state: {
+        Args: { p_code_verifier?: string; p_state: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "manager" | "sales_rep" | "viewer"
