@@ -140,22 +140,22 @@ export function UniversalCRMTester() {
       console.log('HubSpot tokens:', hubspotTokens, 'Error:', hsError);
 
       // Count synced records for each platform
-      const { count: salesforceContacts, error: sfCountError } = await supabase
+      const { data: salesforceContactsData, error: sfCountError } = await supabase
         .from('contacts')
-        .select('*', { count: 'exact', head: true })
+        .select('id')
         .not('salesforce_id', 'is', null);
 
-      console.log('Salesforce count:', salesforceContacts, 'Error:', sfCountError);
+      console.log('Salesforce contacts data:', salesforceContactsData, 'Error:', sfCountError);
 
-      const { count: hubspotContacts, error: hsCountError } = await supabase
+      const { data: hubspotContactsData, error: hsCountError } = await supabase
         .from('contacts')
-        .select('*', { count: 'exact', head: true })
+        .select('id')
         .not('hubspot_id', 'is', null);
 
-      console.log('HubSpot count:', hubspotContacts, 'Error:', hsCountError);
+      console.log('HubSpot contacts data:', hubspotContactsData, 'Error:', hsCountError);
 
-      const salesforceRecordCount = salesforceContacts || 0;
-      const hubspotRecordCount = hubspotContacts || 0;
+      const salesforceRecordCount = salesforceContactsData?.length || 0;
+      const hubspotRecordCount = hubspotContactsData?.length || 0;
 
       console.log('Final counts:', { salesforceRecordCount, hubspotRecordCount });
 
@@ -333,15 +333,15 @@ export function UniversalCRMTester() {
               <Card key={connection.platform}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold capitalize">{connection.platform}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Last sync: {connection.lastSync !== 'Never' 
-                          ? new Date(connection.lastSync).toLocaleDateString() 
-                          : 'Never'
-                        }
-                      </p>
-                    </div>
+                     <div>
+                       <h4 className="font-semibold capitalize">{connection.platform}</h4>
+                       <p className="text-sm text-muted-foreground">
+                         {connection.recordCount} records • Last sync: {connection.lastSync !== 'Never' 
+                           ? new Date(connection.lastSync).toLocaleDateString() 
+                           : 'Never'
+                         }
+                       </p>
+                     </div>
                     {getStatusBadge(connection.status)}
                   </div>
                 </CardContent>
