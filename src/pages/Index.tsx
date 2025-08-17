@@ -25,8 +25,10 @@ import { CustomerIntelligenceTestSuite } from '@/components/CustomerIntelligence
 import { SalesforceDebugger } from '@/components/SalesforceDebugger';
 import { AISecurityMonitor } from '@/components/AISecurityMonitor';
 import heroCommand from "@/assets/hero-command.jpg";
-import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings, Smartphone, Monitor, BookOpen } from "lucide-react";
+import { Brain, Database, Users, Target, TrendingUp, Activity, Bot, Zap, Shield, BarChart3, PieChart, Sparkles, Settings, Smartphone, Monitor, BookOpen, CheckCircle, XCircle, Unplug } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 // Clear previous test results on page load
 const clearTestResults = () => {
@@ -40,11 +42,71 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("enterprise");
   const [showAgentConfig, setShowAgentConfig] = useState<{platform: 'salesforce' | 'hubspot'; agentType: string} | null>(null);
   const [showAgentSelector, setShowAgentSelector] = useState<string | null>(null);
+  const [salesforceConnected, setSalesforceConnected] = useState(false);
+  const [hubspotConnected, setHubspotConnected] = useState(false);
+
+  // Check connection status
+  const checkConnectionStatus = async () => {
+    if (!user) return;
+    
+    try {
+      // Check Salesforce connection
+      const { data: salesforceTokens } = await supabase
+        .from('salesforce_tokens')
+        .select('*')
+        .eq('user_id', user.id)
+        .gt('expires_at', new Date().toISOString());
+      
+      setSalesforceConnected(salesforceTokens && salesforceTokens.length > 0);
+      
+      // Check HubSpot connection
+      const { data: hubspotTokens } = await supabase
+        .from('hubspot_tokens')
+        .select('*')
+        .eq('user_id', user.id)
+        .gt('expires_at', new Date().toISOString());
+      
+      setHubspotConnected(hubspotTokens && hubspotTokens.length > 0);
+    } catch (error) {
+      console.error('Error checking connection status:', error);
+    }
+  };
+
+  const handleDisconnect = async (platform: 'salesforce' | 'hubspot') => {
+    try {
+      const table = platform === 'salesforce' ? 'salesforce_tokens' : 'hubspot_tokens';
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      if (platform === 'salesforce') {
+        setSalesforceConnected(false);
+      } else {
+        setHubspotConnected(false);
+      }
+
+      toast({
+        title: "Disconnected",
+        description: `${platform === 'salesforce' ? 'Salesforce' : 'HubSpot'} connection has been removed.`,
+      });
+    } catch (error) {
+      console.error(`${platform} disconnect failed:`, error);
+      toast({
+        title: "Disconnect Failed",
+        description: `Failed to disconnect from ${platform === 'salesforce' ? 'Salesforce' : 'HubSpot'}.`,
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     // Clear previous test results on page load
@@ -52,6 +114,11 @@ const Index = () => {
     
     if (!loading && !user) {
       navigate('/auth');
+    }
+
+    // Check connection status when component mounts or user changes
+    if (user) {
+      checkConnectionStatus();
     }
 
     // Handle navigation state for agent management
@@ -302,32 +369,119 @@ const Index = () => {
                 </div>
                 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                  {/* Platform selection cards with mobile optimization */}
-                  <button
-                    onClick={() => setSelectedPlatform('salesforce')}
-                    className={`bg-card border rounded-lg p-3 sm:p-4 text-center transition-all hover:shadow-lg ${
-                      selectedPlatform === 'salesforce' 
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
-                        : 'border-border/50 hover:border-border'
-                    }`}
-                  >
+                  {/* Salesforce Platform Card */}
+                  <div className={`bg-card border rounded-lg p-3 sm:p-4 text-center transition-all ${
+                    selectedPlatform === 'salesforce' 
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                      : 'border-border/50'
+                  }`}>
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-blue-600 rounded-lg mx-auto mb-2 sm:mb-3 flex items-center justify-center text-white font-bold text-xs sm:text-base">SF</div>
                     <h3 className="font-medium mb-1 text-xs sm:text-sm">Salesforce</h3>
                     <p className="text-xs text-muted-foreground hidden sm:block">Enterprise CRM</p>
-                  </button>
+                    
+                    <div className="mt-3 space-y-2">
+                      {salesforceConnected ? (
+                        <div className="flex items-center justify-center text-xs text-green-600 mb-2">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Connected
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center text-xs text-muted-foreground mb-2">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Disconnected
+                        </div>
+                      )}
+                      
+                      <div className="flex flex-col gap-1">
+                        {salesforceConnected ? (
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs h-6 px-2"
+                              onClick={() => setSelectedPlatform('salesforce')}
+                            >
+                              Manage
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs h-6 px-2 text-red-600 hover:text-red-700"
+                              onClick={() => handleDisconnect('salesforce')}
+                            >
+                              <Unplug className="h-3 w-3 mr-1" />
+                              Disconnect
+                            </Button>
+                          </>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            className="text-xs h-6 px-2"
+                            onClick={() => setSelectedPlatform('salesforce')}
+                          >
+                            Connect
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                   
-                  <button
-                    onClick={() => setSelectedPlatform('hubspot')}
-                    className={`bg-card border rounded-lg p-3 sm:p-4 text-center transition-all hover:shadow-lg ${
-                      selectedPlatform === 'hubspot' 
-                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-950' 
-                        : 'border-border/50 hover:border-border'
-                    }`}
-                  >
+                  {/* HubSpot Platform Card */}
+                  <div className={`bg-card border rounded-lg p-3 sm:p-4 text-center transition-all ${
+                    selectedPlatform === 'hubspot' 
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-950' 
+                      : 'border-border/50'
+                  }`}>
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-orange-500 rounded-lg mx-auto mb-2 sm:mb-3 flex items-center justify-center text-white font-bold text-xs sm:text-base">HS</div>
                     <h3 className="font-medium mb-1 text-xs sm:text-sm">HubSpot</h3>
                     <p className="text-xs text-muted-foreground hidden sm:block">Inbound Marketing</p>
-                  </button>
+                    
+                    <div className="mt-3 space-y-2">
+                      {hubspotConnected ? (
+                        <div className="flex items-center justify-center text-xs text-green-600 mb-2">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Connected
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center text-xs text-muted-foreground mb-2">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Disconnected
+                        </div>
+                      )}
+                      
+                      <div className="flex flex-col gap-1">
+                        {hubspotConnected ? (
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs h-6 px-2"
+                              onClick={() => setSelectedPlatform('hubspot')}
+                            >
+                              Manage
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs h-6 px-2 text-red-600 hover:text-red-700"
+                              onClick={() => handleDisconnect('hubspot')}
+                            >
+                              <Unplug className="h-3 w-3 mr-1" />
+                              Disconnect
+                            </Button>
+                          </>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            className="text-xs h-6 px-2"
+                            onClick={() => setSelectedPlatform('hubspot')}
+                          >
+                            Connect
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                   
                   <button
                     onClick={() => setSelectedPlatform('pipedrive')}
@@ -356,8 +510,16 @@ const Index = () => {
                 </div>
                 
                 {/* Integration content */}
-                {selectedPlatform === 'salesforce' && <SalesforceConnectionManager />}
-                {selectedPlatform === 'hubspot' && <HubSpotIntegration />}
+                {selectedPlatform === 'salesforce' && (
+                  <div className="space-y-4">
+                    <SalesforceConnectionManager />
+                  </div>
+                )}
+                {selectedPlatform === 'hubspot' && (
+                  <div className="space-y-4">
+                    <HubSpotIntegration />
+                  </div>
+                )}
                 {selectedPlatform === 'native' && (
                   <div className="text-center py-8 sm:py-12">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center">
