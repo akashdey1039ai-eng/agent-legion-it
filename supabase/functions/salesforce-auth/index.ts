@@ -133,33 +133,12 @@ Deno.serve(async (req) => {
 
     console.log('Salesforce authentication completed successfully')
 
-    // Return an HTML response that closes the popup and notifies the parent window
-    const htmlResponse = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Salesforce Authentication</title>
-        </head>
-        <body>
-          <script>
-            if (window.opener) {
-              window.opener.postMessage({
-                type: 'SALESFORCE_AUTH_SUCCESS',
-                success: true,
-                message: 'Salesforce authentication successful'
-              }, '*');
-              window.close();
-            } else {
-              document.body.innerHTML = '<h2>✅ Authentication Successful!</h2><p>You can close this window.</p>';
-            }
-          </script>
-        </body>
-      </html>
-    `
-
-    return new Response(htmlResponse, {
-      headers: { ...corsHeaders, 'Content-Type': 'text/html' },
-      status: 200,
+    // Redirect back to the app with success parameter
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': `https://39ed96a2-ffc6-48c5-9851-b801787f8221.lovableproject.com/?salesforce_success=true`,
+      }
     })
 
   } catch (error) {
