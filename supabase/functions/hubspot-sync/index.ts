@@ -336,15 +336,19 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
 
   console.log(`Fetched ${records.length} ${objectType} from HubSpot`)
 
-  // Transform and upsert records
-  const transformedRecords = records.map((record: HubSpotRecord) => {
-    const transformed: any = {
-      hubspot_id: record.id, // Store HubSpot ID for tracking
-      salesforce_id: record.id, // Also store in salesforce_id for consistency
-      last_sync_at: new Date().toISOString(),
-      owner_id: userId, // Assign to the current user
-      assigned_user_id: userId // For companies and deals
-    }
+    // Transform and upsert records
+    const transformedRecords = records.map((record: HubSpotRecord) => {
+      const transformed: any = {
+        hubspot_id: record.id, // Store HubSpot ID for tracking
+        salesforce_id: record.id, // Also store in salesforce_id for consistency
+        last_sync_at: new Date().toISOString(),
+        owner_id: userId // Assign to the current user
+      }
+
+      // Add assigned_user_id only for companies and deals, not contacts
+      if (objectType === 'companies' || objectType === 'deals') {
+        transformed.assigned_user_id = userId
+      }
 
     // Apply field mappings
     for (const [hubspotField, localField] of Object.entries(mapping.fieldMapping)) {
