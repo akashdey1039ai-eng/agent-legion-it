@@ -249,9 +249,12 @@ export function SalesforceIntegration({ onSyncComplete }: SalesforceIntegrationP
     { key: 'opportunity', label: 'Opportunities', description: 'Sync Salesforce Opportunities' },
   ];
 
-  // Check connection status on component mount
+  // Check connection status on component mount and when user changes
   useEffect(() => {
-    checkConnection();
+    if (user) {
+      console.log('🔄 Auto-checking connection for user:', user.id);
+      checkConnection();
+    }
   }, [user]);
 
   return (
