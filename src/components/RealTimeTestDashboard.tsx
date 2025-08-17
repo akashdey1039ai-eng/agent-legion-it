@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 interface BatchProgress {
   batchId: string;
@@ -110,6 +110,7 @@ export const RealTimeTestDashboard = () => {
   });
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   // Load historical data on component mount
   useEffect(() => {
@@ -166,10 +167,17 @@ export const RealTimeTestDashboard = () => {
           setBatches(historicalBatches);
         }
 
-        toast.success(`Loaded ${runs?.length || 0} past runs. Recent data shows ${recentProgress?.reduce((sum, p) => sum + (p.records_processed || 0), 0).toLocaleString()} records processed in last 10 minutes.`);
+        toast({
+          title: "Success",
+          description: `Loaded ${runs?.length || 0} past runs. Recent data shows ${recentProgress?.reduce((sum, p) => sum + (p.records_processed || 0), 0).toLocaleString()} records processed in last 10 minutes.`,
+        });
       } catch (error) {
         console.error('Failed to load historical data:', error);
-        toast.error('Failed to load historical data');
+        toast({
+          title: "Error",
+          description: "Failed to load historical data",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -298,12 +306,19 @@ export const RealTimeTestDashboard = () => {
 
   const startRealTest = async () => {
     if (!user) {
-      toast.error("Please log in to start the test");
+      toast({
+        title: "Error",
+        description: "Please log in to start the test",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
-      toast.info("Starting real AI agent test run...");
+      toast({
+        title: "Starting Test",
+        description: "Starting real AI agent test run...",
+      });
       setIsRunning(true);
       setBatches([]);
       setApiCalls([]);
@@ -321,13 +336,20 @@ export const RealTimeTestDashboard = () => {
 
       if (error) {
         console.error('Test run error:', error);
-        toast.error('Failed to start test run');
+        toast({
+          title: "Error",
+          description: "Failed to start test run",
+          variant: "destructive",
+        });
         setIsRunning(false);
         return;
       }
 
       setTestRunId(data?.testRunId);
-      toast.success('Real AI test started successfully!');
+      toast({
+        title: "Success",
+        description: "Real AI test started successfully!",
+      });
       
       // Start polling for real progress
       if (data?.testRunId) {
@@ -335,7 +357,11 @@ export const RealTimeTestDashboard = () => {
       }
     } catch (error) {
       console.error('Error starting test:', error);
-      toast.error('Failed to start real test');
+      toast({
+        title: "Error",
+        description: "Failed to start real test",
+        variant: "destructive",
+      });
       setIsRunning(false);
     }
   };
@@ -376,7 +402,10 @@ export const RealTimeTestDashboard = () => {
         clearInterval(intervalRef.current);
       }
       
-      toast.info("Stopping all running tests...");
+      toast({
+        title: "Stopping Tests",
+        description: "Stopping all running tests...",
+      });
 
       const { data, error } = await supabase.functions.invoke('stop-ai-tests', {
         body: { userId: user?.id }
@@ -384,22 +413,37 @@ export const RealTimeTestDashboard = () => {
 
       if (error) {
         console.error('Stop test error:', error);
-        toast.error('Failed to stop tests: ' + error.message);
+        toast({
+          title: "Error",
+          description: "Failed to stop tests: " + error.message,
+          variant: "destructive",
+        });
         return;
       }
 
       if (data?.success) {
-        toast.success(data.message || 'Tests stopped successfully');
+        toast({
+          title: "Success",
+          description: data.message || 'Tests stopped successfully',
+        });
         // Reload historical data to show updated status
         setTimeout(() => {
           window.location.reload();
         }, 1500);
       } else {
-        toast.error(data?.error || 'Failed to stop tests');
+        toast({
+          title: "Error",
+          description: data?.error || 'Failed to stop tests',
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Stop test error:', error);
-      toast.error('Failed to stop tests');
+      toast({
+        title: "Error",
+        description: "Failed to stop tests",
+        variant: "destructive",
+      });
     }
   };
 
