@@ -830,10 +830,17 @@ export const RealTimeTestDashboard = () => {
                           <CheckCircle className="w-5 h-5 text-green-500" />
                         ) : run.status === 'failed' ? (
                           <XCircle className="w-5 h-5 text-red-500" />
+                        ) : run.status === 'cancelled' ? (
+                          <Square className="w-5 h-5 text-orange-500" />
                         ) : (
                           <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
                         )}
-                        <Badge variant={run.status === 'completed' ? 'default' : run.status === 'failed' ? 'destructive' : 'secondary'}>
+                        <Badge variant={
+                          run.status === 'completed' ? 'default' : 
+                          run.status === 'failed' ? 'destructive' : 
+                          run.status === 'cancelled' ? 'outline' :
+                          'secondary'
+                        }>
                           {run.status}
                         </Badge>
                       </div>
