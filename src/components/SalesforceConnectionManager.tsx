@@ -104,21 +104,67 @@ export function SalesforceConnectionManager() {
       return;
     }
 
+    // Prevent multiple concurrent connections
+    if (isConnecting) {
+      console.log('Connection already in progress, ignoring...');
+      return;
+    }
+
     setIsConnecting(true);
-    console.log('Starting Salesforce connection process...');
+    console.log('Starting Salesforce connection process for user:', user.id);
     
     try {
       const { data, error } = await supabase.functions.invoke('salesforce-auth-url', {
         body: { userId: user.id }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error getting auth URL:', error);
+        throw error;
+      }
 
       if (!data?.authUrl) {
         throw new Error('Failed to get Salesforce authorization URL');
       }
 
-      console.log('Opening Salesforce OAuth popup...');
+      console.log('Opening Salesforce OAuth popup with URL:', data.authUrl);
+      
+      let isAuthComplete = false;
+      let checkClosed: NodeJS.Timeout;
+      
+      // Cleanup function
+      const cleanup = () => {
+        isAuthComplete = true;
+        setIsConnecting(false);
+        clearTimeout(autoReset);
+        clearInterval(checkClosed);
+        window.removeEventListener('message', handleAuthMessage);
+      };
+
+      // Listen for messages from the popup
+      const handleAuthMessage = (event: MessageEvent) => {
+        console.log('Received message from popup:', event.data, 'from origin:', event.origin);
+        
+        // Only process messages from our Salesforce auth popup
+        if (event.data?.type === 'SALESFORCE_AUTH_SUCCESS' && !isAuthComplete) {
+          console.log('Processing successful auth message');
+          cleanup();
+          
+          // Check connection after a short delay
+          setTimeout(() => {
+            console.log('Checking connection after successful auth');
+            checkConnection();
+          }, 2000);
+          
+          toast({
+            title: "Authentication Successful",
+            description: "Checking connection status...",
+          });
+        }
+      };
+
+      // Clear any existing event listeners to prevent duplicates
+      window.removeEventListener('message', handleAuthMessage);
       
       // Open Salesforce OAuth in new window
       const popup = window.open(
@@ -133,47 +179,29 @@ export function SalesforceConnectionManager() {
 
       // Auto-reset after 5 minutes if still connecting
       const autoReset = setTimeout(() => {
-        console.log('Auto-resetting connection state after timeout');
-        setIsConnecting(false);
-        toast({
-          title: "Connection Timeout",
-          description: "Connection attempt timed out. Please try again.",
-          variant: "destructive",
-        });
+        if (!isAuthComplete) {
+          console.log('Auto-resetting connection state after timeout');
+          cleanup();
+          toast({
+            title: "Connection Timeout",
+            description: "Connection attempt timed out. Please try again.",
+            variant: "destructive",
+          });
+        }
       }, 300000); // 5 minutes
 
-      // Listen for messages from the popup
-      const handleMessage = (event: MessageEvent) => {
-        console.log('Received message from popup:', event.data);
-        if (event.data.type === 'SALESFORCE_AUTH_SUCCESS') {
-          clearTimeout(autoReset);
-          setIsConnecting(false);
-          
-          // Check connection after a short delay
-          setTimeout(() => {
-            checkConnection();
-          }, 2000);
-          
-          toast({
-            title: "Authentication Successful",
-            description: "Checking connection status...",
-          });
-          window.removeEventListener('message', handleMessage);
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
+      window.addEventListener('message', handleAuthMessage);
 
       // Check if popup was closed without success
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          console.log('Popup closed, resetting connection state');
-          clearInterval(checkClosed);
-          clearTimeout(autoReset);
-          window.removeEventListener('message', handleMessage);
-          setIsConnecting(false);
+      checkClosed = setInterval(() => {
+        if (popup?.closed && !isAuthComplete) {
+          console.log('Popup closed without success, cleaning up');
+          cleanup();
           // Check connection in case auth was successful but message was missed
-          setTimeout(checkConnection, 1000);
+          setTimeout(() => {
+            console.log('Checking connection after popup closed');
+            checkConnection();
+          }, 1000);
         }
       }, 1000);
 
