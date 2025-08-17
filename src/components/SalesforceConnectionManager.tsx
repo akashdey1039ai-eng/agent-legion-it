@@ -75,7 +75,7 @@ export function SalesforceConnectionManager() {
           });
         } else {
           setConnectionStatus('disconnected');
-          setDebugInfo('Token found but expired or invalid');
+          setDebugInfo(`Token found but expired at ${new Date(userToken.expires_at).toLocaleString()}. Please reconnect.`);
         }
       } else {
         setConnectionStatus('disconnected');
