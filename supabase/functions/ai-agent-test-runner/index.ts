@@ -111,9 +111,8 @@ serve(async (req) => {
 
     // Test Native AI agents  
     console.log('🔍 Testing Native AI agents...');
-    const nativeAgentTypes = ['customer-sentiment', 'churn-prediction', 'customer-segmentation'];
     
-    for (const agentType of nativeAgentTypes) {
+    for (const agentType of agentTypes) {
       try {
         testResults.summary.totalTests++;
         
