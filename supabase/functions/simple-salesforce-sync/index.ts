@@ -153,7 +153,10 @@ async function syncContacts(supabaseClient: any, tokenData: any, userId: string)
 
       const { error } = await supabaseClient
         .from('contacts')
-        .upsert(contactData, { onConflict: 'salesforce_id' })
+        .upsert(contactData, { 
+          onConflict: 'salesforce_id',
+          ignoreDuplicates: false 
+        })
 
       if (!error) {
         recordsUpdated++
