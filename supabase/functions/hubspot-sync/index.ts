@@ -23,10 +23,27 @@ Deno.serve(async (req) => {
 
   try {
     console.log('Processing sync request')
-    const { objectType, direction = 'from' } = await req.json()
-    console.log(`Sync request for objectType: ${objectType}, direction: ${direction}`)
     
-    if (!objectType) {
+    // Safely parse request body
+    let requestBody = {}
+    try {
+      const text = await req.text()
+      console.log('Raw request body:', text)
+      if (text) {
+        requestBody = JSON.parse(text)
+      }
+    } catch (err) {
+      console.error('Request body parsing error:', err)
+      // Use defaults if no body provided
+    }
+    
+    const { objectType = 'contacts', direction = 'from', dataType } = requestBody
+    // Support both objectType and dataType for compatibility
+    const actualObjectType = objectType || dataType || 'contacts'
+    
+    console.log(`Sync request for objectType: ${actualObjectType}, direction: ${direction}`)
+    
+    if (!actualObjectType) {
       console.error('Missing objectType parameter')
       return new Response(JSON.stringify({ error: 'Missing objectType parameter' }), {
         status: 400,
@@ -71,23 +88,32 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check if token is expired
+    // Check if token is expired and try to refresh if needed
+    let currentToken = tokenData
     if (new Date(tokenData.expires_at) <= new Date()) {
-      console.error('HubSpot token expired for user:', userId)
-      return new Response(JSON.stringify({ error: 'HubSpot token expired' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      console.log('HubSpot token expired, attempting refresh...')
+      try {
+        currentToken = await refreshHubSpotToken(supabase, tokenData, userId)
+        console.log('Token refreshed successfully')
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError)
+        return new Response(JSON.stringify({ 
+          error: 'HubSpot token expired and refresh failed. Please reconnect your HubSpot account.' 
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
     }
 
-    console.log(`Starting HubSpot ${objectType} sync for user: ${userId}`)
+    console.log(`Starting HubSpot ${actualObjectType} sync for user: ${userId}`)
 
     // Create sync log entry
     console.log('Creating sync log entry')
     const { data: logEntry, error: logError } = await supabase
       .from('hubspot_sync_log')
       .insert({
-        object_type: objectType,
+        object_type: actualObjectType,
         operation: 'sync',
         sync_direction: direction,
         status: 'pending'
@@ -105,7 +131,7 @@ Deno.serve(async (req) => {
 
     try {
       if (direction === 'from') {
-        await syncFromHubSpot(supabase, tokenData.access_token, objectType)
+        await syncFromHubSpot(supabase, currentToken.access_token, actualObjectType, userId)
       } else {
         throw new Error('Sync to HubSpot not yet implemented')
       }
@@ -119,17 +145,19 @@ Deno.serve(async (req) => {
         })
         .eq('id', logEntry.id)
 
-      console.log(`HubSpot ${objectType} sync completed successfully`)
+      console.log(`HubSpot ${actualObjectType} sync completed successfully`)
 
       return new Response(JSON.stringify({ 
         success: true,
-        message: `${objectType} sync completed successfully`
+        message: `${actualObjectType} sync completed successfully`,
+        recordsProcessed: 0,
+        recordsUpdated: 0
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
 
     } catch (syncError) {
-      console.error(`HubSpot ${objectType} sync failed:`, syncError)
+      console.error(`HubSpot ${actualObjectType} sync failed:`, syncError)
       
       // Update sync log to failed
       await supabase
@@ -161,7 +189,57 @@ Deno.serve(async (req) => {
   }
 })
 
-async function syncFromHubSpot(supabase: any, accessToken: string, objectType: string) {
+async function refreshHubSpotToken(supabase: any, tokenData: any, userId: string) {
+  console.log('Refreshing HubSpot token...')
+  
+  const hubspotClientId = Deno.env.get('HUBSPOT_CLIENT_ID')!
+  const hubspotClientSecret = Deno.env.get('HUBSPOT_CLIENT_SECRET')!
+  
+  const response = await fetch('https://api.hubapi.com/oauth/v1/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      client_id: hubspotClientId,
+      client_secret: hubspotClientSecret,
+      refresh_token: tokenData.refresh_token,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('Token refresh failed:', errorText)
+    throw new Error(`Token refresh failed: ${response.status} ${errorText}`)
+  }
+
+  const tokenResponse = await response.json()
+  
+  // Update token in database
+  const newExpiresAt = new Date(Date.now() + (tokenResponse.expires_in * 1000)).toISOString()
+  
+  const { data: updatedToken, error } = await supabase
+    .from('hubspot_tokens')
+    .update({
+      access_token: tokenResponse.access_token,
+      refresh_token: tokenResponse.refresh_token || tokenData.refresh_token,
+      expires_at: newExpiresAt,
+      updated_at: new Date().toISOString()
+    })
+    .eq('user_id', userId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Failed to update token in database:', error)
+    throw new Error('Failed to update refreshed token')
+  }
+
+  return updatedToken
+}
+
+async function syncFromHubSpot(supabase: any, accessToken: string, objectType: string, userId: string) {
   console.log(`Starting sync from HubSpot for ${objectType}`)
   
   const objectMappings = {
@@ -261,8 +339,11 @@ async function syncFromHubSpot(supabase: any, accessToken: string, objectType: s
   // Transform and upsert records
   const transformedRecords = records.map((record: HubSpotRecord) => {
     const transformed: any = {
-      salesforce_id: record.id, // Store HubSpot ID in salesforce_id field for consistency
-      last_sync_at: new Date().toISOString()
+      hubspot_id: record.id, // Store HubSpot ID for tracking
+      salesforce_id: record.id, // Also store in salesforce_id for consistency
+      last_sync_at: new Date().toISOString(),
+      owner_id: userId, // Assign to the current user
+      assigned_user_id: userId // For companies and deals
     }
 
     // Apply field mappings
