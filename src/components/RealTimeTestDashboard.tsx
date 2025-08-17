@@ -446,7 +446,7 @@ export const RealTimeTestDashboard = () => {
           </div>
 
           {/* Autonomous Agent Metrics */}
-          <Card className="border-2 border-blue-200/50 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 dark:border-blue-800/50">
+          <Card className="border border-border bg-card shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="w-5 h-5 text-blue-600" />
