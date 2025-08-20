@@ -62,25 +62,37 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    // Clean up expired states first
-    await supabaseClient
+    // Clean up expired states and any existing state for this user
+    console.log('Cleaning up expired and existing OAuth states for user:', userId)
+    
+    // First clean up expired states
+    const { error: expiredCleanupError } = await supabaseClient
       .from('oauth_states')
       .delete()
       .lt('expires_at', new Date().toISOString())
+    
+    if (expiredCleanupError) {
+      console.log('Note: Error cleaning expired states (non-critical):', expiredCleanupError)
+    }
 
-    // Delete any existing state for this user
-    await supabaseClient
+    // Delete any existing state for this user to prevent conflicts
+    const { error: userCleanupError } = await supabaseClient
       .from('oauth_states')
       .delete()
       .eq('state', userId)
+    
+    if (userCleanupError) {
+      console.log('Note: Error cleaning user states (non-critical):', userCleanupError)
+    }
 
-    // Insert new state
+    // Insert new state with longer expiration and better logging
+    console.log('Storing new OAuth state with code verifier')
     const { error: insertError } = await supabaseClient
       .from('oauth_states')
       .insert({
         state: userId,
         code_verifier: codeVerifier,
-        expires_at: new Date(Date.now() + 600000).toISOString() // 10 minutes
+        expires_at: new Date(Date.now() + 900000).toISOString() // 15 minutes for better UX
       })
 
     if (insertError) {

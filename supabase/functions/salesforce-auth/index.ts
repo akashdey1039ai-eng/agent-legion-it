@@ -107,7 +107,8 @@ Deno.serve(async (req) => {
     const tokenData: SalesforceTokenResponse = await tokenResponse.json()
     console.log('Successfully obtained Salesforce access token')
 
-    // Store the tokens securely (in a real app, you'd encrypt these)
+    // Store the tokens securely - use upsert with conflict resolution
+    console.log('Storing Salesforce tokens for user:', state)
     const { error: upsertError } = await supabaseClient
       .from('salesforce_tokens')
       .upsert({
@@ -118,11 +119,35 @@ Deno.serve(async (req) => {
         token_type: tokenData.token_type,
         expires_at: new Date(Date.now() + 86400000), // 24 hours from now
         updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id'
       })
 
     if (upsertError) {
       console.error('Error storing tokens:', upsertError)
-      throw new Error('Failed to store authentication tokens')
+      // For duplicate key errors, try to update existing record
+      if (upsertError.code === '23505') {
+        console.log('Attempting to update existing token record')
+        const { error: updateError } = await supabaseClient
+          .from('salesforce_tokens')
+          .update({
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+            instance_url: tokenData.instance_url,
+            token_type: tokenData.token_type,
+            expires_at: new Date(Date.now() + 86400000),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', state)
+        
+        if (updateError) {
+          console.error('Error updating existing tokens:', updateError)
+          throw new Error('Failed to update authentication tokens')
+        }
+        console.log('Successfully updated existing token record')
+      } else {
+        throw new Error('Failed to store authentication tokens')
+      }
     }
 
     // Clean up the OAuth state after successful token exchange
