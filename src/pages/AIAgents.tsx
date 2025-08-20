@@ -1,11 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bot, Brain, TrendingUp, Zap, Calendar, Target, Play, Settings, Activity } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Bot, Brain, TrendingUp, Zap, Calendar, Target, Play, Settings, Activity, Database, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ComprehensiveAITester } from '@/components/ComprehensiveAITester';
 import { AIDiagnostics } from '@/components/AIDiagnostics';
 import { RealTimeTestDashboard } from '@/components/RealTimeTestDashboard';
+import { DetailedActionResults } from '@/components/DetailedActionResults';
 
 const agents = [
   {
@@ -80,20 +82,11 @@ export default function AIAgents() {
 
   return (
     <div className="space-y-6">
-      {/* Real-Time Test Dashboard */}
-      <RealTimeTestDashboard />
-      
-      {/* AI Diagnostics - Priority Tool to Find Root Cause */}
-      <AIDiagnostics />
-      
-      {/* Comprehensive AI Agent Tester */}
-      <ComprehensiveAITester />
-      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">AI Agents</h1>
           <p className="text-muted-foreground">
-            Autonomous AI agents for your CRM operations
+            Autonomous AI agents for your CRM operations with detailed action tracking
           </p>
         </div>
         <Button>
@@ -102,111 +95,152 @@ export default function AIAgents() {
         </Button>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-primary" />
-              <div>
-                <p className="text-sm font-medium">Active Agents</p>
-                <p className="text-2xl font-bold">2</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Bot className="h-4 w-4 text-primary" />
-              <div>
-                <p className="text-sm font-medium">Total Agents</p>
-                <p className="text-2xl font-bold">5</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <div>
-                <p className="text-sm font-medium">Avg Success Rate</p>
-                <p className="text-2xl font-bold">92.5%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" />
-              <div>
-                <p className="text-sm font-medium">Actions Today</p>
-                <p className="text-2xl font-bold">147</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="testing" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="testing">AI Testing</TabsTrigger>
+          <TabsTrigger value="detailed-actions">Record Actions</TabsTrigger>
+          <TabsTrigger value="agents">Agent Library</TabsTrigger>
+          <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
+        </TabsList>
 
-      {/* Agents Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {agents.map((agent) => {
-          const IconComponent = agent.icon;
-          return (
-            <Card key={agent.id} className="cursor-pointer hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <IconComponent className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{agent.title}</CardTitle>
-                      {getStatusBadge(agent.status)}
-                    </div>
-                  </div>
-                </div>
-                <CardDescription className="mt-2">
-                  {agent.description}
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium mb-2">Capabilities</p>
-                  <div className="flex flex-wrap gap-1">
-                    {agent.capabilities.map((capability) => (
-                      <Badge key={capability} variant="outline" className="text-xs">
-                        {capability}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="flex justify-between text-sm text-muted-foreground">
+        <TabsContent value="testing" className="space-y-6">
+          {/* Real-Time Test Dashboard */}
+          <RealTimeTestDashboard />
+          
+          {/* Comprehensive AI Agent Tester */}
+          <ComprehensiveAITester />
+        </TabsContent>
+
+        <TabsContent value="detailed-actions" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Detailed Record Actions & Analysis
+              </CardTitle>
+              <CardDescription>
+                View specific records processed by AI agents and the actions performed on each record from your connected CRM platforms
+              </CardDescription>
+            </CardHeader>
+          </Card>
+          
+          {/* This will be populated with actual test results */}
+          <DetailedActionResults results={[]} />
+        </TabsContent>
+
+        <TabsContent value="agents" className="space-y-6">
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-primary" />
                   <div>
-                    <span className="font-medium">Last Run:</span> {agent.lastRun}
-                  </div>
-                  <div>
-                    <span className="font-medium">Success:</span> {agent.successRate}
+                    <p className="text-sm font-medium">Active Agents</p>
+                    <p className="text-2xl font-bold">2</p>
                   </div>
                 </div>
-                
-                <Button 
-                  className="w-full" 
-                  variant={agent.status === "active" ? "default" : "outline"}
-                  onClick={() => handleAgentClick(agent.id)}
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  {agent.status === "active" ? "Manage Agent" : "Configure Agent"}
-                </Button>
               </CardContent>
             </Card>
-          );
-        })}
-      </div>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Bot className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Total Agents</p>
+                    <p className="text-2xl font-bold">5</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Avg Success Rate</p>
+                    <p className="text-2xl font-bold">92.5%</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Actions Today</p>
+                    <p className="text-2xl font-bold">147</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Agents Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {agents.map((agent) => {
+              const IconComponent = agent.icon;
+              return (
+                <Card key={agent.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <IconComponent className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{agent.title}</CardTitle>
+                          {getStatusBadge(agent.status)}
+                        </div>
+                      </div>
+                    </div>
+                    <CardDescription className="mt-2">
+                      {agent.description}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium mb-2">Capabilities</p>
+                      <div className="flex flex-wrap gap-1">
+                        {agent.capabilities.map((capability) => (
+                          <Badge key={capability} variant="outline" className="text-xs">
+                            {capability}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <div>
+                        <span className="font-medium">Last Run:</span> {agent.lastRun}
+                      </div>
+                      <div>
+                        <span className="font-medium">Success:</span> {agent.successRate}
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full" 
+                      variant={agent.status === "active" ? "default" : "outline"}
+                      onClick={() => handleAgentClick(agent.id)}
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      {agent.status === "active" ? "Manage Agent" : "Configure Agent"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="diagnostics" className="space-y-6">
+          {/* AI Diagnostics - Priority Tool to Find Root Cause */}
+          <AIDiagnostics />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

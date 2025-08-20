@@ -474,14 +474,33 @@ export function GlobalAIAgentRunner() {
       const finalResult = {
         agentId: agent.id,
         agentName: agent.name,
-        platform: agent.platforms[0], // Use the agent's designated platform
+        platform: platform, // Use the actual platform tested
         status: 'completed' as const,
         confidence: result.confidence || Math.random() * 0.3 + 0.7, // 70-100%
         executionTime: result.executionTime || Math.floor(Math.random() * 5000) + 2000,
         recordsProcessed: result.recordCount || result.recordsAnalyzed || Math.floor(Math.random() * 50) + 10,
         actionsExecuted: result.actionsExecuted || Math.floor(Math.random() * 10) + 1,
         insights: result.insights || result.analysis || [],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        // Add detailed record information
+        rawPlatformData: result.rawSalesforceData || result.rawHubSpotData || [],
+        aiAnalysisDetails: result.analysis,
+        recordDetails: {
+          platform: platform,
+          dataSource: result.dataSource,
+          totalRecords: result.recordsAnalyzed || 0,
+          sampleRecord: (result.rawSalesforceData && result.rawSalesforceData[0]) || 
+                       (result.rawHubSpotData && result.rawHubSpotData[0]) || null,
+          platformSpecific: {
+            salesforce: platform === 'salesforce' ? {
+              instanceUrl: result.instanceUrl,
+              recordTypes: result.rawSalesforceData?.map(r => r.attributes?.type).filter(Boolean) || []
+            } : null,
+            hubspot: platform === 'hubspot' ? {
+              contactTypes: result.rawHubSpotData?.map(r => r.properties?.lifecyclestage).filter(Boolean) || []
+            } : null
+          }
+        }
       };
 
       console.log(`🎉 SUCCESS: ${agent.name} completed successfully!`);

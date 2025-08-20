@@ -318,23 +318,155 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
       {completedTests.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Autonomous Actions Performed</CardTitle>
+            <CardTitle>Detailed Actions & Record Analysis</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {completedTests.map((result) => {
                 const agent = agents.find(a => a.id === result.id);
+                const details = result.details;
+                
                 return (
-                  <div key={result.id} className="border rounded-lg p-4">
-                    <div className="font-medium mb-2">{agent?.name} ({agent?.platform})</div>
-                    {result.details?.analysis?.parsedRecords && (
-                      <div className="text-sm text-muted-foreground">
-                        <div>✅ Analyzed {result.recordsAnalyzed} records</div>
-                        <div>🎯 Confidence: {(result.confidence * 100).toFixed(1)}%</div>
-                        <div>⚡ Execution: {result.executionTime}ms</div>
-                        {result.details.actionsExecuted && (
-                          <div>🤖 Actions: {result.details.actionsExecuted} autonomous updates</div>
+                  <div key={result.id} className="border rounded-lg p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg">{agent?.name}</h3>
+                        <p className="text-sm text-muted-foreground">{agent?.platform} • {result.agentType}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">✅ {result.recordsAnalyzed} records processed</div>
+                        <div className="text-sm text-muted-foreground">🎯 {(result.confidence * 100).toFixed(1)}% confidence</div>
+                      </div>
+                    </div>
+
+                    {/* Raw Platform Data Summary */}
+                    {details?.rawSalesforceData && details.rawSalesforceData.length > 0 && (
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">📊 Salesforce Data Retrieved</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium">Total Records:</span> {details.rawSalesforceData.length}
+                          </div>
+                          <div>
+                            <span className="font-medium">Sample Record:</span> 
+                            {details.rawSalesforceData[0]?.FirstName} {details.rawSalesforceData[0]?.LastName}
+                          </div>
+                          <div>
+                            <span className="font-medium">Company:</span> 
+                            {details.rawSalesforceData[0]?.Account?.Name || 'N/A'}
+                          </div>
+                          <div>
+                            <span className="font-medium">Industry:</span> 
+                            {details.rawSalesforceData[0]?.Account?.Industry || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {details?.rawHubSpotData && details.rawHubSpotData.length > 0 && (
+                      <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+                        <h4 className="font-medium text-orange-900 dark:text-orange-100 mb-2">📊 HubSpot Data Retrieved</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium">Total Records:</span> {details.rawHubSpotData.length}
+                          </div>
+                          <div>
+                            <span className="font-medium">Sample Contact:</span> 
+                            {details.rawHubSpotData[0]?.properties?.firstname} {details.rawHubSpotData[0]?.properties?.lastname}
+                          </div>
+                          <div>
+                            <span className="font-medium">Company:</span> 
+                            {details.rawHubSpotData[0]?.properties?.company || 'N/A'}
+                          </div>
+                          <div>
+                            <span className="font-medium">Stage:</span> 
+                            {details.rawHubSpotData[0]?.properties?.lifecyclestage || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* AI Analysis Results */}
+                    {details?.analysis && (
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <h4 className="font-medium text-green-900 dark:text-green-100 mb-2">🤖 AI Analysis Results</h4>
+                        
+                        {/* Check if analysis contains JSON data with individual records */}
+                        {typeof details.analysis === 'string' && details.analysis.includes('{"') && (
+                          <div className="space-y-3">
+                            <div className="text-sm">
+                              <span className="font-medium">Analysis Type:</span> Individual Record Processing
+                            </div>
+                            <div className="text-sm">
+                              <span className="font-medium">Records with AI Insights:</span> 
+                              {details.analysis.split('{"').length - 1} records scored and analyzed
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded border text-xs font-mono max-h-32 overflow-y-auto">
+                              {details.analysis.substring(0, 500)}
+                              {details.analysis.length > 500 && '... (truncated)'}
+                            </div>
+                          </div>
                         )}
+
+                        {typeof details.analysis === 'object' && details.analysis.analysis && (
+                          <div className="space-y-2">
+                            <div className="text-sm">
+                              <span className="font-medium">Analysis Summary:</span> {details.analysis.analysis}
+                            </div>
+                            {details.analysis.confidence && (
+                              <div className="text-sm">
+                                <span className="font-medium">AI Confidence:</span> {(details.analysis.confidence * 100).toFixed(1)}%
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Actions Taken */}
+                    {details?.actionsExecuted > 0 && (
+                      <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                        <h4 className="font-medium text-purple-900 dark:text-purple-100 mb-2">⚡ Actions Performed</h4>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium">Total Actions:</span> {details.actionsExecuted}
+                          </div>
+                          <div>
+                            <span className="font-medium">Action Type:</span> Autonomous AI Updates
+                          </div>
+                        </div>
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          ✅ AI agent successfully executed {details.actionsExecuted} automated actions on your CRM data
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Performance Metrics */}
+                    <div className="bg-gray-50 dark:bg-gray-900/20 p-4 rounded-lg">
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">📈 Performance Metrics</h4>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium">Execution Time:</span> {result.executionTime}ms
+                        </div>
+                        <div>
+                          <span className="font-medium">Success Rate:</span> 
+                          {result.status === 'completed' ? '100%' : '0%'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Platform:</span> 
+                          {agent?.platform === 'salesforce' ? 'Salesforce Sandbox' : 
+                           agent?.platform === 'hubspot' ? 'HubSpot Sandbox' : 'Native Platform'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Error Details */}
+                    {result.error && (
+                      <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                        <h4 className="font-medium text-red-900 dark:text-red-100 mb-2">❌ Error Details</h4>
+                        <div className="text-sm text-red-700 dark:text-red-300">
+                          {result.error}
+                        </div>
                       </div>
                     )}
                   </div>
