@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Button } from './ui/button';
-import { CheckCircle, XCircle, AlertCircle, PlayCircle, PauseCircle, RotateCcw } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { CheckCircle, XCircle, AlertCircle, PlayCircle, PauseCircle, RotateCcw, Eye, ChevronRight } from 'lucide-react';
 import { useToast } from './ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,7 +36,8 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [currentTest, setCurrentTest] = useState<string | null>(null);
   const [overallProgress, setOverallProgress] = useState(0);
-  // Removed autoRunCompleted state
+  const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const { toast } = useToast();
 
   // Removed auto-run functionality - tests must be manually triggered
@@ -275,7 +278,14 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
               testResults.map((result) => {
                 const agent = agents.find(a => a.id === result.id);
                 return (
-                  <div key={result.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div 
+                    key={result.id} 
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      setSelectedResult(result);
+                      setShowDetailsModal(true);
+                    }}
+                  >
                     <div className="flex items-center gap-3">
                       {getStatusIcon(result.status)}
                       <div>
@@ -295,6 +305,9 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                           <div className="text-sm text-muted-foreground">
                             {result.executionTime}ms
                           </div>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Eye className="h-4 w-4" />
+                          </Button>
                         </>
                       )}
                       
@@ -305,6 +318,7 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                       )}
                       
                       {getStatusBadge(result.status)}
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
                 );
@@ -313,6 +327,221 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Detailed Execution Modal */}
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              {selectedResult && `${agents.find(a => a.id === selectedResult.id)?.name} - Execution Details`}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedResult && (
+            <div className="space-y-6">
+              {/* Execution Summary */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Status</div>
+                      <div className="font-medium">{getStatusBadge(selectedResult.status)}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Records Processed</div>
+                      <div className="font-medium">{selectedResult.recordsAnalyzed || 0}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Confidence</div>
+                      <div className="font-medium">{(selectedResult.confidence * 100).toFixed(1)}%</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Execution Time</div>
+                      <div className="font-medium">{selectedResult.executionTime}ms</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="actions">Actions Taken</TabsTrigger>
+                  <TabsTrigger value="insights">AI Insights</TabsTrigger>
+                  <TabsTrigger value="raw">Raw Data</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="overview" className="space-y-4">
+                  {/* Platform Data Summary */}
+                  {selectedResult.details?.rawSalesforceData && selectedResult.details.rawSalesforceData.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">📊 Salesforce Data Retrieved</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          <div>
+                            <div className="text-2xl font-bold text-blue-600">{selectedResult.details.rawSalesforceData.length}</div>
+                            <div className="text-sm text-muted-foreground">Total Records</div>
+                          </div>
+                          <div>
+                            <div className="font-medium">{selectedResult.details.rawSalesforceData[0]?.FirstName} {selectedResult.details.rawSalesforceData[0]?.LastName}</div>
+                            <div className="text-sm text-muted-foreground">Sample Contact</div>
+                          </div>
+                          <div>
+                            <div className="font-medium">{selectedResult.details.rawSalesforceData[0]?.Account?.Name || 'N/A'}</div>
+                            <div className="text-sm text-muted-foreground">Sample Company</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {selectedResult.details?.rawHubSpotData && selectedResult.details.rawHubSpotData.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">📊 HubSpot Data Retrieved</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          <div>
+                            <div className="text-2xl font-bold text-orange-600">{selectedResult.details.rawHubSpotData.length}</div>
+                            <div className="text-sm text-muted-foreground">Total Records</div>
+                          </div>
+                          <div>
+                            <div className="font-medium">{selectedResult.details.rawHubSpotData[0]?.properties?.firstname} {selectedResult.details.rawHubSpotData[0]?.properties?.lastname}</div>
+                            <div className="text-sm text-muted-foreground">Sample Contact</div>
+                          </div>
+                          <div>
+                            <div className="font-medium">{selectedResult.details.rawHubSpotData[0]?.properties?.company || 'N/A'}</div>
+                            <div className="text-sm text-muted-foreground">Sample Company</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="actions" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">⚡ Actions Performed by AI Agent</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedResult.details?.actionsExecuted > 0 ? (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div>
+                              <div className="text-2xl font-bold text-purple-600">{selectedResult.details.actionsExecuted}</div>
+                              <div className="text-sm text-muted-foreground">Total Actions</div>
+                            </div>
+                            <div>
+                              <div className="font-medium">Autonomous Updates</div>
+                              <div className="text-sm text-muted-foreground">Action Type</div>
+                            </div>
+                            <div>
+                              <div className="font-medium">{selectedResult.agentType}</div>
+                              <div className="text-sm text-muted-foreground">Agent Type</div>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-accent/20 rounded-lg">
+                            <p className="text-sm">
+                              The AI agent successfully performed {selectedResult.details.actionsExecuted} autonomous actions on CRM records, 
+                              including field updates, lead scoring, and status changes based on intelligent analysis.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <p>No specific actions were recorded for this execution.</p>
+                          <p className="text-sm mt-2">The agent may have performed analysis-only operations.</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="insights" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">🤖 AI Analysis & Insights</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedResult.details?.analysis ? (
+                        <div className="space-y-4">
+                          {typeof selectedResult.details.analysis === 'string' && selectedResult.details.analysis.includes('{"') && (
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <div className="text-2xl font-bold text-green-600">
+                                    {selectedResult.details.analysis.split('{"').length - 1}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">Records Analyzed</div>
+                                </div>
+                                <div>
+                                  <div className="font-medium">Individual Processing</div>
+                                  <div className="text-sm text-muted-foreground">Analysis Type</div>
+                                </div>
+                              </div>
+                              <div className="p-4 bg-accent/20 rounded-lg">
+                                <h5 className="font-medium mb-2">Analysis Preview:</h5>
+                                <div className="bg-background p-3 rounded border text-xs font-mono max-h-40 overflow-y-auto">
+                                  {selectedResult.details.analysis.substring(0, 800)}
+                                  {selectedResult.details.analysis.length > 800 && '\n... (view Raw Data tab for complete analysis)'}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {typeof selectedResult.details.analysis === 'object' && selectedResult.details.analysis.analysis && (
+                            <div className="space-y-3">
+                              <div className="p-4 bg-accent/20 rounded-lg">
+                                <h5 className="font-medium mb-2">Analysis Summary:</h5>
+                                <p className="text-sm">{selectedResult.details.analysis.analysis}</p>
+                                {selectedResult.details.analysis.confidence && (
+                                  <div className="mt-2 pt-2 border-t">
+                                    <span className="text-sm font-medium">AI Confidence: </span>
+                                    <Badge variant="secondary">{(selectedResult.details.analysis.confidence * 100).toFixed(1)}%</Badge>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <p>No detailed analysis data available for this execution.</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="raw" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">📋 Complete Execution Data</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-accent/20 rounded-lg">
+                          <h5 className="font-medium mb-2">Full Response Data:</h5>
+                          <div className="bg-background p-4 rounded border text-xs font-mono max-h-96 overflow-y-auto">
+                            <pre>{JSON.stringify(selectedResult.details, null, 2)}</pre>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Detailed Results */}
       {completedTests.length > 0 && (
