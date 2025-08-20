@@ -411,8 +411,8 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
 
                         {/* Show actual platform data from edge function response */}
                         {selectedResult.details && (
-                          <div className="p-4 bg-muted/50 rounded-lg">
-                            <h5 className="font-medium mb-2">Live Data Retrieved:</h5>
+                          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <h5 className="font-medium mb-2 text-blue-900 dark:text-blue-100">Live Data Retrieved:</h5>
                             <div className="text-sm space-y-2">
                               <div><strong>Success:</strong> {selectedResult.details.success ? 'Yes' : 'No'}</div>
                               <div><strong>Agent Type:</strong> {selectedResult.details.agentType}</div>
@@ -609,9 +609,9 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                             // Fallback for non-array analysis
                             return (
                               <div className="space-y-3">
-                                <div className="p-4 bg-accent/20 rounded-lg">
-                                  <h5 className="font-medium mb-2">Analysis Summary:</h5>
-                                  <div className="bg-background p-3 rounded border text-sm max-h-40 overflow-y-auto">
+                                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                  <h5 className="font-medium mb-2 text-green-900 dark:text-green-100">Analysis Summary:</h5>
+                                  <div className="bg-white dark:bg-gray-800 p-3 rounded border text-sm max-h-40 overflow-y-auto">
                                     {analysisText 
                                       ? (typeof analysisText === 'string' 
                                           ? analysisText.substring(0, 1000)
@@ -623,7 +623,7 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                                     }
                                   </div>
                                 </div>
-                                <div className="text-xs text-muted-foreground p-2 bg-muted/50 rounded">
+                                <div className="text-xs text-gray-600 dark:text-gray-400 p-3 bg-gray-100 dark:bg-gray-800 rounded border">
                                   <strong>Debug:</strong> Available in details: {Object.keys(selectedResult.details || {}).join(', ')}
                                 </div>
                               </div>
@@ -631,15 +631,17 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                           })()}
                         </div>
                        ) : (
-                        <div className="text-center py-8 text-muted-foreground">
+                          <div className="text-center py-8 text-muted-foreground">
                           <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                           <p>No AI analysis data found at expected location.</p>
                           <p className="text-sm mt-2">The agent may still be processing or the response structure differs.</p>
-                          <div className="text-xs mt-4 p-3 bg-muted/50 rounded text-left">
-                            <strong>Debug info:</strong><br/>
-                            Available keys in details: {Object.keys(selectedResult.details || {}).join(', ')}<br/>
-                            Analysis type: {typeof selectedResult.details?.analysis}<br/>
-                            Has analysis.analysis: {!!(selectedResult.details?.analysis?.analysis)}
+                          <div className="text-xs mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded text-left border border-orange-200 dark:border-orange-800">
+                            <strong className="text-orange-900 dark:text-orange-100">Debug info:</strong><br/>
+                            <div className="text-orange-800 dark:text-orange-200 mt-1">
+                              Available keys in details: {Object.keys(selectedResult.details || {}).join(', ')}<br/>
+                              Analysis type: {typeof selectedResult.details?.analysis}<br/>
+                              Has analysis.analysis: {!!(selectedResult.details?.analysis?.analysis)}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -654,9 +656,9 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="p-4 bg-accent/20 rounded-lg">
-                          <h5 className="font-medium mb-2">Full Response Data:</h5>
-                          <div className="bg-background p-4 rounded border text-xs font-mono max-h-96 overflow-y-auto">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800">
+                          <h5 className="font-medium mb-2 text-slate-900 dark:text-slate-100">Full Response Data:</h5>
+                          <div className="bg-white dark:bg-gray-900 p-4 rounded border text-xs font-mono max-h-96 overflow-y-auto">
                             <pre>{JSON.stringify(selectedResult.details, null, 2)}</pre>
                           </div>
                         </div>
