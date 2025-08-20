@@ -478,20 +478,33 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                       <CardTitle className="text-lg">🤖 AI Analysis & Insights</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {selectedResult.details?.analysis ? (
+                       {selectedResult.details?.analysis ? (
                         <div className="space-y-4">
                           {/* Parse and display individual record insights */}
                           {(() => {
                             let analysisData = null;
+                            let analysisText = null;
+                            
                             try {
-                              if (typeof selectedResult.details.analysis === 'string') {
+                              // Check multiple possible locations for analysis data
+                              const rawAnalysis = selectedResult.details.analysis?.analysis || selectedResult.details.analysis;
+                              analysisText = rawAnalysis;
+                              
+                              if (typeof rawAnalysis === 'string') {
                                 // Extract JSON from the analysis string
-                                const jsonMatch = selectedResult.details.analysis.match(/```json\n([\s\S]*?)\n```/);
+                                const jsonMatch = rawAnalysis.match(/```json\n([\s\S]*?)\n```/);
                                 if (jsonMatch) {
                                   analysisData = JSON.parse(jsonMatch[1]);
+                                } else {
+                                  // Try to parse the entire string as JSON
+                                  try {
+                                    analysisData = JSON.parse(rawAnalysis);
+                                  } catch (e) {
+                                    console.log('Could not parse as direct JSON:', e);
+                                  }
                                 }
-                              } else if (typeof selectedResult.details.analysis === 'object') {
-                                analysisData = selectedResult.details.analysis;
+                              } else if (typeof rawAnalysis === 'object') {
+                                analysisData = rawAnalysis;
                               }
                             } catch (e) {
                               console.log('Could not parse analysis JSON:', e);
@@ -580,24 +593,35 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                                 <div className="p-4 bg-accent/20 rounded-lg">
                                   <h5 className="font-medium mb-2">Analysis Summary:</h5>
                                   <div className="bg-background p-3 rounded border text-sm max-h-40 overflow-y-auto">
-                                    {typeof selectedResult.details.analysis === 'string' 
-                                      ? selectedResult.details.analysis.substring(0, 1000)
-                                      : JSON.stringify(selectedResult.details.analysis, null, 2)
+                                    {analysisText 
+                                      ? (typeof analysisText === 'string' 
+                                          ? analysisText.substring(0, 1000)
+                                          : JSON.stringify(analysisText, null, 2))
+                                      : 'No analysis text available'
                                     }
-                                    {typeof selectedResult.details.analysis === 'string' && selectedResult.details.analysis.length > 1000 && 
+                                    {typeof analysisText === 'string' && analysisText.length > 1000 && 
                                       '\n... (view Raw Data tab for complete analysis)'
                                     }
                                   </div>
+                                </div>
+                                <div className="text-xs text-muted-foreground p-2 bg-muted/50 rounded">
+                                  <strong>Debug:</strong> Available in details: {Object.keys(selectedResult.details || {}).join(', ')}
                                 </div>
                               </div>
                             );
                           })()}
                         </div>
-                      ) : (
+                       ) : (
                         <div className="text-center py-8 text-muted-foreground">
                           <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p>No AI analysis data available for this execution.</p>
-                          <p className="text-sm mt-2">The agent may still be processing or encountered an error.</p>
+                          <p>No AI analysis data found at expected location.</p>
+                          <p className="text-sm mt-2">The agent may still be processing or the response structure differs.</p>
+                          <div className="text-xs mt-4 p-3 bg-muted/50 rounded text-left">
+                            <strong>Debug info:</strong><br/>
+                            Available keys in details: {Object.keys(selectedResult.details || {}).join(', ')}<br/>
+                            Analysis type: {typeof selectedResult.details?.analysis}<br/>
+                            Has analysis.analysis: {!!(selectedResult.details?.analysis?.analysis)}
+                          </div>
                         </div>
                       )}
                     </CardContent>
