@@ -18,6 +18,7 @@ import { UserPlaybook } from "@/components/UserPlaybook";
 import { EnterpriseSafetyDashboard } from "@/components/EnterpriseSafetyDashboard";
 import { VideoDemoStudio } from "@/components/VideoDemoStudio";
 import { UniversalCRMTester } from "@/components/UniversalCRMTester";
+import PresentationDeck from "@/components/PresentationDeck";
 import { RealTimeTestDashboard } from "@/components/RealTimeTestDashboard";
 import { Header } from "@/components/Header";
 import { SandboxConnector } from "@/components/SandboxConnector";

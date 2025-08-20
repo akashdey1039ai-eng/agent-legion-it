@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Brain, Shield, Zap, Target, Users, TrendingUp, 
-  CheckCircle, Activity, BarChart3, Lock, Globe
+  CheckCircle, Activity, BarChart3, Lock, Globe, Presentation, Play
 } from 'lucide-react';
+import PresentationDeck from './PresentationDeck';
 
 export const EnterpriseWelcomeDashboard = () => {
+  const [showPresentation, setShowPresentation] = useState(false);
+
+  if (showPresentation) {
+    return <PresentationDeck />;
+  }
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -23,7 +30,7 @@ export const EnterpriseWelcomeDashboard = () => {
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
           Your autonomous AI workforce is deployed and ready to transform your CRM operations across all platforms
         </p>
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-2 mb-6">
           <Badge className="bg-green-100 text-green-800">
             <CheckCircle className="h-3 w-3 mr-1" />
             Production Ready
@@ -36,6 +43,24 @@ export const EnterpriseWelcomeDashboard = () => {
             <Globe className="h-3 w-3 mr-1" />
             Universal CRM Support
           </Badge>
+        </div>
+        <div className="flex justify-center gap-4">
+          <Button 
+            onClick={() => setShowPresentation(true)}
+            className="bg-gradient-primary hover:scale-105 transition-all duration-300 shadow-glow"
+            size="lg"
+          >
+            <Presentation className="h-5 w-5 mr-2" />
+            View Executive Presentation
+          </Button>
+          <Button 
+            variant="outline" 
+            className="hover:scale-105 transition-all duration-300"
+            size="lg"
+          >
+            <Play className="h-5 w-5 mr-2" />
+            Live Demo
+          </Button>
         </div>
       </div>
 
