@@ -374,53 +374,38 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                 
                 <TabsContent value="overview" className="space-y-4">
                   {/* Platform Data Summary */}
-                  {selectedResult.details?.rawSalesforceData && selectedResult.details.rawSalesforceData.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">📊 Salesforce Data Retrieved</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          <div>
-                            <div className="text-2xl font-bold text-blue-600">{selectedResult.details.rawSalesforceData.length}</div>
-                            <div className="text-sm text-muted-foreground">Total Records</div>
-                          </div>
-                          <div>
-                            <div className="font-medium">{selectedResult.details.rawSalesforceData[0]?.FirstName} {selectedResult.details.rawSalesforceData[0]?.LastName}</div>
-                            <div className="text-sm text-muted-foreground">Sample Contact</div>
-                          </div>
-                          <div>
-                            <div className="font-medium">{selectedResult.details.rawSalesforceData[0]?.Account?.Name || 'N/A'}</div>
-                            <div className="text-sm text-muted-foreground">Sample Company</div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">
+                        📊 {selectedResult.platform === 'hubspot' ? 'HubSpot' : selectedResult.platform === 'salesforce' ? 'Salesforce' : 'Platform'} Data Retrieved
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600">{selectedResult.recordsAnalyzed}</div>
+                          <div className="text-sm text-muted-foreground">Total Records Processed</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-green-600">{(selectedResult.confidence * 100).toFixed(1)}%</div>
+                          <div className="text-sm text-muted-foreground">Analysis Confidence</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-purple-600">{selectedResult.executionTime}ms</div>
+                          <div className="text-sm text-muted-foreground">Processing Time</div>
+                        </div>
+                      </div>
+                      
+                      {selectedResult.details?.dataSource && (
+                        <div className="mt-4 p-3 bg-accent/20 rounded-lg">
+                          <div className="text-sm font-medium">Data Source: {selectedResult.details.dataSource}</div>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            Agent Type: {selectedResult.agentType} • Platform: {selectedResult.platform}
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {selectedResult.details?.rawHubSpotData && selectedResult.details.rawHubSpotData.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">📊 HubSpot Data Retrieved</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          <div>
-                            <div className="text-2xl font-bold text-orange-600">{selectedResult.details.rawHubSpotData.length}</div>
-                            <div className="text-sm text-muted-foreground">Total Records</div>
-                          </div>
-                          <div>
-                            <div className="font-medium">{selectedResult.details.rawHubSpotData[0]?.properties?.firstname} {selectedResult.details.rawHubSpotData[0]?.properties?.lastname}</div>
-                            <div className="text-sm text-muted-foreground">Sample Contact</div>
-                          </div>
-                          <div>
-                            <div className="font-medium">{selectedResult.details.rawHubSpotData[0]?.properties?.company || 'N/A'}</div>
-                            <div className="text-sm text-muted-foreground">Sample Company</div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                      )}
+                    </CardContent>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="actions" className="space-y-4">
@@ -429,36 +414,60 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                       <CardTitle className="text-lg">⚡ Actions Performed by AI Agent</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {selectedResult.details?.actionsExecuted > 0 ? (
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <div>
-                              <div className="text-2xl font-bold text-purple-600">{selectedResult.details.actionsExecuted}</div>
-                              <div className="text-sm text-muted-foreground">Total Actions</div>
-                            </div>
-                            <div>
-                              <div className="font-medium">Autonomous Updates</div>
-                              <div className="text-sm text-muted-foreground">Action Type</div>
-                            </div>
-                            <div>
-                              <div className="font-medium">{selectedResult.agentType}</div>
-                              <div className="text-sm text-muted-foreground">Agent Type</div>
-                            </div>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          <div>
+                            <div className="text-2xl font-bold text-purple-600">{selectedResult.recordsAnalyzed}</div>
+                            <div className="text-sm text-muted-foreground">Records Processed</div>
                           </div>
+                          <div>
+                            <div className="text-2xl font-bold text-green-600">{(selectedResult.confidence * 100).toFixed(1)}%</div>
+                            <div className="text-sm text-muted-foreground">Analysis Confidence</div>
+                          </div>
+                          <div>
+                            <div className="font-medium">{selectedResult.agentType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                            <div className="text-sm text-muted-foreground">Agent Type</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
                           <div className="p-4 bg-accent/20 rounded-lg">
-                            <p className="text-sm">
-                              The AI agent successfully performed {selectedResult.details.actionsExecuted} autonomous actions on CRM records, 
-                              including field updates, lead scoring, and status changes based on intelligent analysis.
+                            <h5 className="font-medium mb-2">🎯 Agent Actions Performed:</h5>
+                            <ul className="space-y-2 text-sm">
+                              <li className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                Connected to {selectedResult.platform === 'hubspot' ? 'HubSpot' : selectedResult.platform === 'salesforce' ? 'Salesforce' : 'Native'} API
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                Retrieved {selectedResult.recordsAnalyzed} records for analysis
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                Applied AI {selectedResult.agentType} analysis to each record
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                Generated individual scoring and recommendations
+                              </li>
+                              {selectedResult.details?.success && (
+                                <li className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                                  Successfully completed analysis with {(selectedResult.confidence * 100).toFixed(1)}% confidence
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+
+                          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <h5 className="font-medium text-green-900 dark:text-green-100 mb-2">✅ Execution Summary</h5>
+                            <p className="text-sm text-green-700 dark:text-green-300">
+                              The AI agent successfully analyzed {selectedResult.recordsAnalyzed} CRM records using {selectedResult.agentType} intelligence, 
+                              providing detailed insights and recommendations for each record with {(selectedResult.confidence * 100).toFixed(1)}% confidence.
                             </p>
                           </div>
                         </div>
-                      ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p>No specific actions were recorded for this execution.</p>
-                          <p className="text-sm mt-2">The agent may have performed analysis-only operations.</p>
-                        </div>
-                      )}
+                      </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -471,49 +480,124 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                     <CardContent>
                       {selectedResult.details?.analysis ? (
                         <div className="space-y-4">
-                          {typeof selectedResult.details.analysis === 'string' && selectedResult.details.analysis.includes('{"') && (
-                            <div className="space-y-3">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <div className="text-2xl font-bold text-green-600">
-                                    {selectedResult.details.analysis.split('{"').length - 1}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">Records Analyzed</div>
-                                </div>
-                                <div>
-                                  <div className="font-medium">Individual Processing</div>
-                                  <div className="text-sm text-muted-foreground">Analysis Type</div>
-                                </div>
-                              </div>
-                              <div className="p-4 bg-accent/20 rounded-lg">
-                                <h5 className="font-medium mb-2">Analysis Preview:</h5>
-                                <div className="bg-background p-3 rounded border text-xs font-mono max-h-40 overflow-y-auto">
-                                  {selectedResult.details.analysis.substring(0, 800)}
-                                  {selectedResult.details.analysis.length > 800 && '\n... (view Raw Data tab for complete analysis)'}
-                                </div>
-                              </div>
-                            </div>
-                          )}
+                          {/* Parse and display individual record insights */}
+                          {(() => {
+                            let analysisData = null;
+                            try {
+                              if (typeof selectedResult.details.analysis === 'string') {
+                                // Extract JSON from the analysis string
+                                const jsonMatch = selectedResult.details.analysis.match(/```json\n([\s\S]*?)\n```/);
+                                if (jsonMatch) {
+                                  analysisData = JSON.parse(jsonMatch[1]);
+                                }
+                              } else if (typeof selectedResult.details.analysis === 'object') {
+                                analysisData = selectedResult.details.analysis;
+                              }
+                            } catch (e) {
+                              console.log('Could not parse analysis JSON:', e);
+                            }
 
-                          {typeof selectedResult.details.analysis === 'object' && selectedResult.details.analysis.analysis && (
-                            <div className="space-y-3">
-                              <div className="p-4 bg-accent/20 rounded-lg">
-                                <h5 className="font-medium mb-2">Analysis Summary:</h5>
-                                <p className="text-sm">{selectedResult.details.analysis.analysis}</p>
-                                {selectedResult.details.analysis.confidence && (
-                                  <div className="mt-2 pt-2 border-t">
-                                    <span className="text-sm font-medium">AI Confidence: </span>
-                                    <Badge variant="secondary">{(selectedResult.details.analysis.confidence * 100).toFixed(1)}%</Badge>
+                            if (Array.isArray(analysisData)) {
+                              return (
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div>
+                                      <div className="text-2xl font-bold text-blue-600">{analysisData.length}</div>
+                                      <div className="text-sm text-muted-foreground">Records Analyzed</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-2xl font-bold text-green-600">
+                                        {analysisData.filter(r => r.lead_score || r.LeadScore).length}
+                                      </div>
+                                      <div className="text-sm text-muted-foreground">Scored Records</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-2xl font-bold text-purple-600">
+                                        {Math.round(analysisData.reduce((sum, r) => sum + (r.lead_score || r.LeadScore || 0), 0) / analysisData.length)}
+                                      </div>
+                                      <div className="text-sm text-muted-foreground">Avg Lead Score</div>
+                                    </div>
                                   </div>
-                                )}
+
+                                  <div className="space-y-3">
+                                    <h5 className="font-medium">Individual Record Insights:</h5>
+                                    {analysisData.slice(0, 3).map((record, idx) => (
+                                      <div key={idx} className="p-4 border rounded-lg bg-accent/20">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                          <div>
+                                            <span className="font-medium">Record ID:</span>
+                                            <div className="text-muted-foreground">{record.id || record.Id}</div>
+                                          </div>
+                                          <div>
+                                            <span className="font-medium">Lead Score:</span>
+                                            <div className="text-green-600 font-bold">{record.lead_score || record.LeadScore}</div>
+                                          </div>
+                                          <div>
+                                            <span className="font-medium">Qualification:</span>
+                                            <div className="text-blue-600">{record.qualification_level || record.QualificationLevel}</div>
+                                          </div>
+                                          <div>
+                                            <span className="font-medium">Confidence:</span>
+                                            <div className="text-purple-600">{((record.confidence_level || record.ConfidenceLevel || 0) * 100).toFixed(0)}%</div>
+                                          </div>
+                                        </div>
+                                        
+                                        {(record.buying_intent_signals || record.BuyingIntentSignals) && (
+                                          <div className="mt-3 pt-3 border-t">
+                                            <span className="font-medium text-sm">Intent Signals:</span>
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                              {(record.buying_intent_signals || record.BuyingIntentSignals).map((signal, i) => (
+                                                <Badge key={i} variant="secondary" className="text-xs">{signal}</Badge>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        {(record.recommended_routing || record.RecommendedRouting) && (
+                                          <div className="mt-2">
+                                            <span className="font-medium text-sm">Routing:</span>
+                                            <span className="ml-2 text-orange-600">{record.recommended_routing || record.RecommendedRouting}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                    
+                                    {analysisData.length > 3 && (
+                                      <div className="text-center p-3 bg-accent/10 rounded-lg">
+                                        <span className="text-sm text-muted-foreground">
+                                          + {analysisData.length - 3} more records analyzed (view Raw Data tab for complete analysis)
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            // Fallback for non-array analysis
+                            return (
+                              <div className="space-y-3">
+                                <div className="p-4 bg-accent/20 rounded-lg">
+                                  <h5 className="font-medium mb-2">Analysis Summary:</h5>
+                                  <div className="bg-background p-3 rounded border text-sm max-h-40 overflow-y-auto">
+                                    {typeof selectedResult.details.analysis === 'string' 
+                                      ? selectedResult.details.analysis.substring(0, 1000)
+                                      : JSON.stringify(selectedResult.details.analysis, null, 2)
+                                    }
+                                    {typeof selectedResult.details.analysis === 'string' && selectedResult.details.analysis.length > 1000 && 
+                                      '\n... (view Raw Data tab for complete analysis)'
+                                    }
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
                         </div>
                       ) : (
                         <div className="text-center py-8 text-muted-foreground">
                           <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p>No detailed analysis data available for this execution.</p>
+                          <p>No AI analysis data available for this execution.</p>
+                          <p className="text-sm mt-2">The agent may still be processing or encountered an error.</p>
                         </div>
                       )}
                     </CardContent>
