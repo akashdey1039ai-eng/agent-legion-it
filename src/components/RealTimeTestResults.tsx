@@ -685,7 +685,7 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                 const details = result.details;
                 
                 return (
-                  <div key={result.id} className="border rounded-lg p-6 space-y-4">
+                  <div key={result.id} className="border rounded-lg p-6 space-y-4 bg-card">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold text-lg">{agent?.name}</h3>
