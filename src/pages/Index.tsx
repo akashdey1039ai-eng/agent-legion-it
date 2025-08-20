@@ -221,56 +221,106 @@ const Index = () => {
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 sm:grid-cols-10 gap-1">
-              <TabsTrigger value="enterprise" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Enterprise</span>
-                <span className="sm:hidden">Home</span>
+            <TabsList className="grid w-full grid-cols-5 sm:grid-cols-10 gap-2 p-2 bg-gradient-card backdrop-blur-sm border border-border/50 shadow-lg rounded-xl">
+              <TabsTrigger 
+                value="enterprise" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <Brain className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Enterprise</span>
+                <span className="sm:hidden transition-all duration-smooth">Home</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="smart-sync" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Smart Sync</span>
-                <span className="sm:hidden">Sync</span>
+              
+              <TabsTrigger 
+                value="smart-sync" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Smart Sync</span>
+                <span className="sm:hidden transition-all duration-smooth">Sync</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="global-ai" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">AI Agents</span>
-                <span className="sm:hidden">AI</span>
+              
+              <TabsTrigger 
+                value="global-ai" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">AI Agents</span>
+                <span className="sm:hidden transition-all duration-smooth">AI</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="video-demo" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Video Demo</span>
-                <span className="sm:hidden">Video</span>
+              
+              <TabsTrigger 
+                value="video-demo" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <Activity className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Video Demo</span>
+                <span className="sm:hidden transition-all duration-smooth">Video</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="playbook" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Playbook</span>
-                <span className="sm:hidden">Guide</span>
+              
+              <TabsTrigger 
+                value="playbook" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Playbook</span>
+                <span className="sm:hidden transition-all duration-smooth">Guide</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="safety" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Security</span>
-                <span className="sm:hidden">Safe</span>
+              
+              <TabsTrigger 
+                value="safety" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Security</span>
+                <span className="sm:hidden transition-all duration-smooth">Safe</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="production" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Production</span>
-                <span className="sm:hidden">Prod</span>
+              
+              <TabsTrigger 
+                value="production" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Production</span>
+                <span className="sm:hidden transition-all duration-smooth">Prod</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="universal-testing" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Universal Testing</span>
-                <span className="sm:hidden">Test</span>
+              
+              <TabsTrigger 
+                value="universal-testing" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Universal Testing</span>
+                <span className="sm:hidden transition-all duration-smooth">Test</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="integration" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Database className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Integration</span>
-                <span className="sm:hidden">Connect</span>
+              
+              <TabsTrigger 
+                value="integration" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30"
+              >
+                <Database className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Integration</span>
+                <span className="sm:hidden transition-all duration-smooth">Connect</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
-              <TabsTrigger value="crm" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm" onClick={() => navigate('/crm')}>
-                <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Native CRM</span>
-                <span className="sm:hidden">CRM</span>
+              
+              <TabsTrigger 
+                value="crm" 
+                className="group relative flex flex-col items-center gap-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-medium bg-transparent hover:bg-gradient-primary/10 data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-smooth rounded-lg border border-transparent hover:border-primary/20 data-[state=active]:border-primary/30" 
+                onClick={() => navigate('/crm')}
+              >
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-smooth group-hover:scale-110 group-data-[state=active]:scale-110" />
+                <span className="hidden sm:inline transition-all duration-smooth">Native CRM</span>
+                <span className="sm:hidden transition-all duration-smooth">CRM</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-smooth rounded-lg" />
               </TabsTrigger>
             </TabsList>
 
