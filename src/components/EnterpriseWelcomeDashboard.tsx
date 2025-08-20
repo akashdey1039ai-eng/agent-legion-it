@@ -8,10 +8,12 @@ import {
 } from 'lucide-react';
 import PresentationDeck from './PresentationDeck';
 import { EnterpriseArchitectureDashboard } from './EnterpriseArchitectureDashboard';
+import { StunningSoftwareArchitecture } from './StunningSoftwareArchitecture';
 
 export const EnterpriseWelcomeDashboard = () => {
   const [showPresentation, setShowPresentation] = useState(false);
   const [showArchitecture, setShowArchitecture] = useState(false);
+  const [showStunningArchitecture, setShowStunningArchitecture] = useState(false);
 
   if (showPresentation) {
     return <PresentationDeck />;
@@ -19,6 +21,10 @@ export const EnterpriseWelcomeDashboard = () => {
 
   if (showArchitecture) {
     return <EnterpriseArchitectureDashboard />;
+  }
+
+  if (showStunningArchitecture) {
+    return <StunningSoftwareArchitecture />;
   }
 
   return (
@@ -50,7 +56,7 @@ export const EnterpriseWelcomeDashboard = () => {
             Universal CRM Support
           </Badge>
         </div>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 flex-wrap">
           <Button 
             onClick={() => setShowPresentation(true)}
             className="bg-gradient-primary hover:scale-105 transition-all duration-300 shadow-glow"
@@ -60,13 +66,21 @@ export const EnterpriseWelcomeDashboard = () => {
             View Executive Presentation
           </Button>
           <Button 
+            onClick={() => setShowStunningArchitecture(true)}
+            className="bg-gradient-to-r from-accent to-primary hover:scale-105 transition-all duration-300 shadow-glow text-white"
+            size="lg"
+          >
+            <Layers className="h-5 w-5 mr-2" />
+            Stunning Architecture
+          </Button>
+          <Button 
             onClick={() => setShowArchitecture(true)}
             variant="outline" 
             className="hover:scale-105 transition-all duration-300"
             size="lg"
           >
-            <Layers className="h-5 w-5 mr-2" />
-            Technical Architecture
+            <BarChart3 className="h-5 w-5 mr-2" />
+            Technical Details
           </Button>
           <Button 
             variant="outline" 
