@@ -96,6 +96,9 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
 
         const data = response.data;
         
+        // Debug log the response data structure
+        console.log(`Response for ${agent.name} (${agent.platform}):`, data);
+        
         setTestResults(prev => prev.map(r => 
           r.id === agent.id 
             ? {
@@ -381,29 +384,45 @@ export function RealTimeTestResults({ agents }: RealTimeTestResultsProps) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div>
-                          <div className="text-2xl font-bold text-blue-600">{selectedResult.recordsAnalyzed}</div>
-                          <div className="text-sm text-muted-foreground">Total Records Processed</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-green-600">{(selectedResult.confidence * 100).toFixed(1)}%</div>
-                          <div className="text-sm text-muted-foreground">Analysis Confidence</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-purple-600">{selectedResult.executionTime}ms</div>
-                          <div className="text-sm text-muted-foreground">Processing Time</div>
-                        </div>
-                      </div>
-                      
-                      {selectedResult.details?.dataSource && (
-                        <div className="mt-4 p-3 bg-accent/20 rounded-lg">
-                          <div className="text-sm font-medium">Data Source: {selectedResult.details.dataSource}</div>
-                          <div className="text-sm text-muted-foreground mt-1">
-                            Agent Type: {selectedResult.agentType} • Platform: {selectedResult.platform}
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          <div>
+                            <div className="text-2xl font-bold text-blue-600">{selectedResult.recordsAnalyzed}</div>
+                            <div className="text-sm text-muted-foreground">Total Records Processed</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold text-green-600">{(selectedResult.confidence * 100).toFixed(1)}%</div>
+                            <div className="text-sm text-muted-foreground">Analysis Confidence</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold text-purple-600">{selectedResult.executionTime}ms</div>
+                            <div className="text-sm text-muted-foreground">Processing Time</div>
                           </div>
                         </div>
-                      )}
+                        
+                        {selectedResult.details?.dataSource && (
+                          <div className="mt-4 p-3 bg-accent/20 rounded-lg">
+                            <div className="text-sm font-medium">Data Source: {selectedResult.details.dataSource}</div>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              Agent Type: {selectedResult.agentType} • Platform: {selectedResult.platform}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Show actual platform data from edge function response */}
+                        {selectedResult.details && (
+                          <div className="p-4 bg-muted/50 rounded-lg">
+                            <h5 className="font-medium mb-2">Live Data Retrieved:</h5>
+                            <div className="text-sm space-y-2">
+                              <div><strong>Success:</strong> {selectedResult.details.success ? 'Yes' : 'No'}</div>
+                              <div><strong>Agent Type:</strong> {selectedResult.details.agentType}</div>
+                              <div><strong>Data Source:</strong> {selectedResult.details.dataSource}</div>
+                              <div><strong>Records Analyzed:</strong> {selectedResult.details.recordsAnalyzed}</div>
+                              <div><strong>Has Analysis:</strong> {selectedResult.details.analysis ? 'Yes' : 'No'}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
