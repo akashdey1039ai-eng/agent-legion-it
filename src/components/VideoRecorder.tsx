@@ -42,39 +42,55 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({ onVideoGenerated }
 
   const demoScenarios = [
     {
-      id: 'agent-showcase',
-      title: 'AI Agents Live Demo',
-      description: 'Show all 24 agents running with real CRM data',
+      id: 'hd-complete-demo',
+      title: 'HD Complete AI Agent Demo',
+      description: 'Professional 6-7 minute demo showcasing end-to-end AI agent workflow',
+      duration: '6-7 minutes',
+      steps: [
+        '🎬 Opening Hook: Enterprise dashboard with "24 AI Agents" (30s)',
+        '📊 Platform Overview: Universal support, ROI metrics (1min)',
+        '⚡ Live Agent Execution: All 24 agents with real data (4min)',
+        '🔍 Record Actions: Show detailed AI actions on records',
+        '🎯 ROI Impact: Business results and call-to-action (1.5min)'
+      ]
+    },
+    {
+      id: 'agents-deep-dive',
+      title: 'AI Agents Deep Dive',
+      description: 'Focused demo on agent execution and record-level actions',
+      duration: '4-5 minutes',
+      steps: [
+        'Navigate to AI Agents tab showing all 24 agents',
+        'Start comprehensive test with live Salesforce/HubSpot data',
+        'Display real-time progress bars and confidence scores',
+        'Switch to "Record Actions" tab for detailed view',
+        'Show AI analysis, scoring, and autonomous actions',
+        'Demonstrate platform switching between CRM systems'
+      ]
+    },
+    {
+      id: 'enterprise-highlight',
+      title: 'Enterprise Feature Highlight',
+      description: 'Business-focused demo emphasizing ROI and security',
       duration: '3-4 minutes',
       steps: [
-        'Navigate to AI Agents tab',
-        'Run all agents simultaneously',
-        'Display real-time results',
-        'Show confidence scores and metrics'
+        'Enterprise dashboard with key performance metrics',
+        'Security and compliance feature overview',
+        'Live agent execution showing business impact',
+        'ROI presentation: 35% conversion ↑, 28% cycle ↓',
+        'Enterprise security monitoring in action'
       ]
     },
     {
-      id: 'platform-overview',
-      title: 'Platform Overview',
-      description: 'Complete tour of enterprise features',
-      duration: '5-6 minutes',
-      steps: [
-        'Enterprise welcome dashboard',
-        'Security and compliance features',
-        'User playbook walkthrough',
-        'ROI metrics and benefits'
-      ]
-    },
-    {
-      id: 'quick-demo',
-      title: 'Quick Demo',
-      description: 'Highlight key features in 2 minutes',
+      id: 'quick-power-demo',
+      title: 'Power Demo (2 minutes)',
+      description: 'High-impact condensed demo for busy executives',
       duration: '2 minutes',
       steps: [
-        'Show 24 agents overview',
-        'Run 3-4 key agents',
-        'Display business impact metrics',
-        'Call to action'
+        'Show 24 agents + universal platform support (15s)',
+        'Run 8-10 key agents with live data (75s)',
+        'Quick Record Actions view (15s)',
+        'ROI metrics and next steps (15s)'
       ]
     }
   ];
