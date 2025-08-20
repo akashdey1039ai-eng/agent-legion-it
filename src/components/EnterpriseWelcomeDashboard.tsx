@@ -4,15 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Brain, Shield, Zap, Target, Users, TrendingUp, 
-  CheckCircle, Activity, BarChart3, Lock, Globe, Presentation, Play
+  CheckCircle, Activity, BarChart3, Lock, Globe, Presentation, Play, Layers
 } from 'lucide-react';
 import PresentationDeck from './PresentationDeck';
+import { EnterpriseArchitectureDashboard } from './EnterpriseArchitectureDashboard';
 
 export const EnterpriseWelcomeDashboard = () => {
   const [showPresentation, setShowPresentation] = useState(false);
+  const [showArchitecture, setShowArchitecture] = useState(false);
 
   if (showPresentation) {
     return <PresentationDeck />;
+  }
+
+  if (showArchitecture) {
+    return <EnterpriseArchitectureDashboard />;
   }
 
   return (
@@ -52,6 +58,15 @@ export const EnterpriseWelcomeDashboard = () => {
           >
             <Presentation className="h-5 w-5 mr-2" />
             View Executive Presentation
+          </Button>
+          <Button 
+            onClick={() => setShowArchitecture(true)}
+            variant="outline" 
+            className="hover:scale-105 transition-all duration-300"
+            size="lg"
+          >
+            <Layers className="h-5 w-5 mr-2" />
+            Technical Architecture
           </Button>
           <Button 
             variant="outline" 
